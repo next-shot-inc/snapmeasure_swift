@@ -60,7 +60,7 @@ class CameraViewController: UIViewController {
                 previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
                 previewLayer!.videoGravity = AVLayerVideoGravityResizeAspect
                 previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.Portrait
-                superPreviewView.layer.addSublayer(previewLayer)
+                previewView.layer.addSublayer(previewLayer)
                 
                 captureSession!.startRunning()
             }
@@ -70,7 +70,7 @@ class CameraViewController: UIViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        previewLayer!.frame = superPreviewView.bounds
+        previewLayer!.frame = previewView.bounds
     }
     
     
