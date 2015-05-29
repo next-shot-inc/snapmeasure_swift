@@ -12,14 +12,11 @@ import UIKit
 struct Line {
     var points = [CGPoint]()
     var name = String()
+    var color = UIColor.blackColor().CGColor
     
     mutating func merge(line: Line) {
-        let leftToRight0 = points[1].x > points[0].x
-        let leftToRight1 = line.points[1].x > line.points[0].x
         var points0 = points
-        if( !leftToRight0 ) { points0 = points0.reverse() }
         var points1 = line.points
-        if( !leftToRight1 ) { points1 = points1.reverse() }
         
         var newPoints = [CGPoint]()
         var inserted = false
@@ -39,6 +36,28 @@ struct Line {
             }
         }
         points = newPoints
+    }
+    
+    mutating func cleanOrientation() {
+        // See if first is in opposite direction of the line and remove it (finger tremble)
+        if( points.count < 2 ) {
+            return
+        }
+        
+        let globalLeftToRight = points.last!.x > points.first!.x
+        var filtered = false
+        do {
+            filtered = false
+            let leftToRight = points[1].x > points[0].x
+            if( globalLeftToRight != leftToRight ) {
+                points.removeAtIndex(0)
+                filtered = true
+            }
+        } while ( filtered )
+        
+        if( !globalLeftToRight ) {
+            points = points.reverse()
+        }
     }
     
     func intersectBox(rect: CGRect) -> Bool {
@@ -127,7 +146,7 @@ class LineView : UIView {
         
         // Draw digitized lines
         for line in lines {
-            CGContextSetStrokeColorWithColor(context, UIColor.blackColor().CGColor)
+            CGContextSetStrokeColorWithColor(context, line.color)
             CGContextMoveToPoint (context, line.points[0].x, line.points[0].y);
             for ( var k = 1; k < line.points.count; k++) {
                 CGContextAddLineToPoint (context, line.points[k].x, line.points[k].y);
@@ -135,6 +154,21 @@ class LineView : UIView {
             CGContextStrokePath(context)
         }
         
+        // Fill color between two path
+        for var i=0; i < lines.count-1; i++  {
+            CGContextSetAlpha(context, 0.3)
+            CGContextSetFillColorWithColor(context, lines[i].color)
+            CGContextMoveToPoint (context, lines[i].points[0].x, lines[i].points[0].y)
+            for ( var k = 1; k < lines[i].points.count; k++) {
+                CGContextAddLineToPoint (context, lines[i].points[k].x, lines[i].points[k].y);
+            }
+            for ( var k=lines[i+1].points.count-1; k >= 0 ; k--) {
+                CGContextAddLineToPoint (context, lines[i+1].points[k].x, lines[i+1].points[k].y);
+            }
+            CGContextFillPath(context)
+        }
+        
+        // Draw line being drawn
         if( currentLine.points.count > 2 ) {
             CGContextSetStrokeColorWithColor(context, UIColor.blackColor().CGColor)
             // Draw as dash line
@@ -153,6 +187,7 @@ class LineView : UIView {
         
         var scale = 1.0
         if( refMeasurePoints.count == 2 ) {
+            // Draw reference line
             CGContextSetStrokeColorWithColor(context, UIColor.blueColor().CGColor)
             let loc = CGPoint(
                 x: (refMeasurePoints[1].x+refMeasurePoints[0].x)/2.0,
@@ -172,6 +207,7 @@ class LineView : UIView {
         }
         
         if( measure.count == 2 ) {
+            // Draw measurement line
             CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
             let dx = measure[1].x - measure[0].x
             let dy = measure[1].y - measure[0].y
@@ -186,6 +222,8 @@ class LineView : UIView {
             CGContextStrokePath(context)
         }
         
+        // Draw bounding rectangle
+        CGContextSetStrokeColorWithColor(context, UIColor.blackColor().CGColor)
         CGContextMoveToPoint (context, 10, 10);
         CGContextAddLineToPoint(context, bounds.width - 10.0, 10.0);
         CGContextAddLineToPoint(context, bounds.width - 10.0, bounds.height - 10.0)
@@ -194,17 +232,31 @@ class LineView : UIView {
         CGContextStrokePath(context)
     }
     
+    // Add or merge a new line 
+    // The merge is done when the name of the new line is the same as the name of an existing line
     func add(line: Line) {
         for (index,value) in enumerate(lines) {
             if( value.name == line.name ) {
                 var newline = value
+                newline.color = line.color // Take latest color
                 newline.merge(line)
                 lines.removeAtIndex(index)
                 lines.append(newline)
                 return
             }
         }
-        lines.append(line)
+        // Order the line from top to bottom (y)
+        var inserted = false
+        for var i=0; i < lines.count; i++  {
+            if( line.points[0].y < lines[i].points[0].y ) {
+                lines.insert(line, atIndex: i)
+                inserted = true
+                break
+            }
+        }
+        if( !inserted ) {
+           lines.append(line)
+        }
     }
 }
 
@@ -216,6 +268,7 @@ class DrawingView : UIImageView {
     var lineView = LineView()
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
+    var curColor = UIColor.blackColor().CGColor
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -234,6 +287,10 @@ class DrawingView : UIImageView {
         lineView.backgroundColor = nil
         lineView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
         self.addSubview(lineView)
+    }
+    
+    func initFrame() {
+        //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: image!.size)
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -276,7 +333,9 @@ class DrawingView : UIImageView {
                 lineView.measure.append(lineView.currentLine.points[lineView.currentLine.points.count-1])
             }
         } else if( drawMode == ToolMode.Draw) {
+            lineView.currentLine.color = curColor
             lineView.currentLine.name = lineView.currentLineName
+            lineView.currentLine.cleanOrientation()
             lineView.add(lineView.currentLine)
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)

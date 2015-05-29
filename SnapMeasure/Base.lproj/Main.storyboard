@@ -209,6 +209,45 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                <rect key="frame" x="21" y="63" width="558" height="455"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
+                                    <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
+                                    <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
+                                </connections>
+                            </imageView>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
+                                <rect key="frame" x="436" y="57" width="100" height="162"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="u6m-L5-SJL"/>
+                                </constraints>
+                            </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
+                                <rect key="frame" x="471" y="27" width="30" height="30"/>
+                                <state key="normal" title="Col">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushColButton:" destination="KD6-M1-rG7" eventType="touchDown" id="64X-as-XpB"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
+                                <rect key="frame" x="370" y="27" width="91" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u4C-tu-Tbg">
+                                <rect key="frame" x="21" y="25" width="30" height="30"/>
+                                <state key="normal" title="X">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
+                                </connections>
+                            </button>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
                                 <rect key="frame" x="59" y="28" width="303" height="29"/>
                                 <segments>
@@ -221,41 +260,6 @@
                                     <action selector="toolChanged:" destination="KD6-M1-rG7" eventType="valueChanged" id="aZ6-D7-upH"/>
                                 </connections>
                             </segmentedControl>
-                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
-                                <rect key="frame" x="21" y="63" width="558" height="455"/>
-                                <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
-                                    <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
-                                    <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
-                                </connections>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u4C-tu-Tbg">
-                                <rect key="frame" x="21" y="25" width="30" height="30"/>
-                                <state key="normal" title="X">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
-                                </connections>
-                            </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
-                                <rect key="frame" x="370" y="27" width="91" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
-                            </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
-                                <rect key="frame" x="471" y="27" width="30" height="30"/>
-                                <state key="normal" title="Col">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="pushColButton:" destination="KD6-M1-rG7" eventType="touchDown" id="64X-as-XpB"/>
-                                </connections>
-                            </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
-                                <rect key="frame" x="326" y="57" width="320" height="162"/>
-                            </pickerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
