@@ -227,6 +227,7 @@
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
                                     <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
+                                    <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
                                 </connections>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u4C-tu-Tbg">
@@ -293,6 +294,11 @@
                         <action selector="handlePan:" destination="KD6-M1-rG7" id="Ah5-8c-0IB"/>
                     </connections>
                 </panGestureRecognizer>
+                <tapGestureRecognizer id="LKt-km-RPt">
+                    <connections>
+                        <action selector="handleTap:" destination="KD6-M1-rG7" id="ZZy-xQ-eM5"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1910" y="236"/>
         </scene>

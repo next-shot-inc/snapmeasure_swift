@@ -85,8 +85,8 @@ class DrawingViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
-        self.view.addGestureRecognizer(recognizer)
+        //let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
+        //self.view.addGestureRecognizer(recognizer)
         
         colorPickerView.delegate = colorPickerCtrler
         colorPickerView.dataSource = colorPickerCtrler
@@ -123,21 +123,6 @@ class DrawingViewController: UIViewController {
         }
     }
     
-    func handleTap(recognizer: UITapGestureRecognizer) {
-        referenceSizeTextField.resignFirstResponder()
-        let drawingView = imageView as! DrawingView
-        
-        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
-            var nf = NSNumberFormatter()
-            var ns = nf.numberFromString(referenceSizeTextField.text)
-            if( ns != nil ) {
-                drawingView.lineView.refMeasureValue = ns!.floatValue
-            }
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.currentLineName = referenceSizeTextField.text
-        }
-    }
-    
     @IBAction func handlePinch(sender: AnyObject) {
         let recognizer = sender as! UIPinchGestureRecognizer
         let scaleFactor = recognizer.scale
@@ -150,6 +135,21 @@ class DrawingViewController: UIViewController {
         recognizer.view!.center = CGPointMake(recognizer.view!.center.x + translation.x,
             recognizer.view!.center.y + translation.y);
         recognizer.setTranslation(CGPoint(x: 0,y: 0), inView: self.view)
+    }
+    
+    @IBAction func handleTap(sender: AnyObject) {
+        referenceSizeTextField.resignFirstResponder()
+        let drawingView = imageView as! DrawingView
+        
+        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
+            var nf = NSNumberFormatter()
+            var ns = nf.numberFromString(referenceSizeTextField.text)
+            if( ns != nil ) {
+                drawingView.lineView.refMeasureValue = ns!.floatValue
+            }
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+            drawingView.lineView.currentLineName = referenceSizeTextField.text
+        }
     }
     
     @IBAction func pushColButton(sender: AnyObject) {
