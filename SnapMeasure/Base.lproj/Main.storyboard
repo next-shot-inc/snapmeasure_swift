@@ -51,16 +51,31 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Location name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Pcu-nD-7vs">
+                                <rect key="frame" x="228" y="186" width="117" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
+                                <rect key="frame" x="155" y="186" width="63" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="trailing" constant="10" id="0Sq-gi-FQI"/>
                             <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="224" id="1EF-r7-alC"/>
+                            <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="Pcu-nD-7vs" secondAttribute="bottom" constant="28" id="81p-It-npI"/>
                             <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="20" id="Cyx-QI-cRy"/>
                             <constraint firstAttribute="centerX" secondItem="iGn-33-JlB" secondAttribute="centerX" id="FAa-du-RY7"/>
                             <constraint firstItem="oea-fH-bxA" firstAttribute="top" secondItem="cw7-zZ-foI" secondAttribute="bottom" constant="20" id="Qy4-hQ-FnG"/>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="trailing" secondItem="iGn-33-JlB" secondAttribute="trailing" id="ad0-f5-ZkR"/>
                             <constraint firstAttribute="centerX" secondItem="oea-fH-bxA" secondAttribute="centerX" id="alj-8m-FSB"/>
                             <constraint firstAttribute="centerX" secondItem="KPO-lU-ARU" secondAttribute="centerX" id="b48-CA-xgA"/>
                             <constraint firstAttribute="centerX" secondItem="cw7-zZ-foI" secondAttribute="centerX" id="eyW-at-xsF"/>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="centerY" secondItem="zoN-5C-vHP" secondAttribute="centerY" constant="4.5" id="tXS-jl-Kjl"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="20" id="zAo-GU-u11"/>
                         </constraints>
                     </view>

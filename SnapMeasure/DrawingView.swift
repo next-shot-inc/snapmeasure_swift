@@ -118,6 +118,30 @@ struct Line {
         }
         return true;
     }
+    
+    func segmentsIntersect(a: CGPoint, b: CGPoint, c: CGPoint, d: CGPoint) -> (Bool, CGPoint) {
+        let denom = a.x * ( d.y - c.y ) + b.x * ( c.y - d.y ) +
+                    d.x * ( b.y - a.y ) + c.x * ( a.y - b.y );
+            
+            /* If denom is zero, then segments are parallel: handle separately. */
+        if( denom < 1e-6 ) {
+            return (false, CGPoint())
+        }
+            
+        let nums = a.x * ( d.y - c.y ) + c.x * ( a.y - d.y ) + d.x * ( c.y - a.y );
+        let s = nums / denom
+        
+        let numt = a.x * ( c.y - b.y ) + b.x * ( a.y - c.y ) + c.x * ( b.y - a.y )
+        let t = -numt / denom
+        
+        let exist = ( (0.0 < s) && (s < 1.0) &&
+                      (0.0 < t) && (t < 1.0) )
+        
+        var p : CGPoint = CGPoint()
+        p.x = a.x + s * ( b.x - a.x );
+        p.y = a.y + s * ( b.y - a.y );
+        return (exist, p)
+    }
 }
 
 class LineView : UIView {
