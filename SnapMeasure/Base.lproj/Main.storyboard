@@ -51,16 +51,31 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Location name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Pcu-nD-7vs">
+                                <rect key="frame" x="228" y="186" width="117" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
+                                <rect key="frame" x="155" y="186" width="63" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="trailing" constant="10" id="0Sq-gi-FQI"/>
                             <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="224" id="1EF-r7-alC"/>
+                            <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="Pcu-nD-7vs" secondAttribute="bottom" constant="28" id="81p-It-npI"/>
                             <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="20" id="Cyx-QI-cRy"/>
                             <constraint firstAttribute="centerX" secondItem="iGn-33-JlB" secondAttribute="centerX" id="FAa-du-RY7"/>
                             <constraint firstItem="oea-fH-bxA" firstAttribute="top" secondItem="cw7-zZ-foI" secondAttribute="bottom" constant="20" id="Qy4-hQ-FnG"/>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="trailing" secondItem="iGn-33-JlB" secondAttribute="trailing" id="ad0-f5-ZkR"/>
                             <constraint firstAttribute="centerX" secondItem="oea-fH-bxA" secondAttribute="centerX" id="alj-8m-FSB"/>
                             <constraint firstAttribute="centerX" secondItem="KPO-lU-ARU" secondAttribute="centerX" id="b48-CA-xgA"/>
                             <constraint firstAttribute="centerX" secondItem="cw7-zZ-foI" secondAttribute="centerX" id="eyW-at-xsF"/>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="centerY" secondItem="zoN-5C-vHP" secondAttribute="centerY" constant="4.5" id="tXS-jl-Kjl"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="20" id="zAo-GU-u11"/>
                         </constraints>
                     </view>
@@ -210,6 +225,45 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                <rect key="frame" x="21" y="63" width="558" height="455"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
+                                    <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
+                                    <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
+                                </connections>
+                            </imageView>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
+                                <rect key="frame" x="436" y="57" width="100" height="162"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="100" id="u6m-L5-SJL"/>
+                                </constraints>
+                            </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
+                                <rect key="frame" x="471" y="27" width="30" height="30"/>
+                                <state key="normal" title="Col">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushColButton:" destination="KD6-M1-rG7" eventType="touchDown" id="64X-as-XpB"/>
+                                </connections>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
+                                <rect key="frame" x="370" y="27" width="91" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u4C-tu-Tbg">
+                                <rect key="frame" x="21" y="25" width="30" height="30"/>
+                                <state key="normal" title="X">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
+                                </connections>
+                            </button>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
                                 <rect key="frame" x="59" y="28" width="303" height="29"/>
                                 <segments>
@@ -222,40 +276,6 @@
                                     <action selector="toolChanged:" destination="KD6-M1-rG7" eventType="valueChanged" id="aZ6-D7-upH"/>
                                 </connections>
                             </segmentedControl>
-                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
-                                <rect key="frame" x="21" y="63" width="558" height="455"/>
-                                <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
-                                    <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
-                                </connections>
-                            </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u4C-tu-Tbg">
-                                <rect key="frame" x="21" y="25" width="30" height="30"/>
-                                <state key="normal" title="X">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
-                                </connections>
-                            </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
-                                <rect key="frame" x="370" y="27" width="91" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
-                            </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
-                                <rect key="frame" x="471" y="27" width="30" height="30"/>
-                                <state key="normal" title="Col">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="pushColButton:" destination="KD6-M1-rG7" eventType="touchDown" id="64X-as-XpB"/>
-                                </connections>
-                            </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
-                                <rect key="frame" x="326" y="57" width="320" height="162"/>
-                            </pickerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -294,6 +314,11 @@
                         <action selector="handlePan:" destination="KD6-M1-rG7" id="Ah5-8c-0IB"/>
                     </connections>
                 </panGestureRecognizer>
+                <tapGestureRecognizer id="LKt-km-RPt">
+                    <connections>
+                        <action selector="handleTap:" destination="KD6-M1-rG7" id="ZZy-xQ-eM5"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1910" y="236"/>
         </scene>

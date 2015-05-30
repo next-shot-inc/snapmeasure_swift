@@ -84,9 +84,11 @@ class DrawingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        referenceSizeTextField.keyboardType = UIKeyboardType.Default
+        referenceSizeTextField.placeholder = "Name"
         
-        let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
-        self.view.addGestureRecognizer(recognizer)
+        //let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
+        //self.view.addGestureRecognizer(recognizer)
         
         colorPickerView.delegate = colorPickerCtrler
         colorPickerView.dataSource = colorPickerCtrler
@@ -109,6 +111,7 @@ class DrawingViewController: UIViewController {
 
         let drawingView = imageView as! DrawingView
         drawingView.imageInfo = imageInfo
+        drawingView.initFrame()
     }
     
     @IBAction func toolChanged(sender: AnyObject) {
@@ -118,23 +121,10 @@ class DrawingViewController: UIViewController {
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
             referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
+            referenceSizeTextField.placeholder = "Size"
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             referenceSizeTextField.keyboardType = UIKeyboardType.Default
-        }
-    }
-    
-    func handleTap(recognizer: UITapGestureRecognizer) {
-        referenceSizeTextField.resignFirstResponder()
-        let drawingView = imageView as! DrawingView
-        
-        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
-            var nf = NSNumberFormatter()
-            var ns = nf.numberFromString(referenceSizeTextField.text)
-            if( ns != nil ) {
-                drawingView.lineView.refMeasureValue = ns!.floatValue
-            }
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.currentLineName = referenceSizeTextField.text
+            referenceSizeTextField.placeholder = "Name"
         }
     }
     
@@ -152,8 +142,28 @@ class DrawingViewController: UIViewController {
         recognizer.setTranslation(CGPoint(x: 0,y: 0), inView: self.view)
     }
     
+    @IBAction func handleTap(sender: AnyObject) {
+        referenceSizeTextField.resignFirstResponder()
+        colorPickerView.hidden = true
+        
+        let drawingView = imageView as! DrawingView
+        
+        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
+            var nf = NSNumberFormatter()
+            var ns = nf.numberFromString(referenceSizeTextField.text)
+            if( ns != nil ) {
+                drawingView.lineView.refMeasureValue = ns!.floatValue
+            }
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+            drawingView.lineView.currentLineName = referenceSizeTextField.text
+            drawingView.curColor = colButton.backgroundColor?.CGColor
+        }
+    }
+    
     @IBAction func pushColButton(sender: AnyObject) {
         colorPickerView.hidden = !colorPickerView.hidden
+        let drawingView = imageView as! DrawingView
+        drawingView.curColor = colButton.backgroundColor?.CGColor
     }
     
     @IBAction func closeWindow(sender: AnyObject) {
