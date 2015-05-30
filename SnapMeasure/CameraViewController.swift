@@ -18,6 +18,29 @@ struct ImageInfo {
     var subjectDistance : Float = 0.0
 }
 
+extension AVCaptureVideoOrientation {
+    var uiInterfaceOrientation: UIInterfaceOrientation {
+        get {
+            switch self {
+            case .LandscapeLeft:        return .LandscapeLeft
+            case .LandscapeRight:       return .LandscapeRight
+            case .Portrait:             return .Portrait
+            case .PortraitUpsideDown:   return .PortraitUpsideDown
+            }
+        }
+    }
+    
+    init(ui:UIInterfaceOrientation) {
+        switch ui {
+        case .LandscapeRight:       self = .LandscapeRight
+        case .LandscapeLeft:        self = .LandscapeLeft
+        case .Portrait:             self = .Portrait
+        case .PortraitUpsideDown:   self = .PortraitUpsideDown
+        default:                    self = .Portrait
+        }
+    }
+}
+
 class CameraViewController: UIViewController {
     var captureSession: AVCaptureSession?
     var stillImageOutput: AVCaptureStillImageOutput?
@@ -58,8 +81,11 @@ class CameraViewController: UIViewController {
                 captureSession!.addOutput(stillImageOutput)
                 
                 previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-                previewLayer!.videoGravity = AVLayerVideoGravityResizeAspect
-                previewLayer!.connection?.videoOrientation = AVCaptureVideoOrientation.Portrait
+                if let connection = previewLayer?.connection {
+                    connection.videoOrientation = AVCaptureVideoOrientation(ui:UIApplication.sharedApplication().statusBarOrientation)
+
+                }
+                previewLayer!.videoGravity = AVLayerVideoGravityResizeAspectFill
                 previewView.layer.addSublayer(previewLayer)
                 
                 captureSession!.startRunning()
@@ -136,6 +162,78 @@ class CameraViewController: UIViewController {
             })
         }
     }
+    
+    override func supportedInterfaceOrientations() -> Int {
+        return Int(UIInterfaceOrientationMask.All.rawValue);
+    }
+    
+     override func viewWillTransitionToSize(size: CGSize,
+        withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+            
+            // willRotateToInterfaceOrientation code goes here
+            
+            coordinator.animateAlongsideTransition({ (UIViewControllerTransitionCoordinatorContext) -> Void in
+                // willAnimateRotationToInterfaceOrientation code goes here
+                super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+                
+                }, completion: { (UIViewControllerTransitionCoordinatorContext) -> Void in
+                    
+                    // didRotateFromInterfaceOrientation goes here
+                    if let connection = self.previewLayer?.connection {
+                        connection.videoOrientation = AVCaptureVideoOrientation(ui:UIApplication.sharedApplication().statusBarOrientation)
+                        
+                        /**
+                        switch connection.videoOrientation {
+                        case AVCaptureVideoOrientation.LandscapeLeft: NSLog("LandscapeLeft");
+                        case AVCaptureVideoOrientation.LandscapeRight: NSLog("LandscapeRight");
+                        case AVCaptureVideoOrientation.Portrait: NSLog("Portrait");
+                        case AVCaptureVideoOrientation.PortraitUpsideDown: NSLog("LandscapeLeft");
+                        } **/
+
+                    }
+                    self.previewLayer!.frame = self.previewView.bounds
+
+                    self.previewLayer!.videoGravity = AVLayerVideoGravityResizeAspectFill
+                    NSLog("Omg Rotation!")
+
+            })
+
+            /**
+            [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+                // willAnimateRotationToInterfaceOrientation code goes here
+                [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+                if(self.showsShadow){
+                CGPathRef oldShadowPath = self.centerContainerView.layer.shadowPath;
+                if(oldShadowPath){
+                CFRetain(oldShadowPath);
+                }
+                
+                [self updateShadowForCenterView];
+                
+                if (oldShadowPath) {
+                [self.centerContainerView.layer addAnimation:((^ {
+                CABasicAnimation *transition = [CABasicAnimation animationWithKeyPath:@"shadowPath"];
+                transition.fromValue = (__bridge id)oldShadowPath;
+                transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+                return transition;
+                })()) forKey:@"transition"];
+                CFRelease(oldShadowPath);
+                }
+                }
+                
+                } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+                // didRotateFromInterfaceOrientation goes here (nothing for now)
+                
+                }];
+**/
+        
+    }
+
+    /**
+    func willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+    {
+    [[(AVCaptureVideoPreviewLayer *)[[self previewView] layer] connection] setVideoOrientation:(AVCaptureVideoOrientation)toInterfaceOrientation];
+    } **/
     
     @IBAction func closeWindow(sender: AnyObject) {
         self.dismissViewControllerAnimated(true, completion: nil)
