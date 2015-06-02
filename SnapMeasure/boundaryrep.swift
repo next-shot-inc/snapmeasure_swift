@@ -10,8 +10,11 @@ import Foundation
 import UIKit
 
 class RadialNode {
-    var loc : CGPoint = CGPoint()
-    var lines = [OrientedLine]()
+    // Contains the sorted list all all the lines intersecting at that location
+    
+    var loc : CGPoint = CGPoint() // The location of the radial node
+    var lines = [OrientedLine]() // The sorted array of lines beginning by at this radial node
+    
     init(loc: CGPoint) {
         self.loc = loc
     }
@@ -21,12 +24,16 @@ class RadialNode {
         var c = line.endSegment()
         
         if( lines.count < 2 ) {
+            // The first line is always first (angle = 0)
+            // The second line is always second (angle > 0 && angle < 360)
            lines.append(line)
         } else {
+            // Sort by computing the angle of the given line with the segment 0.
             let b = lines[0].endSegment()
             let nangle = angle(loc, b: b, c: c)
             for( var i=1; i < lines.count; i++ ) {
                 let ci = lines[i].endSegment()
+                // compute angle of segment i with segment 0,
                 let iangle = angle(loc, b: b, c: ci)
                 if( nangle < iangle ) {
                     lines.insert(line, atIndex: i)
@@ -38,6 +45,7 @@ class RadialNode {
     }
     
     func next(line: OrientedLine) -> OrientedLine? {
+        // Return the next line in the array of lines
         for (index, iline) in enumerate(lines) {
             if( iline == line ) {
                 if( index == lines.count-1 ) {
@@ -58,29 +66,27 @@ class RadialNode {
     func dot(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
         return (b.x - a.x)*(c.x - a.x) + (b.y - a.y)*(c.y - a.y)
     }
-    
-    func norm(a: CGPoint, b: CGPoint) -> CGFloat {
-        return sqrt(dot(a, b: b, c: b))
-    }
-    
+   
     func angle(a: CGPoint, b: CGPoint, c: CGPoint) ->  Double {
         var a = atan2(Double(cross(a, b: b, c: c)), Double(dot(a,b: b,c: c)))
         if( a < 0.0 ) {
             // All angles need to be measured along the same direction.
             a += 2*M_PI
         }
+        // Return angle between 0 and 360.
         return a * 180/M_PI
     }
 }
 
 class OrientedLine : Hashable {
+    // Represents a Macro Half Segment
     static var globalIndex = 0
     
-    var line: Line
-    var reverse : Bool
-    var index: Int
-    var mate : OrientedLine?
-    var rn : RadialNode?
+    var line: Line  // The real line geometry
+    var reverse : Bool // In which direction should the array of points be interpreted.
+    var index: Int // An hash index
+    var mate : OrientedLine? // The half macro-segment in the opposite direction
+    var rn : RadialNode? // The radial node at the beginning of the macro-segment
     
     init(line: Line, reverse: Bool) {
         self.line = line
@@ -145,30 +151,32 @@ class SplitLine {
     }
     
     func add(seg: SplitSegment) {
+        // Add the split of the line in order along the line
         for( var i=0; i < splits.count; i++ ) {
             if( seg.index < splits[i].index ) {
                 splits.insert(seg, atIndex: i)
                 return
             } else if( seg.index == splits[i].index ) {
-                let s1 = Line.segmentIntersectPoint(
+                // Same segment is splitted. Find the order.
+                let s = Line.segmentIntersectPoint(
                     line.points[seg.index], b: line.points[seg.index+1], c: seg.loc
                 )
-                let s2 = Line.segmentIntersectPoint(
+                let si = Line.segmentIntersectPoint(
                     line.points[seg.index], b: line.points[seg.index+1], c: splits[i].loc
                 )
-                if( s1 < s2 ) {
+                if( s < si ) {
                     splits.insert(seg, atIndex: i)
-                } else {
-                    splits.insert(seg, atIndex: i+1)
+                    return
+                } else if( s == si ) {
+                    return
                 }
-
-                return
             }
         }
         splits.append(seg)
     }
     
     func split() -> [Line] {
+        // Take the splits and create n+1 lines.
         var lines = [Line]()
         
         // Start first line
@@ -204,6 +212,7 @@ class SplitLine {
 }
 
 class Extremity : Comparable {
+    // Store the extremity of the oriented line (Remark: Loc is redundant and can be computed)
     var line: OrientedLine
     var loc : CGPoint
     init(line: OrientedLine, loc: CGPoint) {
@@ -241,6 +250,7 @@ class Polygons {
         for line in splitLines.values {
             var splitted = line.split()
             for nline in splitted {
+                // For every piece of geomtric line,create two oppositely oriented lines
                 var o1 = OrientedLine(line: nline, reverse: false)
                 var o2 = OrientedLine(line: nline, reverse: true)
                 o1.mate = o2

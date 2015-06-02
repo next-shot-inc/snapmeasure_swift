@@ -11,7 +11,7 @@ import Foundation
 import UIKit
 
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    let count = 5
+    let count = 8
     var colorButton : UIButton?
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
@@ -46,27 +46,37 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         return pickerLabel!
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
-        var cell = tableView.dequeueReusableCellWithIdentifier("colorCell", forIndexPath: indexPath) as! UITableViewCell
-        cell.accessoryType = UITableViewCellAccessoryType.Checkmark
+    func selectNextColor(pickerView: UIPickerView) -> UIColor {
+        var curColor = pickerView.selectedRowInComponent(0)
+        curColor++
+        if( curColor >= count ) {
+            // cycle through
+            curColor = 0
+        }
+        pickerView.selectRow(curColor, inComponent: 0, animated: false)
+        let hue = CGFloat(curColor)/CGFloat(count)
+        return UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
     }
-    
-    func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
-        var cell = tableView.dequeueReusableCellWithIdentifier("colorCell", forIndexPath: indexPath) as! UITableViewCell
-        cell.accessoryType = UITableViewCellAccessoryType.None
-    }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell = tableView.dequeueReusableCellWithIdentifier("colorCell", forIndexPath: indexPath) as! UITableViewCell
-        //let hue = CGFloat(indexPath.row)/CGFloat(count)
-        //cell.contentView.backgroundColor =
-            //UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
-        //cell.textLabel?.backgroundColor = cell.contentView.backgroundColor
-        cell.textLabel?.text = String(indexPath.row)
-        return cell
-    }
+}
 
+class TypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+    let types = ["Top", "Unconformity", "Fault"]
+    var typeButton : UIButton?
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
+        typeButton?.setTitle(types[row], forState: UIControlState.Normal)
+    }
+    
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return types.count
+    }
+    
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+        return types[row]
+    }
 }
 
 class DrawingViewController: UIViewController {
@@ -76,26 +86,48 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var referenceSizeTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
+    @IBOutlet weak var typeButton: UIButton!
+    @IBOutlet weak var typePickerView: UIPickerView!
     
     var image : UIImage?
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
+    var typePickerCtrler = TypePickerController()
+    static var lineCount = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        // Initialize widgets at the top
+        // 1. Text field
         referenceSizeTextField.keyboardType = UIKeyboardType.Default
         referenceSizeTextField.placeholder = "Name"
+        referenceSizeTextField.text = "H1"
         
         //let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
         //self.view.addGestureRecognizer(recognizer)
         
+        // 2. Color picker
         colorPickerView.delegate = colorPickerCtrler
         colorPickerView.dataSource = colorPickerCtrler
+        let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
+        // 3. Color button
         colButton.setTitle(" ", forState: UIControlState.Normal)
-        colButton.backgroundColor = UIColor.blackColor()
+        colButton.backgroundColor = color
         colorPickerCtrler.colorButton = colButton
+        
+        //4. Type button
+        typeButton.setTitle("Top", forState: UIControlState.Normal)
+        typePickerView.delegate = typePickerCtrler
+        typePickerView.dataSource = typePickerCtrler
+        typePickerCtrler.typeButton = typeButton
+        
+        // 4. Drawing View initial state
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.curColor = color.CGColor
     }
     
     override func didReceiveMemoryWarning() {
@@ -120,11 +152,17 @@ class DrawingViewController: UIViewController {
             DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
+            
             referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
             referenceSizeTextField.placeholder = "Size"
+            let nf = NSNumberFormatter()
+            referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+            
             referenceSizeTextField.keyboardType = UIKeyboardType.Default
             referenceSizeTextField.placeholder = "Name"
+            referenceSizeTextField.text = drawingView.lineView.currentLineName
         }
     }
     
@@ -145,6 +183,7 @@ class DrawingViewController: UIViewController {
     @IBAction func handleTap(sender: AnyObject) {
         referenceSizeTextField.resignFirstResponder()
         colorPickerView.hidden = true
+        typePickerView.hidden = true
         
         let drawingView = imageView as! DrawingView
         
@@ -164,6 +203,24 @@ class DrawingViewController: UIViewController {
         colorPickerView.hidden = !colorPickerView.hidden
         let drawingView = imageView as! DrawingView
         drawingView.curColor = colButton.backgroundColor?.CGColor
+    }
+    
+    @IBAction func pushNewLine(sender: AnyObject) {
+        referenceSizeTextField.text = String("H") +
+                                      String(++DrawingViewController.lineCount)
+        
+        let drawingView = imageView as! DrawingView
+        let color = colorPickerCtrler.selectNextColor(colorPickerView)
+        
+        colButton.backgroundColor = color
+        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.curColor = color.CGColor
+    }
+    
+    @IBAction func pushTypeButton(sender: AnyObject) {
+        typePickerView.hidden = !typePickerView.hidden
+        
+        //let drawingView = imageView as! DrawingView
     }
     
     @IBAction func closeWindow(sender: AnyObject) {

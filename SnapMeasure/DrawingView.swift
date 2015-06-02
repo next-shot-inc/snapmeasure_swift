@@ -445,7 +445,7 @@ class DrawingView : UIImageView {
                 for (index,value) in enumerate(lineView.lines) {
                     if( value.intersectBox(rect) ) {
                         lineView.lines.removeAtIndex(index)
-                        
+                        lineView.computePolygon()
                         break
                     }
                 }
