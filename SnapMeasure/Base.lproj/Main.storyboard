@@ -163,9 +163,6 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="NOd-dG-y3f" appends="YES" id="Gxt-fd-JQr"/>
-                                </connections>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KuA-6A-Z82">
                                 <rect key="frame" x="253" y="562" width="30" height="30"/>
@@ -218,11 +215,6 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fu6-Ji-z0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <tapGestureRecognizer id="NOd-dG-y3f">
-                    <connections>
-                        <action selector="focusAndExposeTap:" destination="SuH-D2-ybR" id="yJI-9f-44L"/>
-                    </connections>
-                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1138" y="775"/>
         </scene>
@@ -337,6 +329,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="oX2-9E-jws"/>
+        <segue reference="LFb-Hb-Otc"/>
     </inferredMetricsTieBreakers>
 </document>

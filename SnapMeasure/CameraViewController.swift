@@ -208,6 +208,16 @@ class CameraViewController: UIViewController {
             }
         }
         
+        // Add a single tap gesture to focus on the point tapped, then lock focus
+        let singleTap = UITapGestureRecognizer(target: self, action: "focusAndExposeTap:")
+        singleTap.numberOfTapsRequired = 1
+        previewView.addGestureRecognizer(singleTap)
+        
+        // Add a double tap gesture to reset the focus mode to continuous auto focus
+        let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTaptoContinuouslyAutofocus:")
+        doubleTap.numberOfTapsRequired = 2
+        singleTap.requireGestureRecognizerToFail(doubleTap)
+        previewView.addGestureRecognizer(doubleTap)        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -375,9 +385,20 @@ class CameraViewController: UIViewController {
     
     }
     
-    @IBAction func focusAndExposeTap(gestureRecognizer : UIGestureRecognizer) {
+    func focusAndExposeTap(gestureRecognizer : UIGestureRecognizer) {
         let devicePoint = self.previewLayer?.captureDevicePointOfInterestForPoint(gestureRecognizer.locationInView(gestureRecognizer.view))
         self.focusWithMode(AVCaptureFocusMode.AutoFocus, exposeWithMode: AVCaptureExposureMode.AutoExpose, atDevicePoint: devicePoint!, monitorSubjectAreaChange: true)
+        NSLog("No Continuous Focus")
+        //self.drawFocusBox(devicePoint!)
+        
+    }
+    
+    func doubleTaptoContinuouslyAutofocus(gestureRecognizer : UIGestureRecognizer) {
+        let midH = self.previewView.bounds.height/2
+        let midW = self.previewView.bounds.width/2
+        let devicePoint = CGPoint(x: midW, y: midH);
+        self.focusWithMode(AVCaptureFocusMode.ContinuousAutoFocus, exposeWithMode: AVCaptureExposureMode.ContinuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
+        NSLog("Continuous Focus")
     }
     
     @IBAction func closeWindow(sender: AnyObject) {
@@ -416,6 +437,21 @@ class CameraViewController: UIViewController {
             //error
         }
     }
+    /**
+    func drawFocusBox (centerPoint: CGPoint) {
+        //Box h=w=100
+        let focusView : UIView = UIView()
+        focusView.tag = 10;
+        NSLog("Draw Focus Square")
+        focusView.drawRect(CGRect(x:Int(centerPoint.x)-50,y: Int(centerPoint.y)-50, width: 100, height: 100))
+        self.previewView.addSubview(focusView)
+    }
+    
+    func removeFocusBox () {
+        let focusView = previewView.viewWithTag(10);
+        focusView?.removeFromSuperview()
+    }
+**/
 
     
     class func setFlashMode(flashMode: AVCaptureFlashMode, forDevice device: AVCaptureDevice) {
