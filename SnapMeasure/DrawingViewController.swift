@@ -96,6 +96,7 @@ class DrawingViewController: UIViewController {
         colButton.setTitle(" ", forState: UIControlState.Normal)
         colButton.backgroundColor = UIColor.blackColor()
         colorPickerCtrler.colorButton = colButton
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -105,11 +106,9 @@ class DrawingViewController: UIViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        imageView.image = image
         imageView.setNeedsDisplay()
-
         let drawingView = imageView as! DrawingView
+        drawingView.image = image
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
     }
@@ -171,6 +170,5 @@ class DrawingViewController: UIViewController {
     }
 
 }
-
 
 
