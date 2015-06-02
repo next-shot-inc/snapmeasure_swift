@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -240,14 +240,14 @@
                                 </connections>
                             </imageView>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
-                                <rect key="frame" x="436" y="57" width="100" height="162"/>
+                                <rect key="frame" x="325" y="55" width="100" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="u6m-L5-SJL"/>
                                 </constraints>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
-                                <rect key="frame" x="471" y="27" width="30" height="30"/>
+                                <rect key="frame" x="360" y="25" width="30" height="30"/>
                                 <state key="normal" title="Col">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -256,7 +256,7 @@
                                 </connections>
                             </button>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
-                                <rect key="frame" x="370" y="27" width="91" height="30"/>
+                                <rect key="frame" x="259" y="25" width="91" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                             </textField>
@@ -269,35 +269,63 @@
                                     <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
                                 </connections>
                             </button>
-                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
-                                <rect key="frame" x="59" y="28" width="303" height="29"/>
+                            <segmentedControl opaque="NO" contentMode="center" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
+                                <rect key="frame" x="61" y="26" width="147" height="29"/>
                                 <segments>
-                                    <segment title="Draw"/>
-                                    <segment title="Clear"/>
-                                    <segment title="Measure"/>
-                                    <segment title="Reference"/>
+                                    <segment title="" image="Pencil" width="36"/>
+                                    <segment title="" image="erase" width="36"/>
+                                    <segment title="" image="measure" width="36"/>
+                                    <segment title="" image="draw_ref" width="36"/>
                                 </segments>
                                 <connections>
                                     <action selector="toolChanged:" destination="KD6-M1-rG7" eventType="valueChanged" id="aZ6-D7-upH"/>
                                 </connections>
                             </segmentedControl>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0V3-cV-DX3">
+                                <rect key="frame" x="218" y="25" width="31" height="30"/>
+                                <state key="normal" title="New">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushNewLine:" destination="KD6-M1-rG7" eventType="touchDown" id="4SN-b1-TcO"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HHQ-8o-Zsd">
+                                <rect key="frame" x="400" y="26" width="32" height="30"/>
+                                <state key="normal" title="Type">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushTypeButton:" destination="KD6-M1-rG7" eventType="touchDown" id="TS0-yY-DlA"/>
+                                </connections>
+                            </button>
+                            <pickerView hidden="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
+                                <rect key="frame" x="366" y="55" width="100" height="162"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </pickerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="top" secondItem="k29-4t-8uI" secondAttribute="bottom" constant="5" id="0df-1y-4am"/>
                             <constraint firstAttribute="trailingMargin" secondItem="EaD-SD-Xzk" secondAttribute="trailing" constant="5" id="27M-Pw-d02"/>
+                            <constraint firstItem="HHQ-8o-Zsd" firstAttribute="leading" secondItem="7Ua-vU-sig" secondAttribute="trailing" constant="10" id="3lN-fe-GFo"/>
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="6bf-g5-LA8"/>
+                            <constraint firstItem="vx2-ax-Iw8" firstAttribute="centerX" secondItem="HHQ-8o-Zsd" secondAttribute="centerX" id="8f6-en-guN"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="5" id="Iw1-vN-D33"/>
                             <constraint firstItem="wev-s6-Qso" firstAttribute="top" secondItem="7Ua-vU-sig" secondAttribute="bottom" id="Q8f-dS-pfR"/>
-                            <constraint firstItem="SBq-9U-Dsq" firstAttribute="leading" secondItem="u4C-tu-Tbg" secondAttribute="trailing" constant="8" id="eEu-dr-wGl"/>
-                            <constraint firstItem="i07-eQ-9as" firstAttribute="leading" secondItem="SBq-9U-Dsq" secondAttribute="trailing" constant="8" id="fa0-94-2P8"/>
+                            <constraint firstItem="vx2-ax-Iw8" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="bottom" constant="-1" id="WlE-4y-0fL"/>
+                            <constraint firstItem="0V3-cV-DX3" firstAttribute="leading" secondItem="SBq-9U-Dsq" secondAttribute="trailing" constant="10" id="d1p-cC-oHe"/>
+                            <constraint firstItem="SBq-9U-Dsq" firstAttribute="leading" secondItem="u4C-tu-Tbg" secondAttribute="trailing" constant="10" id="eEu-dr-wGl"/>
                             <constraint firstItem="7Ua-vU-sig" firstAttribute="leading" secondItem="i07-eQ-9as" secondAttribute="trailing" constant="10" id="fjM-i6-0Ue"/>
                             <constraint firstItem="i07-eQ-9as" firstAttribute="centerY" secondItem="7Ua-vU-sig" secondAttribute="centerY" id="obf-2m-yrn"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="qcJ-vx-xIf"/>
-                            <constraint firstItem="u4C-tu-Tbg" firstAttribute="centerY" secondItem="SBq-9U-Dsq" secondAttribute="centerY" constant="-2" id="rhF-7u-HAD"/>
+                            <constraint firstItem="HHQ-8o-Zsd" firstAttribute="centerY" secondItem="7Ua-vU-sig" secondAttribute="centerY" constant="1" id="rgB-dU-zaG"/>
+                            <constraint firstItem="u4C-tu-Tbg" firstAttribute="centerY" secondItem="SBq-9U-Dsq" secondAttribute="centerY" id="rhF-7u-HAD"/>
                             <constraint firstItem="wev-s6-Qso" firstAttribute="centerX" secondItem="7Ua-vU-sig" secondAttribute="centerX" id="tlC-OA-gB1"/>
                             <constraint firstItem="rxP-Dv-Dey" firstAttribute="top" relation="greaterThanOrEqual" secondItem="EaD-SD-Xzk" secondAttribute="bottom" id="vRZ-xD-QcZ"/>
+                            <constraint firstItem="i07-eQ-9as" firstAttribute="leading" secondItem="0V3-cV-DX3" secondAttribute="trailing" constant="10" id="xgQ-Ag-DdR"/>
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="centerY" secondItem="i07-eQ-9as" secondAttribute="centerY" id="yyr-30-GqX"/>
+                            <constraint firstItem="SBq-9U-Dsq" firstAttribute="centerY" secondItem="0V3-cV-DX3" secondAttribute="centerY" id="ziI-1h-nwP"/>
                         </constraints>
                     </view>
                     <connections>
@@ -306,6 +334,8 @@
                         <outlet property="imageView" destination="EaD-SD-Xzk" id="LMm-eW-lYq"/>
                         <outlet property="referenceSizeTextField" destination="i07-eQ-9as" id="VHU-tc-Spn"/>
                         <outlet property="toolbarSegmentedControl" destination="SBq-9U-Dsq" id="7tJ-b0-LiP"/>
+                        <outlet property="typeButton" destination="HHQ-8o-Zsd" id="rDV-NW-LgT"/>
+                        <outlet property="typePickerView" destination="vx2-ax-Iw8" id="NLd-C3-fWj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Iwq-Su-1Dn" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -328,6 +358,12 @@
             <point key="canvasLocation" x="1910" y="236"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Pencil" width="36" height="36"/>
+        <image name="draw_ref" width="36" height="36"/>
+        <image name="erase" width="36" height="35"/>
+        <image name="measure" width="36" height="36"/>
+    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="LFb-Hb-Otc"/>
     </inferredMetricsTieBreakers>
