@@ -10,9 +10,14 @@ import Foundation
 import UIKit
 
 struct Line {
+    enum Role : Int {
+        case Border = 0, Horizon = 1, Unconformity = 2, Fault = 3
+    }
+    
     var points = [CGPoint]()
     var name = String()
     var color = UIColor.blackColor().CGColor
+    var role : Role = Role.Horizon
     
     mutating func merge(line: Line) {
         var points0 = points
@@ -119,28 +124,42 @@ struct Line {
         return true;
     }
     
-    func segmentsIntersect(a: CGPoint, b: CGPoint, c: CGPoint, d: CGPoint) -> (Bool, CGPoint) {
-        let denom = a.x * ( d.y - c.y ) + b.x * ( c.y - d.y ) +
-                    d.x * ( b.y - a.y ) + c.x * ( a.y - b.y );
+    static func segmentsIntersect(a: CGPoint, b: CGPoint, c: CGPoint, d: CGPoint) -> (exist: Bool, loc: CGPoint) {
+        let denom = Double(a.x) * Double( d.y - c.y ) + Double(b.x) * Double( c.y - d.y ) +
+                    Double(d.x) * Double( b.y - a.y ) + Double(c.x) * Double( a.y - b.y );
             
-            /* If denom is zero, then segments are parallel: handle separately. */
-        if( denom < 1e-6 ) {
+        /* If denom is zero, then segments are parallel: no intersection */
+        if( abs(denom) < 1e-6 ) {
             return (false, CGPoint())
         }
             
-        let nums = a.x * ( d.y - c.y ) + c.x * ( a.y - d.y ) + d.x * ( c.y - a.y );
-        let s = nums / denom
+        let nums = Double(a.x) * Double( d.y - c.y ) + Double(c.x) * Double( a.y - d.y ) + Double(d.x) * Double( c.y - a.y )
+        var s = nums / denom
         
-        let numt = a.x * ( c.y - b.y ) + b.x * ( a.y - c.y ) + c.x * ( b.y - a.y )
+        let numt = Double(a.x) * Double( c.y - b.y ) + Double(b.x) * Double( a.y - c.y ) + Double(c.x) * Double( b.y - a.y )
         let t = -numt / denom
         
-        let exist = ( (0.0 < s) && (s < 1.0) &&
-                      (0.0 < t) && (t < 1.0) )
+        let eps = 1e-8
+        let exist = ( (-eps < s) && (s < 1.0+eps) &&
+                      (-eps < t) && (t < 1.0+eps) )
         
         var p : CGPoint = CGPoint()
-        p.x = a.x + s * ( b.x - a.x );
-        p.y = a.y + s * ( b.y - a.y );
+        if( s < 0 ) { s = 0.0 }
+        if( s > 1.0 ) { s = 1.0 }
+        
+        p.x = a.x + CGFloat(s) * ( b.x - a.x )
+        p.y = a.y + CGFloat(s) * ( b.y - a.y )
         return (exist, p)
+    }
+    
+    static func segmentIntersectPoint(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
+        if( b.x != a.x ) {
+            return (c.x - a.x)/(b.x - a.x)
+        } else if( b.y != a.y ) {
+            return (c.y - a.y)/(b.y - a.y)
+        } else {
+            return 0.0
+        }
     }
 }
 
@@ -153,6 +172,7 @@ class LineView : UIView {
     var refLabel = UILabel()
     var refMeasureValue : Float = 0.0
     var currentLineName = String()
+    var polygons : Polygons?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -179,17 +199,45 @@ class LineView : UIView {
         }
         
         // Fill color between two path
-        for var i=0; i < lines.count-1; i++  {
-            CGContextSetAlpha(context, 0.3)
-            CGContextSetFillColorWithColor(context, lines[i].color)
-            CGContextMoveToPoint (context, lines[i].points[0].x, lines[i].points[0].y)
-            for ( var k = 1; k < lines[i].points.count; k++) {
-                CGContextAddLineToPoint (context, lines[i].points[k].x, lines[i].points[k].y);
+        if( polygons == nil ) {
+            for var i=0; i < lines.count-1; i++  {
+                CGContextSetAlpha(context, 0.3)
+                CGContextSetFillColorWithColor(context, lines[i].color)
+                CGContextMoveToPoint (context, lines[i].points[0].x, lines[i].points[0].y)
+                for ( var k = 1; k < lines[i].points.count; k++) {
+                    CGContextAddLineToPoint (context, lines[i].points[k].x, lines[i].points[k].y);
+                }
+                for ( var k=lines[i+1].points.count-1; k >= 0 ; k--) {
+                    CGContextAddLineToPoint (context, lines[i+1].points[k].x, lines[i+1].points[k].y);
+                }
+                CGContextFillPath(context)
             }
-            for ( var k=lines[i+1].points.count-1; k >= 0 ; k--) {
-                CGContextAddLineToPoint (context, lines[i+1].points[k].x, lines[i+1].points[k].y);
+        } else {
+            for p in polygons!.polygons  {
+                CGContextSetAlpha(context, 0.3)
+                CGContextSetFillColorWithColor(context, p.color)
+                var first = true
+                for l in p.lines  {
+                    if( l.reverse ) {
+                        for( var k=l.line.points.count-1; k >= 0 ; k-- ) {
+                            if( first ) {
+                                CGContextMoveToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                                first = false
+                            }
+                            CGContextAddLineToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                        }
+                    } else {
+                        for( var k=0; k < l.line.points.count; k++ ) {
+                            if( first ) {
+                                CGContextMoveToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                                first = false
+                            }
+                            CGContextAddLineToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                        }
+                    }
+                }
+                CGContextFillPath(context)
             }
-            CGContextFillPath(context)
         }
         
         // Draw line being drawn
@@ -259,16 +307,18 @@ class LineView : UIView {
     // Add or merge a new line 
     // The merge is done when the name of the new line is the same as the name of an existing line
     func add(line: Line) {
+        // Find if it needs to be merged with an existing line
         for (index,value) in enumerate(lines) {
             if( value.name == line.name ) {
                 var newline = value
                 newline.color = line.color // Take latest color
                 newline.merge(line)
                 lines.removeAtIndex(index)
-                lines.append(newline)
+                lines.insert(newline, atIndex: index)
                 return
             }
         }
+        // If not an existing line
         // Order the line from top to bottom (y)
         var inserted = false
         for var i=0; i < lines.count; i++  {
@@ -281,6 +331,20 @@ class LineView : UIView {
         if( !inserted ) {
            lines.append(line)
         }
+    }
+    
+    func computePolygon() {
+        var nlines = lines;
+        var border = Line()
+        border.role = Line.Role.Border
+        border.points.append(CGPoint(x: 10, y: 10))
+        border.points.append(CGPoint(x: bounds.width - 10.0, y: 10))
+        border.points.append(CGPoint(x: bounds.width - 10.0, y: bounds.height - 10.0))
+        border.points.append(CGPoint(x: 10, y: bounds.height - 10.0))
+        border.points.append(CGPoint(x: 10, y: 10))
+        
+        nlines.append(border)
+        polygons = Polygons(lines: nlines)
     }
 }
 
@@ -361,6 +425,7 @@ class DrawingView : UIImageView {
             lineView.currentLine.name = lineView.currentLineName
             lineView.currentLine.cleanOrientation()
             lineView.add(lineView.currentLine)
+            lineView.computePolygon()
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)
             if( lineView.currentLine.points.count >= 2 ) {

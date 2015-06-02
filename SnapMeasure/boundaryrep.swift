@@ -1,0 +1,323 @@
+//
+//  boundaryrep.swift
+//  SnapMeasure
+//
+//  Created by next-shot on 6/1/15.
+//  Copyright (c) 2015 next-shot. All rights reserved.
+//
+
+import Foundation
+import UIKit
+
+class RadialNode {
+    var loc : CGPoint = CGPoint()
+    var lines = [OrientedLine]()
+    init(loc: CGPoint) {
+        self.loc = loc
+    }
+    
+    func add(line: OrientedLine) {
+        var inserted = false
+        var c = line.endSegment()
+        
+        if( lines.count < 2 ) {
+           lines.append(line)
+        } else {
+            let b = lines[0].endSegment()
+            let nangle = angle(loc, b: b, c: c)
+            for( var i=1; i < lines.count; i++ ) {
+                let ci = lines[i].endSegment()
+                let iangle = angle(loc, b: b, c: ci)
+                if( nangle < iangle ) {
+                    lines.insert(line, atIndex: i)
+                    return
+                }
+            }
+            lines.append(line)
+        }
+    }
+    
+    func next(line: OrientedLine) -> OrientedLine? {
+        for (index, iline) in enumerate(lines) {
+            if( iline == line ) {
+                if( index == lines.count-1 ) {
+                    // Circular list
+                    return lines[0]
+                } else {
+                    return lines[index+1]
+                }
+            }
+        }
+        return nil
+    }
+    
+    func cross(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
+        return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)
+    }
+    
+    func dot(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
+        return (b.x - a.x)*(c.x - a.x) + (b.y - a.y)*(c.y - a.y)
+    }
+    
+    func norm(a: CGPoint, b: CGPoint) -> CGFloat {
+        return sqrt(dot(a, b: b, c: b))
+    }
+    
+    func angle(a: CGPoint, b: CGPoint, c: CGPoint) ->  Double {
+        var a = atan2(Double(cross(a, b: b, c: c)), Double(dot(a,b: b,c: c)))
+        if( a < 0.0 ) {
+            // All angles need to be measured along the same direction.
+            a += 2*M_PI
+        }
+        return a * 180/M_PI
+    }
+}
+
+class OrientedLine : Hashable {
+    static var globalIndex = 0
+    
+    var line: Line
+    var reverse : Bool
+    var index: Int
+    var mate : OrientedLine?
+    var rn : RadialNode?
+    
+    init(line: Line, reverse: Bool) {
+        self.line = line
+        self.reverse = reverse
+        self.index = OrientedLine.globalIndex++
+    }
+    
+    func endSegment() -> CGPoint {
+        if( reverse ) {
+            return line.points[line.points.count-2]
+        } else {
+            return line.points[1]
+        }
+    }
+
+    var hashValue : Int {
+        return index
+    }
+}
+
+func ==(left: OrientedLine, right: OrientedLine) -> Bool {
+    return left.index == right.index
+}
+
+class OrientedPolygon {
+    var lines = [OrientedLine]()
+    var color = UIColor.blackColor().CGColor
+    
+    func computerColor() {
+        var ymin : CGFloat = 1e+30
+        var lmin : Line?
+        for l in lines {
+            for(var i=0; i < l.line.points.count-1; i++ ) {
+                let y = (l.line.points[i].y + l.line.points[i+1].y)*0.5
+                if( y < ymin && l.line.role == Line.Role.Horizon ) {
+                    ymin = y
+                    lmin = l.line
+                }
+            }
+        }
+        if( lmin != nil ) {
+            color = lmin!.color
+        }
+    }
+}
+
+class SplitSegment {
+    var index : Int
+    var loc : CGPoint
+    init(index: Int, loc: CGPoint) {
+        self.index = index
+        self.loc = loc
+    }
+}
+
+class SplitLine {
+    var line : Line
+    var splits = [SplitSegment]()
+    
+    init(line: Line) {
+        self.line = line
+    }
+    
+    func add(seg: SplitSegment) {
+        for( var i=0; i < splits.count; i++ ) {
+            if( seg.index < splits[i].index ) {
+                splits.insert(seg, atIndex: i)
+                return
+            } else if( seg.index == splits[i].index ) {
+                let s1 = Line.segmentIntersectPoint(
+                    line.points[seg.index], b: line.points[seg.index+1], c: seg.loc
+                )
+                let s2 = Line.segmentIntersectPoint(
+                    line.points[seg.index], b: line.points[seg.index+1], c: splits[i].loc
+                )
+                if( s1 < s2 ) {
+                    splits.insert(seg, atIndex: i)
+                } else {
+                    splits.insert(seg, atIndex: i+1)
+                }
+
+                return
+            }
+        }
+        splits.append(seg)
+    }
+    
+    func split() -> [Line] {
+        var lines = [Line]()
+        
+        // Start first line
+        var prev = 0
+        var curLine = Line()
+        curLine.name = line.name
+        curLine.color = line.color
+        curLine.role = line.role
+        for split in splits {
+            // Append from prev to split location the points
+            for( var i=prev; i <= split.index ; i++ ) {
+                curLine.points.append(line.points[i])
+            }
+            curLine.points.append(split.loc)
+            lines.append(curLine)
+            
+            // Start new line
+            prev = split.index+1
+            curLine = Line()
+            curLine.name = line.name
+            curLine.color = line.color
+            curLine.role = line.role
+            curLine.points.append(split.loc)
+        }
+        
+        // Fill last line
+        for( var i=prev; i < line.points.count ; i++ ) {
+            curLine.points.append(line.points[i])
+        }
+        lines.append(curLine)
+        return lines
+    }
+}
+
+class Extremity : Comparable {
+    var line: OrientedLine
+    var loc : CGPoint
+    init(line: OrientedLine, loc: CGPoint) {
+        self.line = line
+        self.loc = loc
+    }
+}
+
+func <(left: Extremity, right: Extremity) -> Bool {
+    if( left.loc.x == right.loc.x ) {
+        return left.loc.y < right.loc.y
+    }
+    return left.loc.x < right.loc.x
+}
+
+func ==(left: Extremity, right: Extremity) -> Bool {
+    return left.loc == right.loc
+}
+
+class Polygons {
+    var splitLines = [Int: SplitLine]()
+    var polygons = [OrientedPolygon]()
+    
+    init(lines: [Line]) {
+        // Compute all intersections and store then in splitLines
+        for( var i=0 ; i < lines.count; i++ ) {
+            for( var j=i+1; j < lines.count; j++ ) {
+                intersect(lines, iline0: i, iline1: j)
+            }
+        }
+        
+        // Split the lines
+        var olines = Set<OrientedLine>()
+        var extremities = [Extremity]()
+        for line in splitLines.values {
+            var splitted = line.split()
+            for nline in splitted {
+                var o1 = OrientedLine(line: nline, reverse: false)
+                var o2 = OrientedLine(line: nline, reverse: true)
+                o1.mate = o2
+                o2.mate = o1
+                extremities.append(Extremity(line: o1, loc: nline.points[0]))
+                extremities.append(Extremity(line: o2, loc: nline.points[nline.points.count-1]))
+                olines.insert(o1)
+                olines.insert(o2)
+            }
+        }
+        
+        sort(&extremities)
+        
+        // Construct the radial nodes 
+        // after the sorting the extremities at the same location are next to each others
+        if( extremities.count > 0 ) {
+            var curExtremity = extremities[0].loc
+            var rn = RadialNode(loc: curExtremity)
+            for e in extremities {
+                if( e.loc != curExtremity ) {
+                    curExtremity = e.loc
+                    rn = RadialNode(loc: curExtremity)
+                }
+                e.line.rn = rn
+                rn.add(e.line)
+            }
+        }
+        
+        // Construct oriented polygons
+        while( olines.count > 0 ) {
+            var nline = olines.first
+            let oPolygon = OrientedPolygon()
+            while( nline != nil && olines.contains(nline!) ) {
+                olines.remove(nline!)
+                let mate = nline!.mate!
+                
+                if( nline!.rn != nil && nline!.rn!.lines.count > 1 &&
+                    mate.rn != nil && mate.rn!.lines.count > 1
+                ) {
+                    // Not a free extremity line
+                    oPolygon.lines.append(nline!)
+                }
+                
+                // Next element of the polygon is found around the "mate" radial node
+                // As the next line starting from this radial node
+                nline = mate.rn?.next(mate)
+            }
+            oPolygon.computerColor()
+            polygons.append(oPolygon)
+        }
+        
+    }
+    
+    func intersect(lines: [Line], iline0: Int, iline1: Int) {
+        let line0 = lines[iline0]
+        let line1 = lines[iline1]
+        for( var i=0 ; i < line0.points.count-1; i++ ) {
+            for( var j=0; j < line1.points.count-1; j++ ) {
+                let ipoint = Line.segmentsIntersect(
+                    line0.points[i], b: line0.points[i+1], c: line1.points[j], d: line1.points[j+1]
+                )
+                if( ipoint.exist ) {
+                    var spliti = splitLines[iline0]
+                    if( spliti == nil ) {
+                        spliti = SplitLine(line: line0)
+                        splitLines[iline0] = spliti
+                    }
+                    spliti!.add(SplitSegment(index: i, loc: ipoint.loc))
+                    
+                    var splitj = splitLines[iline1]
+                    if( splitj == nil ) {
+                        splitj = SplitLine(line: line1)
+                        splitLines[iline1] =  splitj
+                    }
+                    splitj!.add(SplitSegment(index: j, loc: ipoint.loc))
+                }
+            }
+        }
+    }
+}

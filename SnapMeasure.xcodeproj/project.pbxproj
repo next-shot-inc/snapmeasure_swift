@@ -19,6 +19,7 @@
 		2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286991B0E57C50095D500 /* DrawingViewController.swift */; };
 		2F12869C1B0E60300095D500 /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12869B1B0E60300095D500 /* DrawingView.swift */; };
 		2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */; };
+		2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		2F1286991B0E57C50095D500 /* DrawingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingViewController.swift; sourceTree = "<group>"; };
 		2F12869B1B0E60300095D500 /* DrawingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingView.swift; sourceTree = "<group>"; };
 		2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
+		2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = boundaryrep.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 				2F1286991B0E57C50095D500 /* DrawingViewController.swift */,
 				2F12869B1B0E60300095D500 /* DrawingView.swift */,
 				2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */,
+				2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */,
 			);
 			path = SnapMeasure;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 				2F1286981B0E3DDF0095D500 /* PreviewView.swift in Sources */,
 				2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */,
 				2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */,
+				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
