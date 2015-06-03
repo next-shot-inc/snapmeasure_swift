@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import CoreData
 import UIKit
 
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
@@ -92,6 +92,7 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var typePickerView: UIPickerView!
     
     var image : UIImage?
+    var lines = [Line]()
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
     var typePickerCtrler = TypePickerController()
@@ -145,10 +146,12 @@ class DrawingViewController: UIViewController {
         
         imageView.image = image
         imageView.setNeedsDisplay()
-
+        
         let drawingView = imageView as! DrawingView
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
+        drawingView.lineView.lines = lines
+        drawingView.lineView.setNeedsDisplay()
     }
     
     @IBAction func toolChanged(sender: AnyObject) {
@@ -254,6 +257,16 @@ class DrawingViewController: UIViewController {
     
     @IBAction func closeWindow(sender: AnyObject) {
         self.dismissViewControllerAnimated(true, completion: nil)
+        
+        let drawingView = imageView as! DrawingView
+        var destinationVC = self.presentingViewController as? ViewController
+        if( destinationVC == nil ) {
+            destinationVC = self.presentingViewController?.presentingViewController as? ViewController
+        }
+        if( destinationVC != nil ) {
+            destinationVC!.image = image
+            destinationVC!.lines = drawingView.lineView.lines
+        }
     }
 
 }
