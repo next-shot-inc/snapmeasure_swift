@@ -7,7 +7,7 @@
 //
 
 import Foundation
-
+import CoreData
 import UIKit
 
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
@@ -81,6 +81,8 @@ class TypePickerController : UIViewController, UIPickerViewDelegate, UIPickerVie
 
 class DrawingViewController: UIViewController {
     
+    @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
+    @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet weak var colButton: UIButton!
     @IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
     @IBOutlet weak var imageView: UIImageView!
@@ -90,6 +92,7 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var typePickerView: UIPickerView!
     
     var image : UIImage?
+    var lines = [Line]()
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
     var typePickerCtrler = TypePickerController()
@@ -98,6 +101,9 @@ class DrawingViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        // Let the one tap wait for the double-tap to fail before firing
+        oneTapGestureRecognizer.requireGestureRecognizerToFail(twoTapsGestureRecognizer)
         
         // Initialize widgets at the top
         // 1. Text field
@@ -128,10 +134,13 @@ class DrawingViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         imageView.setNeedsDisplay()
+        
         let drawingView = imageView as! DrawingView
         drawingView.image = image
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
+        drawingView.lineView.lines = lines
+        drawingView.lineView.setNeedsDisplay()
     }
     
     @IBAction func toolChanged(sender: AnyObject) {
@@ -169,10 +178,12 @@ class DrawingViewController: UIViewController {
     }
     
     @IBAction func handleTap(sender: AnyObject) {
+        // Dismiss UI elements (end editing)
         referenceSizeTextField.resignFirstResponder()
         colorPickerView.hidden = true
         typePickerView.hidden = true
         
+        // Initialize drawing information
         let drawingView = imageView as! DrawingView
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
@@ -184,6 +195,28 @@ class DrawingViewController: UIViewController {
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             drawingView.lineView.currentLineName = referenceSizeTextField.text
             drawingView.curColor = colButton.backgroundColor?.CGColor
+        }
+    }
+    
+    @IBAction func handleDoubleTap(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        let recognizer = sender as! UITapGestureRecognizer
+        let point = recognizer.locationInView(drawingView)
+        
+        // Find if an object is selected
+        let line = drawingView.select(point)
+        
+        if( line != nil && drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+            // Initialize UI with selected object
+            referenceSizeTextField.text = line!.name
+            colButton.backgroundColor = UIColor(CGColor: line!.color)
+            
+            // Initialize drawing information
+            drawingView.lineView.currentLineName = line!.name
+            drawingView.curColor = line!.color
+        } else {
+            self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+            self.imageView.transform = CGAffineTransformIdentity;
         }
     }
     
@@ -213,6 +246,16 @@ class DrawingViewController: UIViewController {
     
     @IBAction func closeWindow(sender: AnyObject) {
         self.dismissViewControllerAnimated(true, completion: nil)
+        
+        let drawingView = imageView as! DrawingView
+        var destinationVC = self.presentingViewController as? ViewController
+        if( destinationVC == nil ) {
+            destinationVC = self.presentingViewController?.presentingViewController as? ViewController
+        }
+        if( destinationVC != nil ) {
+            destinationVC!.image = image
+            destinationVC!.lines = drawingView.lineView.lines
+        }
     }
 
 }

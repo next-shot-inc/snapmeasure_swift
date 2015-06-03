@@ -378,7 +378,19 @@ class DrawingView : UIImageView {
     }
     
     func initFrame() {
-        //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: image!.size)
+        self.sizeToFit()
+        //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: self.bounds.size)
+    }
+    
+    func select(point: CGPoint)  -> Line? {
+        // Fingers are roughly 40 pixels wide
+        let rect = CGRectMake(point.x-20.0, point.y-20.0, 40.0, 40.0)
+        for line in lineView.lines {
+            if( line.intersectBox(rect) ) {
+                return line
+            }
+        }
+        return nil
     }
     
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {

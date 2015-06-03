@@ -432,6 +432,10 @@ class CameraViewController: UIViewController {
     }
     
     @IBAction func closeWindow(sender: AnyObject) {
+        let destinationVC = self.presentingViewController as? ViewController
+        if( destinationVC != nil ) {
+            destinationVC!.image = image
+        }
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     

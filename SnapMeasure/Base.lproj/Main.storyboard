@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iGn-33-JlB">
-                                <rect key="frame" x="256" y="244" width="89" height="32"/>
+                                <rect key="frame" x="228" y="244" width="89" height="32"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                 <state key="normal" title="New picture">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -27,8 +27,60 @@
                                     <segue destination="SuH-D2-ybR" kind="presentation" id="fUf-21-oXL"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cw7-zZ-foI">
+                                <rect key="frame" x="116" y="366" width="77" height="32"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <state key="normal" title="Histogram">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oea-fH-bxA">
+                                <rect key="frame" x="116" y="418" width="33" height="32"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <state key="normal" title="Map">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Location name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Pcu-nD-7vs">
+                                <rect key="frame" x="228" y="204" width="117" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
+                                <rect key="frame" x="116" y="209" width="102" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                                <rect key="frame" x="116" y="158" width="123" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
+                                <rect key="frame" x="247" y="154" width="43" height="30"/>
+                                <state key="normal" title="Select">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="selectFromExisting:" destination="BYZ-38-t0r" eventType="touchDown" id="mYV-Ff-2Me"/>
+                                </connections>
+                            </button>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tbn-vL-J1y">
+                                <rect key="frame" x="290" y="87" width="320" height="162"/>
+                            </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6uk-1b-aik">
+                                <rect key="frame" x="228" y="326" width="34" height="30"/>
+                                <state key="normal" title="Save">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="saveButtonPushed:" destination="BYZ-38-t0r" eventType="touchDown" id="8KS-Mo-xdB"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KPO-lU-ARU">
-                                <rect key="frame" x="253" y="296" width="95" height="32"/>
+                                <rect key="frame" x="228" y="286" width="95" height="32"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                 <state key="normal" title="Load Picture">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -37,50 +89,36 @@
                                     <action selector="selectPhotoFromLibrary:" destination="BYZ-38-t0r" eventType="touchDown" id="jMJ-Ej-VCR"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cw7-zZ-foI">
-                                <rect key="frame" x="262" y="348" width="77" height="32"/>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
-                                <state key="normal" title="Histogram">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oea-fH-bxA">
-                                <rect key="frame" x="284" y="400" width="33" height="32"/>
-                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
-                                <state key="normal" title="Map">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                            </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Location name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Pcu-nD-7vs">
-                                <rect key="frame" x="228" y="186" width="117" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
-                                <rect key="frame" x="155" y="186" width="63" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="Pcu-nD-7vs" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="trailing" constant="10" id="0Sq-gi-FQI"/>
+                            <constraint firstItem="iGn-33-JlB" firstAttribute="leading" secondItem="Pcu-nD-7vs" secondAttribute="leading" id="11E-yz-ixl"/>
                             <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="224" id="1EF-r7-alC"/>
-                            <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="Pcu-nD-7vs" secondAttribute="bottom" constant="28" id="81p-It-npI"/>
-                            <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="20" id="Cyx-QI-cRy"/>
-                            <constraint firstAttribute="centerX" secondItem="iGn-33-JlB" secondAttribute="centerX" id="FAa-du-RY7"/>
+                            <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="leading" id="29X-Yu-xWO"/>
+                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="tbn-vL-J1y" secondAttribute="centerY" id="3hf-nf-Zlg"/>
+                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="h0v-JU-ng0" secondAttribute="centerY" id="3l6-Yd-cpZ"/>
+                            <constraint firstItem="zoN-5C-vHP" firstAttribute="top" secondItem="UIN-ZE-bqi" secondAttribute="bottom" constant="30" id="6Pn-lq-r9a"/>
+                            <constraint firstItem="tbn-vL-J1y" firstAttribute="leading" secondItem="h0v-JU-ng0" secondAttribute="trailing" id="6xI-WF-QQ1"/>
+                            <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="Pcu-nD-7vs" secondAttribute="bottom" constant="10" id="81p-It-npI"/>
+                            <constraint firstItem="h0v-JU-ng0" firstAttribute="leading" secondItem="UIN-ZE-bqi" secondAttribute="trailing" constant="8" id="Bed-dQ-KIz"/>
+                            <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="oea-fH-bxA" secondAttribute="leading" id="CSc-EL-8bH"/>
+                            <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="10" id="Cyx-QI-cRy"/>
+                            <constraint firstItem="iGn-33-JlB" firstAttribute="leading" secondItem="KPO-lU-ARU" secondAttribute="leading" id="Gqz-jm-bWE"/>
                             <constraint firstItem="oea-fH-bxA" firstAttribute="top" secondItem="cw7-zZ-foI" secondAttribute="bottom" constant="20" id="Qy4-hQ-FnG"/>
-                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="trailing" secondItem="iGn-33-JlB" secondAttribute="trailing" id="ad0-f5-ZkR"/>
-                            <constraint firstAttribute="centerX" secondItem="oea-fH-bxA" secondAttribute="centerX" id="alj-8m-FSB"/>
-                            <constraint firstAttribute="centerX" secondItem="KPO-lU-ARU" secondAttribute="centerX" id="b48-CA-xgA"/>
-                            <constraint firstAttribute="centerX" secondItem="cw7-zZ-foI" secondAttribute="centerX" id="eyW-at-xsF"/>
-                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="centerY" secondItem="zoN-5C-vHP" secondAttribute="centerY" constant="4.5" id="tXS-jl-Kjl"/>
-                            <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="20" id="zAo-GU-u11"/>
+                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="100" id="R1V-A1-ThV"/>
+                            <constraint firstItem="6uk-1b-aik" firstAttribute="leading" secondItem="KPO-lU-ARU" secondAttribute="leading" id="c7r-e9-Fu1"/>
+                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="leading" id="hPp-Hh-Tcd"/>
+                            <constraint firstItem="6uk-1b-aik" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="8" id="tRi-0c-cUd"/>
+                            <constraint firstItem="Pcu-nD-7vs" firstAttribute="centerY" secondItem="zoN-5C-vHP" secondAttribute="centerY" id="tXS-jl-Kjl"/>
+                            <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="6uk-1b-aik" secondAttribute="bottom" constant="10" id="wRA-XF-Qhf"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="existingPickerView" destination="tbn-vL-J1y" id="XuT-ps-J5u"/>
                         <outlet property="loadPicture" destination="KPO-lU-ARU" id="ZlW-eT-jiI"/>
+                        <outlet property="outcropName" destination="Pcu-nD-7vs" id="rPY-sy-ZxI"/>
+                        <outlet property="selectExistingButton" destination="h0v-JU-ng0" id="P9N-cQ-gba"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="toDrawingView" id="LFb-Hb-Otc"/>
                     </connections>
                 </viewController>
@@ -230,13 +268,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
                                 <rect key="frame" x="21" y="63" width="558" height="455"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
                                     <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
                                     <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
+                                    <outletCollection property="gestureRecognizers" destination="jtK-wk-2vq" appends="YES" id="r8I-Eg-AOe"/>
                                 </connections>
                             </imageView>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
@@ -332,8 +371,10 @@
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
                         <outlet property="imageView" destination="EaD-SD-Xzk" id="LMm-eW-lYq"/>
+                        <outlet property="oneTapGestureRecognizer" destination="LKt-km-RPt" id="HCX-bu-8FT"/>
                         <outlet property="referenceSizeTextField" destination="i07-eQ-9as" id="VHU-tc-Spn"/>
                         <outlet property="toolbarSegmentedControl" destination="SBq-9U-Dsq" id="7tJ-b0-LiP"/>
+                        <outlet property="twoTapsGestureRecognizer" destination="jtK-wk-2vq" id="EDv-Ih-97r"/>
                         <outlet property="typeButton" destination="HHQ-8o-Zsd" id="rDV-NW-LgT"/>
                         <outlet property="typePickerView" destination="vx2-ax-Iw8" id="NLd-C3-fWj"/>
                     </connections>
@@ -352,6 +393,11 @@
                 <tapGestureRecognizer id="LKt-km-RPt">
                     <connections>
                         <action selector="handleTap:" destination="KD6-M1-rG7" id="ZZy-xQ-eM5"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer numberOfTapsRequired="2" id="jtK-wk-2vq">
+                    <connections>
+                        <action selector="handleDoubleTap:" destination="KD6-M1-rG7" id="QWr-qx-0L6"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>
