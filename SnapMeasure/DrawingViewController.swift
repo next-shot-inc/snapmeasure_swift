@@ -124,16 +124,6 @@ class DrawingViewController: UIViewController {
         colButton.backgroundColor = color
         colorPickerCtrler.colorButton = colButton
         
-        //4. Type button
-        typeButton.setTitle("Top", forState: UIControlState.Normal)
-        typePickerView.delegate = typePickerCtrler
-        typePickerView.dataSource = typePickerCtrler
-        typePickerCtrler.typeButton = typeButton
-        
-        // 4. Drawing View initial state
-        let drawingView = imageView as! DrawingView
-        drawingView.lineView.currentLineName = referenceSizeTextField.text
-        drawingView.curColor = color.CGColor
     }
     
     override func didReceiveMemoryWarning() {
@@ -143,11 +133,10 @@ class DrawingViewController: UIViewController {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        imageView.image = image
         imageView.setNeedsDisplay()
         
         let drawingView = imageView as! DrawingView
+        drawingView.image = image
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
         drawingView.lineView.lines = lines
@@ -270,6 +259,5 @@ class DrawingViewController: UIViewController {
     }
 
 }
-
 
 

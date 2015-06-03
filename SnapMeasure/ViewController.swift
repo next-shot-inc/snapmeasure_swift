@@ -92,7 +92,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         dismissViewControllerAnimated(true, completion: nil)
         
-        self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        //self.performSegueWithIdentifier("toDrawingView", sender: nil)
     }
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
