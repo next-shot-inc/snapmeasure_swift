@@ -225,13 +225,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
                                 <rect key="frame" x="21" y="63" width="558" height="455"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
                                     <outletCollection property="gestureRecognizers" destination="jw2-8G-uJh" appends="YES" id="yIL-dI-sGS"/>
                                     <outletCollection property="gestureRecognizers" destination="LKt-km-RPt" appends="YES" id="T2V-tV-YLl"/>
+                                    <outletCollection property="gestureRecognizers" destination="jtK-wk-2vq" appends="YES" id="r8I-Eg-AOe"/>
                                 </connections>
                             </imageView>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
@@ -327,8 +328,10 @@
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
                         <outlet property="imageView" destination="EaD-SD-Xzk" id="LMm-eW-lYq"/>
+                        <outlet property="oneTapGestureRecognizer" destination="LKt-km-RPt" id="HCX-bu-8FT"/>
                         <outlet property="referenceSizeTextField" destination="i07-eQ-9as" id="VHU-tc-Spn"/>
                         <outlet property="toolbarSegmentedControl" destination="SBq-9U-Dsq" id="7tJ-b0-LiP"/>
+                        <outlet property="twoTapsGestureRecognizer" destination="jtK-wk-2vq" id="EDv-Ih-97r"/>
                         <outlet property="typeButton" destination="HHQ-8o-Zsd" id="rDV-NW-LgT"/>
                         <outlet property="typePickerView" destination="vx2-ax-Iw8" id="NLd-C3-fWj"/>
                     </connections>
@@ -347,6 +350,11 @@
                 <tapGestureRecognizer id="LKt-km-RPt">
                     <connections>
                         <action selector="handleTap:" destination="KD6-M1-rG7" id="ZZy-xQ-eM5"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <tapGestureRecognizer numberOfTapsRequired="2" id="jtK-wk-2vq">
+                    <connections>
+                        <action selector="handleDoubleTap:" destination="KD6-M1-rG7" id="QWr-qx-0L6"/>
                     </connections>
                 </tapGestureRecognizer>
             </objects>
