@@ -179,6 +179,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return false
     }
     
+    /** This is now done in DrawingViewController
     @IBAction func saveButtonPushed(sender: AnyObject) {
         // Copy lines and image to DetailedImageObject and LineObjects and save
 
@@ -219,7 +220,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
            println("Could not save \(error), \(error?.userInfo)")
         }
     
-     }
+     } **/
 
 }
 

@@ -83,6 +83,7 @@ class DrawingViewController: UIViewController {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
+    
     @IBOutlet weak var colButton: UIButton!
     @IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
     @IBOutlet weak var imageView: UIImageView!
@@ -90,6 +91,12 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var colorPickerView: UIPickerView!
     @IBOutlet weak var typeButton: UIButton!
     @IBOutlet weak var typePickerView: UIPickerView!
+    @IBOutlet weak var newLineButton: UIButton!
+    
+    
+    @IBOutlet weak var defineFeatureButton : UIButton!
+    @IBOutlet weak var setWidthButton : UIButton!
+    @IBOutlet weak var setHeightButton : UIButton!
     
     var image : UIImage?
     var lines = [Line]()
@@ -97,6 +104,14 @@ class DrawingViewController: UIViewController {
     var colorPickerCtrler = ColorPickerController()
     var typePickerCtrler = TypePickerController()
     static var lineCount = 1
+    //TODO: Add Feature Type Names
+    var possibleFeatureTypes = ["Type 1","Type 2","Type 3","Type 4","Type 5"]
+    
+    
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var managedContext : NSManagedObjectContext!
+    var feature : FeatureObject?
+    var detailedImage : DetailedImageObject?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -124,6 +139,24 @@ class DrawingViewController: UIViewController {
         colButton.backgroundColor = color
         colorPickerCtrler.colorButton = colButton
         
+        //make sure all buttons are in the right state
+        self.colButton.userInteractionEnabled = true
+        self.newLineButton.userInteractionEnabled = true
+        self.toolbarSegmentedControl.userInteractionEnabled = true
+
+        self.defineFeatureButton.userInteractionEnabled = true
+        self.defineFeatureButton.hidden = false
+        self.setWidthButton.userInteractionEnabled = false
+        self.setWidthButton.hidden = true
+        self.setHeightButton.userInteractionEnabled = false
+        self.setHeightButton.hidden = true
+
+        managedContext = appDelegate.managedObjectContext!
+        
+        if (detailedImage == nil) {
+            detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
+                inManagedObjectContext: managedContext) as? DetailedImageObject
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -142,6 +175,7 @@ class DrawingViewController: UIViewController {
         drawingView.lineView.lines = lines
         drawingView.lineView.setNeedsDisplay()
     }
+    
     
     @IBAction func toolChanged(sender: AnyObject) {
         let drawingView = imageView as! DrawingView
@@ -237,16 +271,66 @@ class DrawingViewController: UIViewController {
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = color.CGColor
     }
-    
+    /**
     @IBAction func pushTypeButton(sender: AnyObject) {
         typePickerView.hidden = !typePickerView.hidden
         
         //let drawingView = imageView as! DrawingView
     }
-    
+    **/
     @IBAction func closeWindow(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
         
+        let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
+        let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
+            self.managedContext.rollback()
+            self.dismissViewControllerAnimated(true, completion: nil)
+
+        }
+        alert.addAction(noAction)
+        let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
+            
+            //update detailedImage and lines
+            //detailedImage!.name = outcropName.text!
+            self.detailedImage!.imageData = UIImageJPEGRepresentation(self.image, 1.0)
+            
+            let linesSet = NSMutableSet()
+            
+            for line in self.lines  {
+                let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
+                    inManagedObjectContext: self.managedContext) as? LineObject
+                
+                lineObject!.name = line.name
+                lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
+                    UIColor(CGColor: line.color)!
+                )
+                
+                var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
+                for( var i=0; i < line.points.count; ++i ) {
+                    points[i].x = line.points[i].x
+                    points[i].y = line.points[i].y
+                }
+                lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
+                lineObject!.image = self.detailedImage!
+                linesSet.addObject(lineObject!)
+            }
+            
+            self.detailedImage!.lines = linesSet
+            
+            //save the managedObjectContext
+            var error: NSError?
+            if !self.managedContext.save(&error) {
+                println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
+            }
+            self.dismissViewControllerAnimated(true, completion: nil)
+
+            
+        }
+        alert.addAction(yesAction)
+        
+        self.presentViewController(alert, animated: true, completion: nil)
+
+        //self.dismissViewControllerAnimated(true, completion: nil)
+        /**
         let drawingView = imageView as! DrawingView
         var destinationVC = self.presentingViewController as? ViewController
         if( destinationVC == nil ) {
@@ -255,8 +339,143 @@ class DrawingViewController: UIViewController {
         if( destinationVC != nil ) {
             destinationVC!.image = image
             destinationVC!.lines = drawingView.lineView.lines
+        } **/
+    }
+    
+    @IBAction func pushDefineFeatureButton(sender : AnyObject) {
+        //disable all other buttons until Feature definition is complete
+        self.colButton.userInteractionEnabled = false
+        self.newLineButton.userInteractionEnabled = false
+        self.toolbarSegmentedControl.userInteractionEnabled = false
+        
+        //create a new Feature
+        feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
+            inManagedObjectContext: managedContext) as? FeatureObject
+        feature!.image = detailedImage!
+        
+        let drawingView = imageView as! DrawingView
+        if (drawingView.lineView.refMeasureValue.isZero || drawingView.lineView.refMeasureValue.isNaN) {
+            let alert = UIAlertController(title: "", message: "Need to establish a reference before defining a Feature", preferredStyle: .Alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .Cancel) { action -> Void in
+                //Do some stuff
+            }
+            alert.addAction(cancelAction)
+            self.presentViewController(alert, animated: true, completion: nil)
+            
+            self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
+            drawingView.drawMode = DrawingView.ToolMode.Reference
+            referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
+            referenceSizeTextField.placeholder = "Size"
+            let nf = NSNumberFormatter()
+            referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            
+        } else {
+            self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+            drawingView.drawMode = DrawingView.ToolMode.Measure
+            self.defineFeatureButton.userInteractionEnabled = false
+            self.defineFeatureButton.hidden = true
+            self.setHeightButton.userInteractionEnabled = true
+            self.setHeightButton.hidden = false
         }
     }
+    
+    
+    @IBAction func pushSetHeightButton(sender : AnyObject) {
+        let drawingView = imageView as! DrawingView
+        var height = 0.0 as NSNumber
+        if drawingView.lineView.label.text != nil {
+            height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)!
+        }
+        if (height.isEqualToNumber(0.0)) {
+            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .Alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+                //Do some stuff
+            }
+            alert.addAction(cancelAction)
+             self.presentViewController(alert, animated: true, completion: nil)
+            //just in case
+            if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
+                self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+                drawingView.drawMode = DrawingView.ToolMode.Measure
+            }
+        } else {
+            //set Feature.height = height
+            if feature == nil {
+                println("Feature is nil when attempting to set height")
+            } else {
+                feature!.height = height
+            }
+            println("height: ", height.floatValue)
+            self.setHeightButton.userInteractionEnabled = false
+            self.setHeightButton.hidden = true
+            self.setWidthButton.userInteractionEnabled = true
+            self.setWidthButton.hidden = false
+            //TODO: Remove measurement line to force user to draw a new line to define the width
+        }
+    }
+    
+    @IBAction func pushSetWdithButton(sender : AnyObject) {
+        let drawingView = imageView as! DrawingView
+        var width = 0.0 as NSNumber
+        if drawingView.lineView.label.text != nil {
+            width = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)!
+        }
+        if (width.isEqualToNumber(0.0)) {
+            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .Alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+                //Do some stuff
+            }
+            alert.addAction(cancelAction)
+            self.presentViewController(alert, animated: true, completion: nil)
+            //just in case
+            if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
+                self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+                drawingView.drawMode = DrawingView.ToolMode.Measure
+            }
+        } else {
+            //set Feature.width = width
+            if feature == nil {
+                println("Feature is nil when attempting to set type")
+            } else {
+                feature!.width = width
+            }
+            println("width: %f",width.floatValue)
+            self.setWidthButton.userInteractionEnabled = false
+            self.setWidthButton.hidden = true
+            
+            let alert = UIAlertController(title: "", message: "Select a Feature type for this Feature", preferredStyle: .Alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
+                self.managedContext.deleteObject(self.feature!)
+                let alert2 = UIAlertController(title: "", message: "Feature was deleted", preferredStyle: .Alert)
+                let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+                    //Do some stuff
+                }
+                self.presentViewController(alert2, animated: true, completion: nil)
+            }
+            alert.addAction(cancelAction)
+            
+            for type in possibleFeatureTypes {
+                var nextAction: UIAlertAction = UIAlertAction(title: type, style: .Default) { action -> Void in
+                    //save Feature.type as type
+                    if self.feature == nil {
+                        println("Feature is nil when attempting to set type")
+                    } else {
+                        self.feature!.type = type
+                    }
+                }
+                alert.addAction(nextAction)
+            }
+            self.presentViewController(alert, animated: true, completion: nil)
+            
+            //TODO: Remove measurement line
+            self.defineFeatureButton.userInteractionEnabled = true
+            self.defineFeatureButton.hidden = false
+        }
+        
+    }
+    
+
+
 
 }
 
