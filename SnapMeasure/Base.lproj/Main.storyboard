@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -52,7 +52,7 @@
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
                                 <rect key="frame" x="116" y="158" width="123" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
@@ -268,8 +268,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
-                                <rect key="frame" x="21" y="63" width="558" height="455"/>
+                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                <rect key="frame" x="21" y="59" width="558" height="0.0"/>
                                 <gestureRecognizers/>
                                 <connections>
                                     <outletCollection property="gestureRecognizers" destination="2Tn-0n-EfQ" appends="YES" id="XFe-aH-8XO"/>
@@ -338,18 +338,50 @@
                                     <action selector="pushTypeButton:" destination="KD6-M1-rG7" eventType="touchDown" id="TS0-yY-DlA"/>
                                 </connections>
                             </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
-                                <rect key="frame" x="366" y="55" width="100" height="162"/>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
+                                <rect key="frame" x="256" y="55" width="320" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </pickerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PoK-3P-TM8">
+                                <rect key="frame" x="490" y="26" width="100" height="30"/>
+                                <state key="normal" title="Define Feature">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushDefineFeatureButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="84j-ee-G5h"/>
+                                </connections>
+                            </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5Va-oC-eeB">
+                                <rect key="frame" x="522" y="26" width="68" height="30"/>
+                                <state key="normal" title="Set Width">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushSetWdithButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="zOE-6K-hT2"/>
+                                </connections>
+                            </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="osR-9M-AcR">
+                                <rect key="frame" x="530" y="26" width="46" height="30"/>
+                                <state key="normal" title="Set Height">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="pushSetHeightButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="igD-OK-X0w"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="top" secondItem="k29-4t-8uI" secondAttribute="bottom" constant="5" id="0df-1y-4am"/>
                             <constraint firstAttribute="trailingMargin" secondItem="EaD-SD-Xzk" secondAttribute="trailing" constant="5" id="27M-Pw-d02"/>
+                            <constraint firstItem="HHQ-8o-Zsd" firstAttribute="top" secondItem="osR-9M-AcR" secondAttribute="top" id="30b-SL-meb"/>
                             <constraint firstItem="HHQ-8o-Zsd" firstAttribute="leading" secondItem="7Ua-vU-sig" secondAttribute="trailing" constant="10" id="3lN-fe-GFo"/>
+                            <constraint firstItem="PoK-3P-TM8" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="top" id="63A-I0-x7U"/>
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="6bf-g5-LA8"/>
+                            <constraint firstAttribute="trailing" secondItem="osR-9M-AcR" secondAttribute="trailing" constant="10" id="8MW-zU-8la"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="centerX" secondItem="HHQ-8o-Zsd" secondAttribute="centerX" id="8f6-en-guN"/>
+                            <constraint firstAttribute="trailing" secondItem="5Va-oC-eeB" secondAttribute="trailing" constant="10" id="Czy-bD-6qG"/>
+                            <constraint firstItem="PoK-3P-TM8" firstAttribute="top" secondItem="NHE-DP-mGt" secondAttribute="top" constant="10" id="Idg-9q-pNe"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="5" id="Iw1-vN-D33"/>
                             <constraint firstItem="wev-s6-Qso" firstAttribute="top" secondItem="7Ua-vU-sig" secondAttribute="bottom" id="Q8f-dS-pfR"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="bottom" constant="-1" id="WlE-4y-0fL"/>
@@ -357,6 +389,7 @@
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="leading" secondItem="u4C-tu-Tbg" secondAttribute="trailing" constant="10" id="eEu-dr-wGl"/>
                             <constraint firstItem="7Ua-vU-sig" firstAttribute="leading" secondItem="i07-eQ-9as" secondAttribute="trailing" constant="10" id="fjM-i6-0Ue"/>
                             <constraint firstItem="i07-eQ-9as" firstAttribute="centerY" secondItem="7Ua-vU-sig" secondAttribute="centerY" id="obf-2m-yrn"/>
+                            <constraint firstAttribute="trailing" secondItem="PoK-3P-TM8" secondAttribute="trailing" constant="10" id="pgb-hd-f4d"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="qcJ-vx-xIf"/>
                             <constraint firstItem="HHQ-8o-Zsd" firstAttribute="centerY" secondItem="7Ua-vU-sig" secondAttribute="centerY" constant="1" id="rgB-dU-zaG"/>
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="centerY" secondItem="SBq-9U-Dsq" secondAttribute="centerY" id="rhF-7u-HAD"/>
@@ -364,15 +397,25 @@
                             <constraint firstItem="rxP-Dv-Dey" firstAttribute="top" relation="greaterThanOrEqual" secondItem="EaD-SD-Xzk" secondAttribute="bottom" id="vRZ-xD-QcZ"/>
                             <constraint firstItem="i07-eQ-9as" firstAttribute="leading" secondItem="0V3-cV-DX3" secondAttribute="trailing" constant="10" id="xgQ-Ag-DdR"/>
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="centerY" secondItem="i07-eQ-9as" secondAttribute="centerY" id="yyr-30-GqX"/>
+                            <constraint firstItem="5Va-oC-eeB" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="top" id="z0X-bK-xRa"/>
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="centerY" secondItem="0V3-cV-DX3" secondAttribute="centerY" id="ziI-1h-nwP"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="Idg-9q-pNe"/>
+                            </mask>
+                        </variation>
                     </view>
                     <connections>
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
+                        <outlet property="defineFeatureButton" destination="PoK-3P-TM8" id="jmc-9o-GsW"/>
                         <outlet property="imageView" destination="EaD-SD-Xzk" id="LMm-eW-lYq"/>
+                        <outlet property="newLineButton" destination="0V3-cV-DX3" id="aNJ-50-RDk"/>
                         <outlet property="oneTapGestureRecognizer" destination="LKt-km-RPt" id="HCX-bu-8FT"/>
                         <outlet property="referenceSizeTextField" destination="i07-eQ-9as" id="VHU-tc-Spn"/>
+                        <outlet property="setHeightButton" destination="osR-9M-AcR" id="yAj-q7-yPz"/>
+                        <outlet property="setWidthButton" destination="5Va-oC-eeB" id="6Yf-Uf-iQF"/>
                         <outlet property="toolbarSegmentedControl" destination="SBq-9U-Dsq" id="7tJ-b0-LiP"/>
                         <outlet property="twoTapsGestureRecognizer" destination="jtK-wk-2vq" id="EDv-Ih-97r"/>
                         <outlet property="typeButton" destination="HHQ-8o-Zsd" id="rDV-NW-LgT"/>
@@ -401,7 +444,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1910" y="236"/>
+            <point key="canvasLocation" x="1911" y="215"/>
         </scene>
     </scenes>
     <resources>

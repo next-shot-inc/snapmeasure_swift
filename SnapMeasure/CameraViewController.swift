@@ -11,6 +11,8 @@ import UIKit
 import AVFoundation
 import ImageIO
 
+let CapturingStillImageContext = UnsafeMutablePointer<Void>()
+
 struct ImageInfo {
     var focalLength : Float = 0.0
     var xDimension : Int = 0
@@ -223,7 +225,35 @@ class CameraViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         previewLayer!.frame = previewView.bounds
+        self.addNotificationObservers()
     }
+    
+    override func viewDidDisappear(animated: Bool) {
+        self.removeNotificationObservers()
+        self.captureSession.stopRunning()
+        super.viewDidDisappear(animated)
+    }
+    
+    override func observeValueForKeyPath(keyPath: String, ofObject object: AnyObject, change: [NSObject : AnyObject], context: UnsafeMutablePointer<Void>) {
+        if (context == CapturingStillImageContext) {
+            let isCapturingStillImage = change[NSKeyValueChangeNewKey]?.boolValue
+            if (isCapturingStillImage!) {
+                self.runStillImageCaptureAnimation()
+            }
+        }
+    }
+    /**
+    - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+    {
+    if (context == CapturingStillImageContext)
+    {
+    BOOL isCapturingStillImage = [change[NSKeyValueChangeNewKey] boolValue];
+    
+    if (isCapturingStillImage)
+    {
+    [self runStillImageCaptureAnimation];
+    }
+    } **/
     
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -387,17 +417,17 @@ class CameraViewController: UIViewController {
     
     func focusAndExposeTap(gestureRecognizer : UIGestureRecognizer) {
         let devicePoint = self.previewLayer?.captureDevicePointOfInterestForPoint(gestureRecognizer.locationInView(gestureRecognizer.view))
+        NSLog("FocusPoint (%f,%f)",devicePoint!.x,devicePoint!.y)
         self.focusWithMode(AVCaptureFocusMode.AutoFocus, exposeWithMode: AVCaptureExposureMode.AutoExpose, atDevicePoint: devicePoint!, monitorSubjectAreaChange: true)
-        NSLog("No Continuous Focus")
-        //self.drawFocusBox(devicePoint!)
+        //NSLog("No Continuous Focus")
+        self.drawFocusBox(devicePoint!)
         
     }
     
     func doubleTaptoContinuouslyAutofocus(gestureRecognizer : UIGestureRecognizer) {
-        let midH = self.previewView.bounds.height/2
-        let midW = self.previewView.bounds.width/2
-        let devicePoint = CGPoint(x: midW, y: midH);
+        let devicePoint = CGPoint(x: 0.5, y: 0.5);
         self.focusWithMode(AVCaptureFocusMode.ContinuousAutoFocus, exposeWithMode: AVCaptureExposureMode.ContinuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
+        removeFocusBox()
         NSLog("Continuous Focus")
     }
     
@@ -441,21 +471,41 @@ class CameraViewController: UIViewController {
             //error
         }
     }
-    /**
+    
+    
     func drawFocusBox (centerPoint: CGPoint) {
+        removeFocusBox()
         //Box h=w=100
-        let focusView : UIView = UIView()
-        focusView.tag = 10;
-        NSLog("Draw Focus Square")
-        focusView.drawRect(CGRect(x:Int(centerPoint.x)-50,y: Int(centerPoint.y)-50, width: 100, height: 100))
+        let focusView : UIImageView = UIImageView(image: UIImage(named: "focusSquare.png"))
+        let topLeftPoint = CGPoint(x: (1.0-centerPoint.x)*self.previewView.bounds.width, y: (1.0-centerPoint.y)*self.previewView.bounds.height)
+        NSLog("topLeftPoint (%i,%i)",Int(topLeftPoint.x),Int(topLeftPoint.y))
+        focusView.frame = CGRect(x: topLeftPoint.x-75.0, y: topLeftPoint.y-75.0, width: 150.0, height: 150.0)
         self.previewView.addSubview(focusView)
+        
+        UIView.animateWithDuration(0.4, delay: 0.1, usingSpringWithDamping: 0.15, initialSpringVelocity: 0.0, options: UIViewAnimationOptions.BeginFromCurrentState, animations: {
+                focusView.transform=CGAffineTransformMakeScale(0.6, 0.6);
+            }, completion: { (value: Bool) in
+                focusView.transform=CGAffineTransformMakeScale(0.6, 0.6);
+        })
     }
     
     func removeFocusBox () {
-        let focusView = previewView.viewWithTag(10);
-        focusView?.removeFromSuperview()
+        //check to see if a focusBox is already being displayed
+        for subview in previewView.subviews as! [UIView] {
+            //if so delete it from previewView
+            if(subview.isKindOfClass(UIImageView)){
+                subview.removeFromSuperview()
+            }
+        }
     }
-**/
+    
+    func runStillImageCaptureAnimation() {
+        //dispatch to main queue?
+        self.previewView.layer.opacity = 0.0;
+        UIView.animateWithDuration(0.25, animations: {
+            self.previewView.layer.opacity = 1.0
+        })
+    }
 
     
     class func setFlashMode(flashMode: AVCaptureFlashMode, forDevice device: AVCaptureDevice) {
@@ -467,6 +517,24 @@ class CameraViewController: UIViewController {
                 //error
             }
         }
+    }
+    
+    //    MARK: Observers
+    func subjectAreaDidChange(notification: NSNotification) {
+        var devicePoint : CGPoint = CGPoint(x: 0.5, y: 0.5)
+        self.focusWithMode(AVCaptureFocusMode.ContinuousAutoFocus, exposeWithMode: AVCaptureExposureMode.ContinuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
+        removeFocusBox()
+        
+    }
+    
+    func addNotificationObservers() {
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
+        self.addObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", options: (NSKeyValueObservingOptions.Old | NSKeyValueObservingOptions.New), context: CapturingStillImageContext)
+    }
+    
+    func removeNotificationObservers() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
+        self.removeObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", context: CapturingStillImageContext)
     }
     
     

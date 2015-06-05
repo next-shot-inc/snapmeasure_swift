@@ -467,7 +467,9 @@ class DrawingView : UIImageView {
         lineView.setNeedsDisplay()
     }
     
+    /**
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)
     }
+**/
 }
