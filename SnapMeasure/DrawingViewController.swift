@@ -450,6 +450,7 @@ class DrawingViewController: UIViewController {
                 let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
                     //Do some stuff
                 }
+                alert2.addAction(cancelAction)
                 self.presentViewController(alert2, animated: true, completion: nil)
             }
             alert.addAction(cancelAction)
