@@ -174,6 +174,10 @@ class DrawingViewController: UIViewController {
         drawingView.initFrame()
         drawingView.lineView.lines = lines
         drawingView.lineView.setNeedsDisplay()
+        
+        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.curColor = colButton.backgroundColor?.CGColor
+
     }
     
     

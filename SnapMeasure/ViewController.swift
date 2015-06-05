@@ -39,7 +39,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBOutlet weak var existingPickerView: UIPickerView!
     
     @IBOutlet weak var selectExistingButton: UIButton!
-    @IBOutlet weak var outcropName: UITextField!
     @IBOutlet weak var loadPicture: UIButton!
     
     override func viewDidLoad() {
