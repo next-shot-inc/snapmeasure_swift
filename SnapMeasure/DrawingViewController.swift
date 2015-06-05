@@ -105,7 +105,7 @@ class DrawingViewController: UIViewController {
     var typePickerCtrler = TypePickerController()
     static var lineCount = 1
     //TODO: Add Feature Type Names
-    var possibleFeatureTypes = ["Type 1","Type 2","Type 3","Type 4","Type 5"]
+    var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
     
     
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -174,6 +174,10 @@ class DrawingViewController: UIViewController {
         drawingView.initFrame()
         drawingView.lineView.lines = lines
         drawingView.lineView.setNeedsDisplay()
+        
+        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.curColor = colButton.backgroundColor?.CGColor
+
     }
     
     
@@ -271,13 +275,13 @@ class DrawingViewController: UIViewController {
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = color.CGColor
     }
-    /**
+    
     @IBAction func pushTypeButton(sender: AnyObject) {
         typePickerView.hidden = !typePickerView.hidden
         
         //let drawingView = imageView as! DrawingView
     }
-    **/
+
     @IBAction func closeWindow(sender: AnyObject) {
         var inputTextField : UITextField?
         let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
@@ -353,9 +357,9 @@ class DrawingViewController: UIViewController {
     
     @IBAction func pushDefineFeatureButton(sender : AnyObject) {
         //disable all other buttons until Feature definition is complete
-        self.colButton.userInteractionEnabled = false
-        self.newLineButton.userInteractionEnabled = false
-        self.toolbarSegmentedControl.userInteractionEnabled = false
+        self.colButton.enabled = false
+        self.newLineButton.enabled = false
+        self.toolbarSegmentedControl.enabled = false
         
         //create a new Feature
         feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
@@ -401,7 +405,7 @@ class DrawingViewController: UIViewController {
                 //Do some stuff
             }
             alert.addAction(cancelAction)
-             self.presentViewController(alert, animated: true, completion: nil)
+            self.presentViewController(alert, animated: true, completion: nil)
             //just in case
             if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
                 self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
@@ -419,7 +423,10 @@ class DrawingViewController: UIViewController {
             self.setHeightButton.hidden = true
             self.setWidthButton.userInteractionEnabled = true
             self.setWidthButton.hidden = false
-            //TODO: Remove measurement line to force user to draw a new line to define the width
+            
+            //Remove measurement line to force user to draw a new line to define the width
+            drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.setNeedsDisplay()
         }
     }
     
@@ -448,11 +455,18 @@ class DrawingViewController: UIViewController {
             } else {
                 feature!.width = width
             }
-            println("width: %f",width.floatValue)
+            println("width: ",width.floatValue)
             self.setWidthButton.userInteractionEnabled = false
             self.setWidthButton.hidden = true
             
-            let alert = UIAlertController(title: "", message: "Select a Feature type for this Feature", preferredStyle: .Alert)
+            let nf = NSNumberFormatter()
+            let message = "Select a feature type for this feature of width: " +
+                nf.stringFromNumber(feature!.width)! + " and height " +
+                nf.stringFromNumber(feature!.height)!
+            
+            let alert = UIAlertController(
+                title: "Define Feature type", message: message, preferredStyle: .Alert
+            )
             let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
                 self.managedContext.deleteObject(self.feature!)
                 let alert2 = UIAlertController(title: "", message: "Feature was deleted", preferredStyle: .Alert)
@@ -464,6 +478,7 @@ class DrawingViewController: UIViewController {
             }
             alert.addAction(cancelAction)
             
+            // Add buttons the alert action
             for type in possibleFeatureTypes {
                 var nextAction: UIAlertAction = UIAlertAction(title: type, style: .Default) { action -> Void in
                     //save Feature.type as type
@@ -477,16 +492,20 @@ class DrawingViewController: UIViewController {
             }
             self.presentViewController(alert, animated: true, completion: nil)
             
-            //TODO: Remove measurement line
+            // Manage UI components
             self.defineFeatureButton.userInteractionEnabled = true
             self.defineFeatureButton.hidden = false
+            
+            //Re-enable all other buttons until Feature definition is complete
+            self.colButton.enabled = true
+            self.newLineButton.enabled = true
+            self.toolbarSegmentedControl.enabled = true
+            
+            // Remove measurement line
+            drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.setNeedsDisplay()
         }
-        
     }
-    
-
-
-
 }
 
 
