@@ -496,6 +496,7 @@ class FaciesView : UIView {
                 if( uiimage != nil ) {
                     let cgimage = uiimage!.CGImage
                     CGContextSaveGState(context)
+                    CGContextSetAlpha(context, 0.4)
                     CGContextClipToRect(context, v.rect)
                     CGContextDrawTiledImage(context,
                         CGRect(x:0, y:0, width: uiimage!.size.width, height: uiimage!.size.height),

@@ -13,6 +13,7 @@ import UIKit
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
     var colorButton : UIButton?
+    var drawingView: DrawingView?
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
@@ -21,6 +22,7 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         let hue = CGFloat(row)/CGFloat(count)
         colorButton!.backgroundColor =
             UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
+        drawingView?.curColor = colorButton!.backgroundColor?.CGColor
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -82,12 +84,14 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
 class FaciesTypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let faciesTypes = ["sand", "mud", "grading", "lamination" ]
     var typeButton : UIButton?
+    var drawingView: DrawingView?
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
     }
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
         typeButton?.setTitle(faciesTypes[row], forState: UIControlState.Normal)
+        drawingView?.faciesView.curImageName = faciesTypes[row]
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -183,9 +187,11 @@ class DrawingViewController: UIViewController {
         typePickerView.delegate = horizonTypePickerCtrler
         typePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = typeButton
+        
         faciesTypePickerView.delegate = faciesTypePickerCtrler
         faciesTypePickerView.dataSource = faciesTypePickerCtrler
         faciesTypePickerCtrler.typeButton = typeButton
+        faciesTypePickerCtrler.drawingView = imageView as? DrawingView
 
         //make sure all buttons are in the right state
         self.colButton.userInteractionEnabled = true
