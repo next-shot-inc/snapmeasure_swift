@@ -54,17 +54,16 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
-                                <rect key="frame" x="247" y="195" width="43" height="30"/>
+                                <rect key="frame" x="247" y="194" width="47" height="32"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                 <state key="normal" title="Select">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
                                     <action selector="selectFromExisting:" destination="BYZ-38-t0r" eventType="touchDown" id="mYV-Ff-2Me"/>
+                                    <segue destination="V6s-ik-y3m" kind="show" identifier="toSelectExisiting" id="ujt-vq-cky"/>
                                 </connections>
                             </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tbn-vL-J1y">
-                                <rect key="frame" x="290" y="128" width="320" height="162"/>
-                            </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KPO-lU-ARU">
                                 <rect key="frame" x="228" y="286" width="95" height="32"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
@@ -72,7 +71,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="V6s-ik-y3m" kind="show" id="gRH-4B-mAr"/>
+                                    <action selector="selectPhotoFromLibrary:" destination="BYZ-38-t0r" eventType="touchDown" id="cDd-DA-trR"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -80,11 +79,9 @@
                         <constraints>
                             <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="224" id="1EF-r7-alC"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="leading" id="29X-Yu-xWO"/>
-                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="tbn-vL-J1y" secondAttribute="centerY" id="3hf-nf-Zlg"/>
                             <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="h0v-JU-ng0" secondAttribute="centerY" id="3l6-Yd-cpZ"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="10" id="5vY-ii-m7S"/>
                             <constraint firstItem="zoN-5C-vHP" firstAttribute="top" secondItem="UIN-ZE-bqi" secondAttribute="bottom" constant="30" id="6Pn-lq-r9a"/>
-                            <constraint firstItem="tbn-vL-J1y" firstAttribute="leading" secondItem="h0v-JU-ng0" secondAttribute="trailing" id="6xI-WF-QQ1"/>
                             <constraint firstItem="h0v-JU-ng0" firstAttribute="leading" secondItem="UIN-ZE-bqi" secondAttribute="trailing" constant="8" id="Bed-dQ-KIz"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="oea-fH-bxA" secondAttribute="leading" id="CSc-EL-8bH"/>
                             <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="10" id="Cyx-QI-cRy"/>
@@ -96,7 +93,6 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="existingPickerView" destination="tbn-vL-J1y" id="XuT-ps-J5u"/>
                         <outlet property="loadPicture" destination="KPO-lU-ARU" id="ZlW-eT-jiI"/>
                         <outlet property="selectExistingButton" destination="h0v-JU-ng0" id="P9N-cQ-gba"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="toDrawingView" id="LFb-Hb-Otc"/>
@@ -127,8 +123,8 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zZL-2J-885" id="4ph-hl-cNB">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
-                                            <rect key="frame" x="156" y="14" width="287" height="250.5"/>
+                                        <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
+                                            <rect key="frame" x="156" y="14" width="287" height="251"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
                                                     <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
@@ -136,11 +132,11 @@
                                                         <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
                                                     </constraints>
                                                 </imageView>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
-                                                    <rect key="frame" x="0.0" y="200" width="287" height="50.5"/>
+                                                <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
+                                                    <rect key="frame" x="0.0" y="200" width="287" height="51"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ImageName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="urp-OZ-iI3" userLabel="nameLabel">
-                                                            <rect key="frame" x="97" y="14" width="93" height="21.5"/>
+                                                            <rect key="frame" x="97" y="14" width="93" height="22"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                             <color key="highlightedColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -482,6 +478,6 @@
         <image name="measure" width="36" height="36"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="klv-3J-VMp"/>
+        <segue reference="LFb-Hb-Otc"/>
     </inferredMetricsTieBreakers>
 </document>
