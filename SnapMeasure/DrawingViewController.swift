@@ -59,25 +59,66 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
     }
 }
 
-class TypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    let types = ["Top", "Unconformity", "Fault"]
+class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+    let horizonTypes = ["Top", "Unconformity", "Fault"]
     var typeButton : UIButton?
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
     }
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
-        typeButton?.setTitle(types[row], forState: UIControlState.Normal)
+        typeButton?.setTitle(horizonTypes[row], forState: UIControlState.Normal)
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return types.count
+        return horizonTypes.count
     }
     
     func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return types[row]
+        return horizonTypes[row]
     }
 }
+
+class FaciesTypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
+    let faciesTypes = ["sand", "mud", "grading", "lamination" ]
+    var typeButton : UIButton?
+    
+    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
+        typeButton?.setTitle(faciesTypes[row], forState: UIControlState.Normal)
+    }
+    
+    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return faciesTypes.count
+    }
+    
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+        return faciesTypes[row]
+    }
+    
+    func pickerView(
+        pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView!
+        ) -> UIView {
+            var pickerImage = view as? UIImageView
+            if( pickerImage == nil ) {
+                pickerImage = UIImageView()
+                pickerImage!.autoresizingMask = UIViewAutoresizing.None
+            }
+            pickerImage?.image = UIImage(named: faciesTypes[row])
+            return pickerImage!
+    }
+    
+    func pickerView(pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 36
+    }
+    func pickerView(pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+        return 36
+    }
+
+}
+
 
 class DrawingViewController: UIViewController {
     
@@ -93,6 +134,7 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var typePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     
+    @IBOutlet weak var faciesTypePickerView: UIPickerView!
     
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
@@ -102,7 +144,8 @@ class DrawingViewController: UIViewController {
     var lines = [Line]()
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
-    var typePickerCtrler = TypePickerController()
+    var horizonTypePickerCtrler = HorizonTypePickerController()
+    var faciesTypePickerCtrler = FaciesTypePickerController()
     static var lineCount = 1
     //TODO: Add Feature Type Names
     var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
@@ -126,9 +169,6 @@ class DrawingViewController: UIViewController {
         referenceSizeTextField.placeholder = "Name"
         referenceSizeTextField.text = "H1"
         
-        //let recognizer = UITapGestureRecognizer(target: self, action: Selector("handleTap:"))
-        //self.view.addGestureRecognizer(recognizer)
-        
         // 2. Color picker
         colorPickerView.delegate = colorPickerCtrler
         colorPickerView.dataSource = colorPickerCtrler
@@ -139,6 +179,14 @@ class DrawingViewController: UIViewController {
         colButton.backgroundColor = color
         colorPickerCtrler.colorButton = colButton
         
+        //4. Type pickers
+        typePickerView.delegate = horizonTypePickerCtrler
+        typePickerView.dataSource = horizonTypePickerCtrler
+        horizonTypePickerCtrler.typeButton = typeButton
+        faciesTypePickerView.delegate = faciesTypePickerCtrler
+        faciesTypePickerView.dataSource = faciesTypePickerCtrler
+        faciesTypePickerCtrler.typeButton = typeButton
+
         //make sure all buttons are in the right state
         self.colButton.userInteractionEnabled = true
         self.newLineButton.userInteractionEnabled = true
@@ -198,6 +246,7 @@ class DrawingViewController: UIViewController {
             referenceSizeTextField.keyboardType = UIKeyboardType.Default
             referenceSizeTextField.placeholder = "Name"
             referenceSizeTextField.text = drawingView.lineView.currentLineName
+            
         }
     }
     
@@ -220,6 +269,7 @@ class DrawingViewController: UIViewController {
         referenceSizeTextField.resignFirstResponder()
         colorPickerView.hidden = true
         typePickerView.hidden = true
+        faciesTypePickerView.hidden = true
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
@@ -233,6 +283,9 @@ class DrawingViewController: UIViewController {
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             drawingView.lineView.currentLineName = referenceSizeTextField.text
             drawingView.curColor = colButton.backgroundColor?.CGColor
+            
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
+            drawingView.faciesView.curImageName = typeButton.titleForState(UIControlState.Normal)!
         }
     }
     
@@ -277,7 +330,12 @@ class DrawingViewController: UIViewController {
     }
     
     @IBAction func pushTypeButton(sender: AnyObject) {
-        typePickerView.hidden = !typePickerView.hidden
+        let drawingView = imageView as! DrawingView
+        if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+            typePickerView.hidden = !typePickerView.hidden
+        } else {
+            faciesTypePickerView.hidden = !faciesTypePickerView.hidden
+        }
         
         //let drawingView = imageView as! DrawingView
     }
