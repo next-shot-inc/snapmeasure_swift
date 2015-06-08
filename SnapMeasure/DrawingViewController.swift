@@ -341,8 +341,12 @@ class DrawingViewController: UIViewController {
     }
 
     @IBAction func closeWindow(sender: AnyObject) {
-        
+        var inputTextField : UITextField?
         let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
+        alert.addTextFieldWithConfigurationHandler { (textField) in
+            textField.placeholder = "Name"
+            inputTextField = textField
+        }
         let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
             self.managedContext.rollback()
             self.dismissViewControllerAnimated(true, completion: nil)
@@ -354,10 +358,13 @@ class DrawingViewController: UIViewController {
             //update detailedImage and lines
             //detailedImage!.name = outcropName.text!
             self.detailedImage!.imageData = UIImageJPEGRepresentation(self.image, 1.0)
-            
+            if (inputTextField != nil) {
+                self.detailedImage?.name = inputTextField!.text
+            }
             let linesSet = NSMutableSet()
             
-            for line in self.lines  {
+            let drawingView = self.imageView as! DrawingView
+            for line in drawingView.lineView.lines  {
                 let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
                     inManagedObjectContext: self.managedContext) as? LineObject
                 
@@ -374,6 +381,7 @@ class DrawingViewController: UIViewController {
                 lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
                 lineObject!.image = self.detailedImage!
                 linesSet.addObject(lineObject!)
+                println("Added a line")
             }
             
             self.detailedImage!.lines = linesSet
@@ -383,6 +391,7 @@ class DrawingViewController: UIViewController {
             if !self.managedContext.save(&error) {
                 println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
             }
+            println("Saved the ManagedObjectContext")
             self.dismissViewControllerAnimated(true, completion: nil)
 
             
