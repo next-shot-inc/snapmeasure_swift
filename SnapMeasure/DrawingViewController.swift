@@ -506,6 +506,10 @@ class DrawingViewController: UIViewController {
             drawingView.lineView.setNeedsDisplay()
         }
     }
+    
+    @IBAction func unwindToDrawing (segue: UIStoryboardSegue) {
+        
+    }
 }
 
 

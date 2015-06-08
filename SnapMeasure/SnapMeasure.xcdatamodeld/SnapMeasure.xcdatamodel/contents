@@ -3,6 +3,8 @@
     <entity name="DetailedImageObject" representedClassName="SnapMeasure.DetailedImageObject" syncable="YES">
         <attribute name="gpsLocation" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="imageData" attributeType="Binary" syncable="YES"/>
+        <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
         <relationship name="features" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="FeatureObject" inverseName="image" inverseEntity="FeatureObject" syncable="YES"/>
         <relationship name="lines" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LineObject" inverseName="image" inverseEntity="LineObject" syncable="YES"/>
@@ -20,7 +22,7 @@
         <relationship name="image" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DetailedImageObject" inverseName="lines" inverseEntity="DetailedImageObject" syncable="YES"/>
     </entity>
     <elements>
-        <element name="DetailedImageObject" positionX="-63" positionY="-18" width="128" height="120"/>
+        <element name="DetailedImageObject" positionX="-63" positionY="-18" width="128" height="150"/>
         <element name="FeatureObject" positionX="169" positionY="189" width="128" height="103"/>
         <element name="LineObject" positionX="-54" positionY="198" width="128" height="103"/>
     </elements>

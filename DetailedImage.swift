@@ -14,7 +14,8 @@ class DetailedImageObject: NSManagedObject {
 
     @NSManaged var name: String
     @NSManaged var imageData: NSData
-    @NSManaged var gpsLocation: String
+    @NSManaged var latitude: NSNumber
+    @NSManaged var longitude: NSNumber
     @NSManaged var lines: NSSet
     @NSManaged var features: NSSet
 

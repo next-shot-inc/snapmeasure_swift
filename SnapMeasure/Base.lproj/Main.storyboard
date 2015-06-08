@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="RQI-os-FFT">
+            <objects>
+                <navigationController id="Rfj-VC-tkh" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="QVx-ip-sd9">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="V6s-ik-y3m" kind="relationship" relationship="rootViewController" id="Zmh-B6-z5O"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Jug-YZ-xM4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="118" y="1118"/>
+        </scene>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
@@ -47,7 +63,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
                                 <rect key="frame" x="116" y="199" width="123" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -72,7 +88,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="V6s-ik-y3m" kind="show" id="gRH-4B-mAr"/>
+                                    <segue destination="Rfj-VC-tkh" kind="presentation" id="Gsa-ys-CYL"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -105,7 +121,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
-        <!--Loading View Controller-->
+        <!--Load Image-->
         <scene sceneID="TPy-Kn-Thd">
             <objects>
                 <tableViewController id="V6s-ik-y3m" customClass="LoadingViewController" customModule="SnapMeasure" customModuleProvider="target" sceneMemberID="viewController">
@@ -187,12 +203,20 @@
                             <outlet property="delegate" destination="V6s-ik-y3m" id="kuL-NJ-FVZ"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" title="Load Image" id="W5E-Eo-evM">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="NTn-Ya-Yrb">
+                            <connections>
+                                <segue destination="5BQ-yi-8aX" kind="unwind" identifier="unwindLoadingToMainMenu" unwindAction="unwindToMainMenu:" id="zQk-Yv-7UC"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="searchDisplayController" destination="8U4-80-qpL" id="pYa-Ih-xkg"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="loadingToDrawing" id="klv-3J-VMp"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="u2t-iT-eTk" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="5BQ-yi-8aX" userLabel="Exit" sceneMemberID="exit"/>
                 <searchDisplayController id="8U4-80-qpL">
                     <connections>
                         <outlet property="delegate" destination="V6s-ik-y3m" id="kSf-wn-50J"/>
@@ -203,7 +227,7 @@
                     </connections>
                 </searchDisplayController>
             </objects>
-            <point key="canvasLocation" x="408" y="1146"/>
+            <point key="canvasLocation" x="118" y="1995"/>
         </scene>
         <!--Camera View Controller-->
         <scene sceneID="xjT-1d-DpE">
@@ -464,7 +488,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1911" y="215"/>
+            <point key="canvasLocation" x="2010" y="306"/>
         </scene>
     </scenes>
     <resources>

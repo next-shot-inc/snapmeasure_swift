@@ -178,6 +178,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         return false
     }
     
+    @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
+    
+    }
+    
     /** This is now done in DrawingViewController
     @IBAction func saveButtonPushed(sender: AnyObject) {
         // Copy lines and image to DetailedImageObject and LineObjects and save
