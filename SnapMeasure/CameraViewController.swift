@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import AVFoundation
 import ImageIO
+import CoreLocation
 
 let CapturingStillImageContext = UnsafeMutablePointer<Void>()
 
@@ -18,6 +19,9 @@ struct ImageInfo {
     var xDimension : Int = 0
     var yDimension : Int = 0
     var subjectDistance : Float = 0.0
+    var longitude : Double = 0.0 //represents a longitude value in degrees, positive values are east of the prime meridian
+    var latitude : Double = 0.0 //represents a latitude value in degrees, postive  values are north of the equator
+    var compassOrienation : Double = 0.0 //Degrees relative to north
 }
 
 extension AVCaptureVideoOrientation {
@@ -152,13 +156,17 @@ extension UIImage {
     }
 }
 
-class CameraViewController: UIViewController {
+class CameraViewController: UIViewController, CLLocationManagerDelegate {
     var captureSession: AVCaptureSession!
     var stillImageOutput: AVCaptureStillImageOutput?
     var previewLayer: AVCaptureVideoPreviewLayer?
     var videoDeviceInput: AVCaptureDeviceInput?
     var image : UIImage?
     var imageInfo = ImageInfo()
+    
+    var locationManager: CLLocationManager?
+    var bestEffortAtLocation : CLLocation?
+    var currentHeading : CLLocationDirection?
     
     @IBOutlet weak var stillButton: UIButton!
     
@@ -219,7 +227,22 @@ class CameraViewController: UIViewController {
         let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTaptoContinuouslyAutofocus:")
         doubleTap.numberOfTapsRequired = 2
         singleTap.requireGestureRecognizerToFail(doubleTap)
-        previewView.addGestureRecognizer(doubleTap)        
+        previewView.addGestureRecognizer(doubleTap)
+        
+        //setup corelocation manger
+        //if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Restricted || CLLocationManager.authorizationStatus() == CLAuthorizationStatus.Denied {
+            locationManager = CLLocationManager()
+            locationManager!.delegate = self
+            // IMPORTANT!!! kCLLocationAccuracyBest should not be used for comparison with location coordinate or altitidue
+            // accuracy because it is a negative value. Instead, compare against some predetermined "real" measure of
+            // acceptable accuracy, or depend on the timeout to stop updating.
+            locationManager!.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+            locationManager!.headingFilter = 5
+            if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.NotDetermined {
+                locationManager!.requestWhenInUseAuthorization()
+            }
+        //}
+
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -242,19 +265,6 @@ class CameraViewController: UIViewController {
             }
         }
     }
-    /**
-    - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-    {
-    if (context == CapturingStillImageContext)
-    {
-    BOOL isCapturingStillImage = [change[NSKeyValueChangeNewKey] boolValue];
-    
-    if (isCapturingStillImage)
-    {
-    [self runStillImageCaptureAnimation];
-    }
-    } **/
-    
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if( segue.identifier == "toDrawingView" ) {
@@ -314,6 +324,15 @@ class CameraViewController: UIViewController {
                         }
                     }
                     
+                    self.getLocation()
+                    self.imageInfo.latitude = self.bestEffortAtLocation!.coordinate.latitude
+                    self.imageInfo.longitude = self.bestEffortAtLocation!.coordinate.longitude
+                    if (self.currentHeading != nil) {
+                        self.imageInfo.compassOrienation = self.currentHeading!
+                    }
+                    
+                    self.stopUpdatingLocationWithMessage("Still Image Captured:")
+                    self.locationManager?.stopUpdatingHeading()
                     self.captureSession!.stopRunning()
                     
                     self.performSegueWithIdentifier("toDrawingView", sender: nil)
@@ -436,6 +455,8 @@ class CameraViewController: UIViewController {
         if( destinationVC != nil ) {
             destinationVC!.image = image
         }
+        locationManager?.stopUpdatingLocation()
+        locationManager?.stopUpdatingHeading()
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -519,6 +540,97 @@ class CameraViewController: UIViewController {
         }
     }
     
+    // Mark: CLManager Delegate Methods
+    func locationManager(manager: CLLocationManager!,
+        didChangeAuthorizationStatus status: CLAuthorizationStatus) //this is called when authorization status changes and when locationManager is initialiazed
+    {
+        if status == CLAuthorizationStatus.AuthorizedAlways || status == CLAuthorizationStatus.AuthorizedWhenInUse {
+            manager.startUpdatingLocation()
+            if (CLLocationManager.headingAvailable()) {
+                manager.startUpdatingHeading()
+            }
+        }
+    }
+    
+    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+        // test the age of the location measurement to determine if the measurement is cached
+        // in most cases you will not want to rely on cached measurements
+        let newLocation = locations.last as! CLLocation
+        let locationAge = newLocation.timestamp.timeIntervalSinceNow;
+        if (abs(locationAge) > 5.0) {
+            return;
+        }
+        
+        // test that the horizontal accuracy does not indicate an invalid measurement
+        if (newLocation.horizontalAccuracy < 0) {
+            return;
+        }
+        
+        // test the measurement to see if it is more accurate than the previous measurement
+        if (self.bestEffortAtLocation == nil || self.bestEffortAtLocation?.horizontalAccuracy > newLocation.horizontalAccuracy) {
+            // store the location as the "best effort"
+            self.bestEffortAtLocation = newLocation;
+            let lat : Double = bestEffortAtLocation!.coordinate.latitude
+            let long : Double = bestEffortAtLocation!.coordinate.longitude
+            println("%f, %f", lat, long)
+            
+            // test the measurement to see if it meets the desired accuracy
+            if (newLocation.horizontalAccuracy <= self.locationManager!.desiredAccuracy) {
+                // we have a measurement that meets our requirements, so we can stop updating the location
+                //
+                // IMPORTANT!!! Minimize power usage by stopping the location manager as soon as possible.
+                //
+                self.stopUpdatingLocationWithMessage("Acquired location: ")
+                
+                // we can also cancel our previous performSelector:withObject:afterDelay: - it's no longer necessary
+                //NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:"stopUpdatingLocationWithMessage:", object:nil);
+            }
+        }
+    }
+    
+    func locationManager(manager : CLLocationManager, didUpdateHeading newHeading : CLHeading) {
+        if (newHeading.headingAccuracy < 0) {
+            return;
+        }
+    
+        // Use the true heading if it is valid.
+        let theHeading = ((newHeading.trueHeading > 0) ?
+            newHeading.trueHeading : newHeading.magneticHeading);
+    
+        self.currentHeading = theHeading;
+
+    }
+
+    
+    func stopUpdatingLocationWithMessage(message: NSString) {
+        self.locationManager!.stopUpdatingLocation()
+        self.locationManager!.delegate = nil;
+        print(message)
+        let lat : Double = bestEffortAtLocation!.coordinate.latitude
+        let long : Double = bestEffortAtLocation!.coordinate.longitude
+        println("%f, %f", lat, long)
+    }
+    
+    func getLocation() {
+        if (bestEffortAtLocation != nil) {
+            let locationAge = bestEffortAtLocation!.timestamp.timeIntervalSinceNow
+            if (abs(locationAge) > 60) {
+                locationManager?.stopUpdatingLocation()
+                locationManager?.startUpdatingLocation()
+            } else {
+                //keep current location value
+            }
+        } else {
+            locationManager?.startUpdatingLocation()
+        }
+    }
+    
+    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
+        NSLog("%@",error)
+        locationManager?.stopUpdatingLocation()
+    }
+    
+    
     //    MARK: Observers
     func subjectAreaDidChange(notification: NSNotification) {
         var devicePoint : CGPoint = CGPoint(x: 0.5, y: 0.5)
@@ -537,7 +649,9 @@ class CameraViewController: UIViewController {
         self.removeObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", context: CapturingStillImageContext)
     }
     
-    
+    @IBAction func unwindToCamera (segue: UIStoryboardSegue) {
+        
+    }
 }
 
 

@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 import CoreData
 
-//TODO: Fix Deprecation of UISearchDisplayController to UISearchController
 class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     var detailedImages: [DetailedImageObject] = []
     var filteredDetailedImages: [DetailedImageObject] = []
@@ -33,8 +32,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             let controller = UISearchController(searchResultsController: nil)
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
-            controller.searchBar.sizeToFit()
-            
+            controller.searchBar.sizeToFit()            
             self.tableView.tableHeaderView = controller.searchBar
             return controller
         })()
@@ -138,21 +136,29 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             imageInfo.yDimension = Int(drawingVC.image!.size.height)
             
             drawingVC.imageInfo = imageInfo
-            
         }
+        
+        var error: NSError?
+        if !self.managedContext.save(&error) {
+            println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
+        } else {
+            println("LoadingViewController saved the ManagedObjectContext")
+        }
+        
     }
     
     // Mark: - Deletion
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return false
+        return true
     }
     
-    /**
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if (editingStyle == UITableViewCellEditingStyle.Delete) {
+            
             if (self.searchController.active) {
                 
             } else {
+                
                 let deletedImage = detailedImages[indexPath.row]
                 managedContext.deleteObject(deletedImage)
                 
@@ -160,7 +166,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
             }
         }
-    } **/
+    }
     
     // Mark: - Filtering
     func updateSearchResultsForSearchController(searchController: UISearchController) {
@@ -184,5 +190,9 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     self.filterContentForSearchText(searchString)
     return true
     } **/
+    
+    @IBAction func unwindToLoading (segue: UIStoryboardSegue) {
+        
+    }
     
 }
