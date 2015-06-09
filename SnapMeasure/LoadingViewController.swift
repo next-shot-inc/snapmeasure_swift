@@ -134,6 +134,11 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             var imageInfo = ImageInfo()
             imageInfo.xDimension = Int(drawingVC.image!.size.width)
             imageInfo.yDimension = Int(drawingVC.image!.size.height)
+            imageInfo.latitude = destinationDetailedImage.latitude?.doubleValue
+            imageInfo.longitude = destinationDetailedImage.longitude?.doubleValue
+            imageInfo.compassOrienation = destinationDetailedImage.compassOrientation?.doubleValue
+            imageInfo.date = destinationDetailedImage.date
+            
             
             drawingVC.imageInfo = imageInfo
         }

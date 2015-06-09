@@ -14,9 +14,11 @@ class DetailedImageObject: NSManagedObject {
 
     @NSManaged var name: String
     @NSManaged var imageData: NSData
-    @NSManaged var latitude: NSNumber
-    @NSManaged var longitude: NSNumber
+    @NSManaged var latitude: NSNumber?
+    @NSManaged var longitude: NSNumber?
+    @NSManaged var compassOrientation: NSNumber?
     @NSManaged var lines: NSSet
     @NSManaged var features: NSSet
+    @NSManaged var date: NSDate
 
 }

@@ -300,6 +300,10 @@ class DrawingViewController: UIViewController {
             //update detailedImage and lines
             //detailedImage!.name = outcropName.text!
             self.detailedImage!.imageData = UIImageJPEGRepresentation(self.image, 1.0)
+            self.detailedImage!.longitude = self.imageInfo.longitude
+            self.detailedImage!.latitude = self.imageInfo.latitude
+            self.detailedImage!.compassOrientation = self.imageInfo.compassOrienation
+            self.detailedImage!.date = self.imageInfo.date
             if (inputTextField != nil) {
                 self.detailedImage?.name = inputTextField!.text
             }
