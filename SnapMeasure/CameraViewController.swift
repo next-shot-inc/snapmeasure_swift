@@ -23,6 +23,7 @@ struct ImageInfo {
     var latitude : Double? //represents a latitude value in degrees, postive  values are north of the equator
     var compassOrienation : Double? //Degrees relative to north
     var date : NSDate = NSDate()
+    var scale: Double? //in meters per point
 }
 
 extension AVCaptureVideoOrientation {

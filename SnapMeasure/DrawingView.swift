@@ -467,6 +467,18 @@ class DrawingView : UIImageView {
         lineView.setNeedsDisplay()
     }
     
+    func getScale() -> (defined: Bool, scale: Double) {
+        if( lineView.refMeasurePoints.count > 1 && lineView.refMeasureValue > 0.0 ) {
+            let dx = lineView.refMeasurePoints[1].x - lineView.refMeasurePoints[0].x
+            let dy = lineView.refMeasurePoints[1].y - lineView.refMeasurePoints[0].y
+            let dist = sqrt(dx*dx + dy*dy)
+            let scale = Double(lineView.refMeasureValue)/Double(dist)
+            return (true, scale)
+        } else {
+            return (false, 0.0)
+        }
+    }
+    
     /**
     override func drawRect(rect: CGRect) {
         super.drawRect(rect)

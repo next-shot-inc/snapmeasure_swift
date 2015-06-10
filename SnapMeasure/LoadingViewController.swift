@@ -138,6 +138,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             imageInfo.longitude = destinationDetailedImage.longitude?.doubleValue
             imageInfo.compassOrienation = destinationDetailedImage.compassOrientation?.doubleValue
             imageInfo.date = destinationDetailedImage.date
+            imageInfo.scale = destinationDetailedImage.scale?.doubleValue
             
             
             drawingVC.imageInfo = imageInfo
