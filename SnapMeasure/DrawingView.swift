@@ -348,12 +348,200 @@ class LineView : UIView {
     }
 }
 
+class FaciesVignette {
+    var rect: CGRect = CGRect()
+    var imageId : Int = -1
+    
+    init(rect: CGRect, image: Int) {
+        self.rect = rect
+        self.imageId = image
+    }
+}
+
+class FaciesColumn {
+    var faciesVignettes = [FaciesVignette]()
+    
+    func inside(point: CGPoint) -> Bool {
+        if( faciesVignettes.count == 0 ) {
+            return false
+        }
+        let rect = faciesVignettes[0].rect
+        return point.x > rect.minX-5 && point.x < rect.maxX+5;
+    }
+    
+    func snap(point: CGPoint) -> (point: CGPoint, below: Bool) {
+        if( faciesVignettes.count == 0 ) {
+            return (point, true)
+        }
+        
+        var snapped = CGPoint()
+        let dxmin = abs(faciesVignettes[0].rect.minX-point.x)
+        let dxmax = abs(faciesVignettes[0].rect.maxX-point.x)
+        if( dxmin < dxmax ) {
+            snapped.x = faciesVignettes[0].rect.minX
+        } else {
+            snapped.x = faciesVignettes[0].rect.maxX
+        }
+        let dymin = abs(faciesVignettes[0].rect.minY-point.y)
+        let dymax = abs(faciesVignettes.last!.rect.maxY-point.y)
+        var below : Bool
+        if( dymin < dymax ) {
+            snapped.y = faciesVignettes[0].rect.minY
+            below = false
+        } else {
+            snapped.y = faciesVignettes.last!.rect.maxY
+            below = true
+        }
+        return (snapped, below)
+    }
+    
+    func snap(origin: CGPoint, point: CGPoint) -> CGRect {
+        if( faciesVignettes.count == 0 ) {
+            var xmin = min(origin.x, point.x)
+            var xmax = max(origin.x, point.x)
+            var ymin = min(origin.y, point.y)
+            var ymax = max(origin.y, point.y)
+            return CGRectMake(xmin, ymin, xmax-xmin, ymax-ymin)
+        } else {
+            var snapped = CGPoint()
+            if( origin.x == faciesVignettes[0].rect.minX ) {
+                snapped.x = faciesVignettes[0].rect.maxX
+            } else {
+                snapped.x = faciesVignettes[0].rect.minX
+            }
+            var xmin = min(origin.x, snapped.x)
+            var xmax = max(origin.x, snapped.x)
+            if( origin.y == faciesVignettes[0].rect.minY ) {
+                // Drawing rectangle above the first one
+                if( point.y < origin.y ) {
+                   return CGRectMake(xmin, point.y, xmax-xmin, origin.y - point.y)
+                } else {
+                   return CGRectMake(xmin, origin.y, xmax-xmin, 0)
+                }
+            } else {
+                // Drawing rectangle below the last one
+                if( point.y > origin.y ) {
+                    return CGRectMake(xmin, origin.y, xmax-xmin, point.y - origin.y)
+                } else {
+                    return CGRectMake(xmin, origin.y, xmax-xmin, 0)
+                }
+            }
+        }
+    }
+    
+    
+    // Remove one element (if the thing is in the middle, remove all elements before or after)
+    func remove(index: Int) {
+        if( index == 0 ) {
+            faciesVignettes.removeAtIndex(0)
+        } else if( index == faciesVignettes.count-1 ) {
+            faciesVignettes.removeAtIndex(index)
+        } else if( index < faciesVignettes.count/2 ) {
+            faciesVignettes.removeRange(Range(start: 0, end: index+1))
+        } else {
+            faciesVignettes.removeRange(Range(start: index, end: faciesVignettes.count))
+        }
+    }
+}
+
+class FaciesDrawTool {
+    var origin = CGPoint()
+    var curColumn : FaciesColumn?
+    var append = false
+    var curRect = CGRect()
+    
+    init(curColumn: FaciesColumn, point: CGPoint) {
+        self.curColumn = curColumn
+        (origin, append) = curColumn.snap(point)
+    }
+    
+    func move(point: CGPoint) {
+        curRect = curColumn!.snap(origin, point: point)
+    }
+    
+    func end(#imageId: Int) {
+        if( append ) {
+            curColumn!.faciesVignettes.append(
+                FaciesVignette(rect: curRect, image: imageId)
+            )
+        } else {
+            curColumn!.faciesVignettes.insert(
+                FaciesVignette(rect: curRect, image: imageId), atIndex: 0
+            )
+        }
+    }
+}
+
+class FaciesView : UIView {
+    var faciesColumns = [FaciesColumn]()
+    var drawTool : FaciesDrawTool?
+    var images = ["sand", "mud", "grading", "lamination" ]
+    var curImageName = String()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        CGContextSetLineWidth(context, 2.0)
+        
+        for fc in faciesColumns {
+            for v in fc.faciesVignettes{
+                let uiimage = UIImage(named: images[v.imageId])
+                if( uiimage != nil ) {
+                    let cgimage = uiimage!.CGImage
+                    CGContextSaveGState(context)
+                    CGContextSetAlpha(context, 0.4)
+                    CGContextClipToRect(context, v.rect)
+                    CGContextDrawTiledImage(context,
+                        CGRect(x:0, y:0, width: uiimage!.size.width, height: uiimage!.size.height),
+                        cgimage
+                    )
+                    CGContextRestoreGState(context)
+                }
+                CGContextAddRect(context, v.rect)
+                CGContextStrokePath(context)
+            }
+        }
+        
+        if( drawTool != nil && drawTool!.curRect.width > 0 && drawTool!.curRect.height > 0 ) {
+            CGContextAddRect(context, drawTool!.curRect)
+            CGContextStrokePath(context)
+        }
+        
+        // Draw bounding rectangle
+        CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+        CGContextMoveToPoint (context, 10, 10);
+        CGContextAddLineToPoint(context, bounds.width - 10.0, 10.0);
+        CGContextAddLineToPoint(context, bounds.width - 10.0, bounds.height - 10.0)
+        CGContextAddLineToPoint(context, 10, bounds.height - 10.0)
+        CGContextAddLineToPoint(context, 10, 10)
+        CGContextStrokePath(context)
+
+    }
+    
+    func imageId() -> Int {
+        for( var i=0; i < images.count; i++ ) {
+            if( images[i] == curImageName ) {
+                return i;
+            }
+        }
+        return 0
+    }
+}
+
 class DrawingView : UIImageView {
     enum ToolMode : Int {
-        case Draw = 0, Erase = 1, Measure = 2, Reference = 3
+        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4
     }
     
     var lineView = LineView()
+    var faciesView = FaciesView()
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
     var curColor = UIColor.blackColor().CGColor
@@ -365,6 +553,11 @@ class DrawingView : UIImageView {
         lineView.opaque = false
         lineView.backgroundColor = nil
         self.addSubview(lineView)
+        
+        faciesView = FaciesView(frame: frame)
+        faciesView.opaque = false
+        faciesView.backgroundColor = nil
+        self.addSubview(faciesView)
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -375,6 +568,13 @@ class DrawingView : UIImageView {
         lineView.backgroundColor = nil
         lineView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
         self.addSubview(lineView)
+
+        
+        faciesView = FaciesView(frame: self.bounds)
+        faciesView.opaque = false
+        faciesView.backgroundColor = nil
+        faciesView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        self.addSubview(faciesView)
     }
     
     func initFrame() {
@@ -396,12 +596,29 @@ class DrawingView : UIImageView {
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
        let touch = touches.first as! UITouch
        let point = touch.locationInView(self)
+    
+        if( drawMode != ToolMode.Facies ) {
+            lineView.currentLine = Line()
+            lineView.currentLine.points.append(point)
+        } else {
+            // See if we are adding a new column or appending to an existing column
+            var cc : FaciesColumn?
+            for fc in faciesView.faciesColumns {
+                if( fc.inside(point) ) {
+                    cc = fc
+                    break
+                }
+            }
+            if( cc == nil ) {
+                cc = FaciesColumn()
+                faciesView.faciesColumns.append(cc!)
+            }
+            faciesView.drawTool = FaciesDrawTool(curColumn: cc!, point: point)
+        }
         
-       lineView.currentLine = Line()
-       lineView.currentLine.points.append(point)
-        
-       if( drawMode == ToolMode.Erase ) {
+        if( drawMode == ToolMode.Erase ) {
             let rect = CGRectMake(point.x-10.0, point.y-10.0, 20.0, 20.0)
+            // Find if there is a line below
             for (index,value) in enumerate(lineView.lines) {
                 if( value.intersectBox(rect) ) {
                     lineView.lines.removeAtIndex(index)
@@ -409,16 +626,36 @@ class DrawingView : UIImageView {
                     break
                 }
             }
-       }
+            // Find if there is a facies vignette
+            for (fcindex, fc) in enumerate(faciesView.faciesColumns) {
+                for (index,value) in enumerate(fc.faciesVignettes) {
+                    if( value.rect.intersects(rect) ) {
+                        fc.remove(index)
+                        if( fc.faciesVignettes.count == 0 ) {
+                            faciesView.faciesColumns.removeAtIndex(fcindex)
+                        }
+                        faciesView.setNeedsDisplay()
+                        break
+                    }
+                }
+            }
+        }
     }
     
     override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
         let touch = touches.first as! UITouch
         let point = touch.locationInView(self)
-        lineView.currentLine.points.append(point)
-        if( drawMode != ToolMode.Erase ) {
-           lineView.setNeedsDisplay()
+        
+        if( drawMode != ToolMode.Facies ) {
+           lineView.currentLine.points.append(point)
+           if( drawMode != ToolMode.Erase ) {
+                lineView.setNeedsDisplay()
+           }
+        } else {
+           faciesView.drawTool!.move(point)
+           faciesView.setNeedsDisplay()
         }
+        
     }
     
     override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
@@ -462,6 +699,12 @@ class DrawingView : UIImageView {
                     }
                 }
             }
+        } else if( drawMode == ToolMode.Facies ) {
+            if( faciesView.drawTool != nil ) {
+                faciesView.drawTool!.end(imageId: faciesView.imageId())
+            }
+            faciesView.drawTool = nil
+            faciesView.setNeedsDisplay()
         }
         lineView.currentLine = Line()
         lineView.setNeedsDisplay()

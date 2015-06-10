@@ -9,34 +9,12 @@
 import UIKit
 import CoreData
 
-class ExistingPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    var existing = [String]()
-    
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
-    }
-    
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return existing.count
-    }
-    
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return existing[row]
-    }
-}
-
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     let picker = UIImagePickerController()
     var image :  UIImage?
     var imageInfo = ImageInfo()
     var lines = [Line]()
-    var existingPicker = ExistingPickerController()
-
-    @IBOutlet weak var existingPickerView: UIPickerView!
     
     @IBOutlet weak var selectExistingButton: UIButton!
     @IBOutlet weak var loadPicture: UIButton!
@@ -46,31 +24,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         // Do any additional setup after loading the view, typically from a nib.
         picker.delegate = self
         
-        existingPickerView.delegate = existingPicker
-        existingPickerView.dataSource = existingPicker
-        
-        // List all existing outcrops
+        // Test if there are existing DetailedImageObject
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
         let managedContext = appDelegate.managedObjectContext!
+        
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        
         var error: NSError?
-        let fetchedResults = managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [NSManagedObject]
+        let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+            error: &error)
+        selectExistingButton.enabled = fetchedResultsCount > 0
         
-        if let results = fetchedResults {
-            for r in results {
-                let di = r as! DetailedImageObject
-                existingPicker.existing.append(di.name)
-            }
-        } else {
-            println("Could not fetch \(error), \(error!.userInfo)")
-        }
-
-        if( existingPicker.existing.count == 0 ) {
-            selectExistingButton.enabled = false
-        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -91,7 +54,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         dismissViewControllerAnimated(true, completion: nil)
         
-        //self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        self.performSegueWithIdentifier("toDrawingView", sender: nil)
     }
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
@@ -116,18 +79,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @IBAction func selectFromExisting(sender: AnyObject) {
-        existingPickerView.hidden = !existingPickerView.hidden
-        
-        if( existingPickerView.hidden == true ) {
-            let row = existingPickerView.selectedRowInComponent(0)
-            if( row < 0 || row > existingPicker.existing.count ) {
-                return
-            }
-            let name = existingPicker.existing[row]
-            if( read(name) ) {
-               self.performSegueWithIdentifier("toDrawingView", sender: nil)
-            }
-        }
+        //self.performSegueWithIdentifier("toSelectExisting", sender: nil)
     }
     
     func read(name: String) -> Bool {

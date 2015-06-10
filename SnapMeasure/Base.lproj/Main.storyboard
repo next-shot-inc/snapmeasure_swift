@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -66,32 +66,31 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
                                 <rect key="frame" x="116" y="199" width="123" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
-                                <rect key="frame" x="247" y="195" width="43" height="30"/>
+                                <rect key="frame" x="247" y="194" width="47" height="32"/>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                 <state key="normal" title="Select">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
                                     <action selector="selectFromExisting:" destination="BYZ-38-t0r" eventType="touchDown" id="mYV-Ff-2Me"/>
+                                    <segue destination="V6s-ik-y3m" kind="show" identifier="toSelectExisiting" id="ujt-vq-cky"/>
                                 </connections>
                             </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tbn-vL-J1y">
-                                <rect key="frame" x="290" y="128" width="320" height="162"/>
-                            </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KPO-lU-ARU">
-                                <rect key="frame" x="228" y="286" width="95" height="32"/>
+                                <rect key="frame" x="228" y="284" width="95" height="32"/>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
                                 <state key="normal" title="Load Picture">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="Rfj-VC-tkh" kind="presentation" id="Gsa-ys-CYL"/>
+                                    <action selector="selectPhotoFromLibrary:" destination="BYZ-38-t0r" eventType="touchDown" id="cDd-DA-trR"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -99,11 +98,9 @@
                         <constraints>
                             <constraint firstItem="iGn-33-JlB" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="224" id="1EF-r7-alC"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="zoN-5C-vHP" secondAttribute="leading" id="29X-Yu-xWO"/>
-                            <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="tbn-vL-J1y" secondAttribute="centerY" id="3hf-nf-Zlg"/>
                             <constraint firstItem="UIN-ZE-bqi" firstAttribute="centerY" secondItem="h0v-JU-ng0" secondAttribute="centerY" id="3l6-Yd-cpZ"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="top" secondItem="KPO-lU-ARU" secondAttribute="bottom" constant="10" id="5vY-ii-m7S"/>
                             <constraint firstItem="zoN-5C-vHP" firstAttribute="top" secondItem="UIN-ZE-bqi" secondAttribute="bottom" constant="30" id="6Pn-lq-r9a"/>
-                            <constraint firstItem="tbn-vL-J1y" firstAttribute="leading" secondItem="h0v-JU-ng0" secondAttribute="trailing" id="6xI-WF-QQ1"/>
                             <constraint firstItem="h0v-JU-ng0" firstAttribute="leading" secondItem="UIN-ZE-bqi" secondAttribute="trailing" constant="8" id="Bed-dQ-KIz"/>
                             <constraint firstItem="cw7-zZ-foI" firstAttribute="leading" secondItem="oea-fH-bxA" secondAttribute="leading" id="CSc-EL-8bH"/>
                             <constraint firstItem="KPO-lU-ARU" firstAttribute="top" secondItem="iGn-33-JlB" secondAttribute="bottom" constant="10" id="Cyx-QI-cRy"/>
@@ -115,7 +112,6 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="existingPickerView" destination="tbn-vL-J1y" id="XuT-ps-J5u"/>
                         <outlet property="loadPicture" destination="KPO-lU-ARU" id="ZlW-eT-jiI"/>
                         <outlet property="selectExistingButton" destination="h0v-JU-ng0" id="P9N-cQ-gba"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="toDrawingView" id="LFb-Hb-Otc"/>
@@ -147,8 +143,8 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zZL-2J-885" id="4ph-hl-cNB">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
-                                            <rect key="frame" x="156" y="14" width="287" height="250.5"/>
+                                        <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
+                                            <rect key="frame" x="156" y="14" width="287" height="251"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
                                                     <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
@@ -156,11 +152,11 @@
                                                         <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
                                                     </constraints>
                                                 </imageView>
-                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
-                                                    <rect key="frame" x="0.0" y="200" width="287" height="50.5"/>
+                                                <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
+                                                    <rect key="frame" x="0.0" y="200" width="287" height="51"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ImageName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="urp-OZ-iI3" userLabel="nameLabel">
-                                                            <rect key="frame" x="97" y="14" width="93" height="21.5"/>
+                                                            <rect key="frame" x="97" y="14" width="93" height="22"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                             <color key="highlightedColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -384,14 +380,14 @@
                                 </connections>
                             </imageView>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
-                                <rect key="frame" x="325" y="55" width="100" height="162"/>
+                                <rect key="frame" x="376" y="55" width="100" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="u6m-L5-SJL"/>
                                 </constraints>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
-                                <rect key="frame" x="360" y="25" width="30" height="30"/>
+                                <rect key="frame" x="411" y="25" width="30" height="30"/>
                                 <state key="normal" title="Col">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -400,7 +396,7 @@
                                 </connections>
                             </button>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
-                                <rect key="frame" x="259" y="25" width="91" height="30"/>
+                                <rect key="frame" x="310" y="25" width="91" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                             </textField>
@@ -414,19 +410,20 @@
                                 </connections>
                             </button>
                             <segmentedControl opaque="NO" contentMode="center" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
-                                <rect key="frame" x="61" y="26" width="147" height="29"/>
+                                <rect key="frame" x="61" y="26" width="198" height="29"/>
                                 <segments>
                                     <segment title="" image="Pencil" width="36"/>
                                     <segment title="" image="erase" width="36"/>
                                     <segment title="" image="measure" width="36"/>
                                     <segment title="" image="draw_ref" width="36"/>
+                                    <segment title="" image="facies"/>
                                 </segments>
                                 <connections>
                                     <action selector="toolChanged:" destination="KD6-M1-rG7" eventType="valueChanged" id="aZ6-D7-upH"/>
                                 </connections>
                             </segmentedControl>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0V3-cV-DX3">
-                                <rect key="frame" x="218" y="25" width="31" height="30"/>
+                                <rect key="frame" x="269" y="25" width="31" height="30"/>
                                 <state key="normal" title="New">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -435,7 +432,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HHQ-8o-Zsd">
-                                <rect key="frame" x="400" y="26" width="32" height="30"/>
+                                <rect key="frame" x="451" y="26" width="32" height="30"/>
                                 <state key="normal" title="Type">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -444,7 +441,7 @@
                                 </connections>
                             </button>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
-                                <rect key="frame" x="256" y="55" width="320" height="162"/>
+                                <rect key="frame" x="307" y="56" width="320" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PoK-3P-TM8">
@@ -465,8 +462,8 @@
                                     <action selector="pushSetWdithButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="zOE-6K-hT2"/>
                                 </connections>
                             </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="osR-9M-AcR">
-                                <rect key="frame" x="530" y="26" width="46" height="30"/>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="osR-9M-AcR">
+                                <rect key="frame" x="517" y="26" width="73" height="30"/>
                                 <state key="normal" title="Set Height">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -474,6 +471,9 @@
                                     <action selector="pushSetHeightButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="igD-OK-X0w"/>
                                 </connections>
                             </button>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="klH-au-6WR">
+                                <rect key="frame" x="307" y="56" width="320" height="162"/>
+                            </pickerView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -485,13 +485,15 @@
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="6bf-g5-LA8"/>
                             <constraint firstAttribute="trailing" secondItem="osR-9M-AcR" secondAttribute="trailing" constant="10" id="8MW-zU-8la"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="centerX" secondItem="HHQ-8o-Zsd" secondAttribute="centerX" id="8f6-en-guN"/>
+                            <constraint firstItem="klH-au-6WR" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="bottom" id="AMt-1M-nQu"/>
                             <constraint firstAttribute="trailing" secondItem="5Va-oC-eeB" secondAttribute="trailing" constant="10" id="Czy-bD-6qG"/>
                             <constraint firstItem="PoK-3P-TM8" firstAttribute="top" secondItem="NHE-DP-mGt" secondAttribute="top" constant="10" id="Idg-9q-pNe"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="5" id="Iw1-vN-D33"/>
                             <constraint firstItem="wev-s6-Qso" firstAttribute="top" secondItem="7Ua-vU-sig" secondAttribute="bottom" id="Q8f-dS-pfR"/>
-                            <constraint firstItem="vx2-ax-Iw8" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="bottom" constant="-1" id="WlE-4y-0fL"/>
+                            <constraint firstItem="vx2-ax-Iw8" firstAttribute="top" secondItem="HHQ-8o-Zsd" secondAttribute="bottom" id="WlE-4y-0fL"/>
                             <constraint firstItem="0V3-cV-DX3" firstAttribute="leading" secondItem="SBq-9U-Dsq" secondAttribute="trailing" constant="10" id="d1p-cC-oHe"/>
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="leading" secondItem="u4C-tu-Tbg" secondAttribute="trailing" constant="10" id="eEu-dr-wGl"/>
+                            <constraint firstItem="klH-au-6WR" firstAttribute="centerX" secondItem="HHQ-8o-Zsd" secondAttribute="centerX" id="eId-hg-6p9"/>
                             <constraint firstItem="7Ua-vU-sig" firstAttribute="leading" secondItem="i07-eQ-9as" secondAttribute="trailing" constant="10" id="fjM-i6-0Ue"/>
                             <constraint firstItem="i07-eQ-9as" firstAttribute="centerY" secondItem="7Ua-vU-sig" secondAttribute="centerY" id="obf-2m-yrn"/>
                             <constraint firstAttribute="trailing" secondItem="PoK-3P-TM8" secondAttribute="trailing" constant="10" id="pgb-hd-f4d"/>
@@ -515,6 +517,7 @@
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
                         <outlet property="defineFeatureButton" destination="PoK-3P-TM8" id="jmc-9o-GsW"/>
+                        <outlet property="faciesTypePickerView" destination="klH-au-6WR" id="FhT-tD-aHc"/>
                         <outlet property="imageView" destination="EaD-SD-Xzk" id="LMm-eW-lYq"/>
                         <outlet property="newLineButton" destination="0V3-cV-DX3" id="aNJ-50-RDk"/>
                         <outlet property="oneTapGestureRecognizer" destination="LKt-km-RPt" id="HCX-bu-8FT"/>
@@ -556,9 +559,11 @@
         <image name="Pencil" width="36" height="36"/>
         <image name="draw_ref" width="36" height="36"/>
         <image name="erase" width="36" height="35"/>
+        <image name="facies" width="36" height="35"/>
         <image name="measure" width="36" height="36"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="klv-3J-VMp"/>
+        <segue reference="ujt-vq-cky"/>
+        <segue reference="LFb-Hb-Otc"/>
     </inferredMetricsTieBreakers>
 </document>
