@@ -275,6 +275,7 @@
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
 				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
+				FD4A71571B2790AC00AD51B4 /* ImageAnnotationView.swift in Sources */,
 				2F27AB541B289E67006501C0 /* FaciesImage.swift in Sources */,
 				2F1286731B0E3A150095D500 /* AppDelegate.swift in Sources */,
 				FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */,

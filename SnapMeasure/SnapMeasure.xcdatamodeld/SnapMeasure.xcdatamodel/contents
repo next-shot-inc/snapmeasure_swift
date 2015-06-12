@@ -7,6 +7,7 @@
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="scale" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <relationship name="faciesVignettes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FaciesVignetteObject" syncable="YES"/>
         <relationship name="features" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FeatureObject" inverseName="image" inverseEntity="FeatureObject" syncable="YES"/>
         <relationship name="lines" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LineObject" inverseName="image" inverseEntity="LineObject" syncable="YES"/>
@@ -32,10 +33,10 @@
         <relationship name="image" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DetailedImageObject" inverseName="lines" inverseEntity="DetailedImageObject" syncable="YES"/>
     </entity>
     <elements>
-        <element name="DetailedImageObject" positionX="-63" positionY="-54" width="128" height="163"/>
+        <element name="DetailedImageObject" positionX="-63" positionY="-54" width="128" height="195"/>
+        <element name="FaciesImage" positionX="-65" positionY="-165" width="128" height="73"/>
+        <element name="FaciesVignetteObject" positionX="162" positionY="99" width="128" height="73"/>
         <element name="FeatureObject" positionX="160" positionY="-58" width="128" height="103"/>
         <element name="LineObject" positionX="-38" positionY="203" width="128" height="103"/>
-        <element name="FaciesVignetteObject" positionX="162" positionY="99" width="128" height="73"/>
-        <element name="FaciesImage" positionX="-65" positionY="-165" width="128" height="73"/>
     </elements>
 </model>

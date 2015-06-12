@@ -19,5 +19,8 @@ class DetailedImageObject: NSManagedObject {
     @NSManaged var compassOrientation: NSNumber?
     @NSManaged var lines: NSSet
     @NSManaged var features: NSSet
+    @NSManaged var date: NSDate
+    @NSManaged var scale: NSNumber? // in meters per point
+
     @NSManaged var faciesVignettes: NSSet
 }
