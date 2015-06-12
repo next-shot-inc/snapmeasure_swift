@@ -11,21 +11,21 @@ import UIKit
 import MapKit
 import CoreData
 
-class MapViewController: UIViewController, MKMapViewDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet var rotationRecognizer: UIRotationGestureRecognizer!
     
     var detailedImages: [DetailedImageObject] = []
     var managedContext: NSManagedObjectContext!
     
     override func viewDidLoad() {
         self.loadImages()
-        println("count = ", detailedImages.count)
+        //println("count = ", detailedImages.count)
         if (detailedImages.count > 0) {
             
             let initialLocation = CLLocation(latitude: detailedImages[0].latitude!.doubleValue, longitude: detailedImages[0].longitude!.doubleValue)
-            println("latitude: %d\nlongitude: %d",detailedImages[0].latitude!.doubleValue,detailedImages[0].longitude!.doubleValue)
-            //let initialLocation = CLLocation(latitude: 21.282778, longitude: -157.829444)
+            //println("latitude: %d\nlongitude: %d",detailedImages[0].latitude!.doubleValue,detailedImages[0].longitude!.doubleValue)
             self.centerMapOnLocation(initialLocation, withRadius: CLLocationDistance(1.0))
             
             mapView.delegate = self
@@ -36,6 +36,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         } else {
             println("No DetailedImageObjects with a location")
         }
+        
+        //set up rotationRecognizer
+        rotationRecognizer.delegate = self
+
     }
     
     func loadImages() {
@@ -73,10 +77,13 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 as? ImageAnnotationView { // checks to see if an unseen annotation view can be reused
                     dequeuedView.annotation = annotation
                     view = dequeuedView
+                    view.rotateMapLineViewDegrees(self.mapView.camera.heading)
             } else {
                 // create a new MKPinAnnotationView
                 view = ImageAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.canShowCallout = true
+                view.rotateMapLineViewDegrees(self.mapView.camera.heading)
+                
                 //view.calloutOffset = CGPoint(x: -5, y: 5)
                 //view.rightCalloutAccessoryView = UIButton.buttonWithType(.DetailDisclosure) as! UIView
                 
@@ -91,8 +98,54 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
         return nil
     }
-    
+
+    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+        if view.isMemberOfClass(ImageAnnotationView) {
+            (view as! ImageAnnotationView).rotateMapLineViewDegrees(self.mapView.camera.heading)
+        }
+    } 
+    /**
     func mapView(mapView: MKMapView!, regionWillChangeAnimated animated: Bool) {
         
+        for ann in mapView.annotations {
+            
+            if ann.isMemberOfClass(ImageAnnotation) {
+                
+                let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
+                
+                annView?.rotateMapLineView(self.mapView.camera.heading)
+            }
+        }
     }
+    
+    func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
+        for ann in mapView.annotations {
+            
+            if ann.isMemberOfClass(ImageAnnotation) {
+                
+                let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
+                
+                annView?.rotateMapLineView(self.mapView.camera.heading)
+            }
+        }
+    } **/
+    
+    //Mark - UIGestureRecognizer methods
+    @IBAction func rotationDetected (gestureRecognizer: UIRotationGestureRecognizer) {
+        for ann in mapView.annotations {
+            
+            if ann.isMemberOfClass(ImageAnnotation) {
+                
+                let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
+                
+                annView?.rotateMapLineViewRads(Double(gestureRecognizer.rotation))
+                rotationRecognizer.rotation = 0
+            }
+        }
+    }
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true;
+    }
+
 }

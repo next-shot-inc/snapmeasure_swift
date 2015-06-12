@@ -34,7 +34,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
         self.date = detailedImage.date
         if (detailedImage.scale != nil) {
             self.length = detailedImage.scale!.doubleValue * Double(image.size.width)
-            println(["Annotation.length = %d", self.length!])
+            //println(["Annotation.length = %d", self.length!])
         } else {
             self.length = nil
         }

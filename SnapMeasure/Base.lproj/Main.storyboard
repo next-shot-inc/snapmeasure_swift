@@ -259,6 +259,10 @@
                         <subviews>
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="a4c-T0-8FP">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="Tfc-9g-WWQ" appends="YES" id="fC9-br-S28"/>
+                                </connections>
                             </mapView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -278,10 +282,16 @@
                     </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="a4c-T0-8FP" id="pZm-SM-V5N"/>
+                        <outlet property="rotationRecognizer" destination="Tfc-9g-WWQ" id="L2m-PM-LgA"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="v9Q-Iq-JfW" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="tJh-eH-YeA" userLabel="Exit" sceneMemberID="exit"/>
+                <rotationGestureRecognizer id="Tfc-9g-WWQ">
+                    <connections>
+                        <action selector="rotationDetected:" destination="7hD-ub-mNa" id="XuI-IX-SQ4"/>
+                    </connections>
+                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1412" y="1860"/>
         </scene>
