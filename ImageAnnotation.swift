@@ -12,7 +12,7 @@ import UIKit
 class ImageAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     let image : UIImage
-    let compassOrientation: CLLocationDirection
+    let compassOrientation: CLLocationDirection?
     let name : String
     let date : NSDate
     let length : Double?
@@ -29,7 +29,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
     init(detailedImage: DetailedImageObject) {
         self.name = detailedImage.name
         self.image = UIImage(data: detailedImage.imageData)!
-        self.compassOrientation = detailedImage.compassOrientation!.doubleValue
+        self.compassOrientation = detailedImage.compassOrientation?.doubleValue
         self.coordinate = CLLocationCoordinate2D(latitude: detailedImage.latitude!.doubleValue, longitude: detailedImage.longitude!.doubleValue)
         self.date = detailedImage.date
         if (detailedImage.scale != nil) {

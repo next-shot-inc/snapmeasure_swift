@@ -359,9 +359,10 @@ class DrawingViewController: UIViewController {
         let scale = drawingView.getScale()
         if(scale.defined) {
             self.detailedImage!.scale = scale.scale
-        } else if (detailedImage!.scale != 0 ) {
-            // Existing image with an existing scaled defined
-        } else {
+        } else if (detailedImage!.scale != nil) {
+            //detailedImage was loaded with a scale
+        }
+        else {
             alert.title = "Save before closing?"
             alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
         }
