@@ -19,9 +19,11 @@ struct ImageInfo {
     var xDimension : Int = 0
     var yDimension : Int = 0
     var subjectDistance : Float = 0.0
-    var longitude : Double = 0.0 //represents a longitude value in degrees, positive values are east of the prime meridian
-    var latitude : Double = 0.0 //represents a latitude value in degrees, postive  values are north of the equator
-    var compassOrienation : Double = 0.0 //Degrees relative to north
+    var longitude : Double? //represents a longitude value in degrees, positive values are east of the prime meridian
+    var latitude : Double? //represents a latitude value in degrees, postive  values are north of the equator
+    var compassOrienation : Double? //Degrees relative to north
+    var date : NSDate = NSDate()
+    var scale: Double? //in meters per point
 }
 
 extension AVCaptureVideoOrientation {
@@ -324,16 +326,19 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                         }
                     }
                     
-                    self.getLocation()
-                    self.imageInfo.latitude = self.bestEffortAtLocation!.coordinate.latitude
-                    self.imageInfo.longitude = self.bestEffortAtLocation!.coordinate.longitude
-                    if (self.currentHeading != nil) {
-                        self.imageInfo.compassOrienation = self.currentHeading!
-                    }
+                    if (CLLocationManager.locationServicesEnabled()) {
+                        self.getLocation()
+                        self.imageInfo.latitude = self.bestEffortAtLocation!.coordinate.latitude
+                        self.imageInfo.longitude = self.bestEffortAtLocation!.coordinate.longitude
+                        if (self.currentHeading != nil) {
+                            self.imageInfo.compassOrienation = self.currentHeading!
+                        }
                     
-                    self.stopUpdatingLocationWithMessage("Still Image Captured:")
-                    self.locationManager?.stopUpdatingHeading()
-                    self.captureSession!.stopRunning()
+                        self.stopUpdatingLocationWithMessage("Still Image Captured:")
+                        self.locationManager?.stopUpdatingHeading()
+                        self.captureSession!.stopRunning()
+                    }
+                    self.imageInfo.date = NSDate()
                     
                     self.performSegueWithIdentifier("toDrawingView", sender: nil)
                 }

@@ -354,6 +354,18 @@ class DrawingViewController: UIViewController {
                 inputTextField = textField
             }
         }
+        let drawingView = self.imageView as! DrawingView
+        //get scale for the image
+        let scale = drawingView.getScale()
+        if(scale.defined) {
+            self.detailedImage!.scale = scale.scale
+        } else if (detailedImage!.scale != nil) {
+            
+        }
+        else {
+            alert.title = "Save before closing?"
+            alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
+        }
         let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
             self.managedContext.rollback()
             self.dismissViewControllerAnimated(true, completion: nil)
@@ -365,6 +377,10 @@ class DrawingViewController: UIViewController {
             //update detailedImage and lines
             //detailedImage!.name = outcropName.text!
             self.detailedImage!.imageData = UIImageJPEGRepresentation(self.image, 1.0)
+            self.detailedImage!.longitude = self.imageInfo.longitude
+            self.detailedImage!.latitude = self.imageInfo.latitude
+            self.detailedImage!.compassOrientation = self.imageInfo.compassOrienation
+            self.detailedImage!.date = self.imageInfo.date
             if (inputTextField != nil) {
                 self.detailedImage?.name = inputTextField!.text
             }

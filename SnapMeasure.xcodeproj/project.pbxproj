@@ -26,6 +26,9 @@
 		2F682F6A1B1F616A002C1BA7 /* DetailedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F691B1F616A002C1BA7 /* DetailedImage.swift */; };
 		2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F6B1B1F616A002C1BA7 /* Line.swift */; };
 		FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */; };
+		FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A714C1B26415400AD51B4 /* MapViewController.swift */; };
+		FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */; };
+		FD4A71571B2790AC00AD51B4 /* ImageAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +65,9 @@
 		2F682F691B1F616A002C1BA7 /* DetailedImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailedImage.swift; path = ../DetailedImage.swift; sourceTree = "<group>"; };
 		2F682F6B1B1F616A002C1BA7 /* Line.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Line.swift; path = ../Line.swift; sourceTree = "<group>"; };
 		FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTableViewCell.swift; sourceTree = "<group>"; };
+		FD4A714C1B26415400AD51B4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageAnnotation.swift; path = ../ImageAnnotation.swift; sourceTree = "<group>"; };
+		FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageAnnotationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +117,9 @@
 				2F12869B1B0E60300095D500 /* DrawingView.swift */,
 				2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */,
 				FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */,
+				FD4A714C1B26415400AD51B4 /* MapViewController.swift */,
+				FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */,
+				FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */,
 				2F1286791B0E3A150095D500 /* Main.storyboard */,
 				2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */,
 				2F682F6B1B1F616A002C1BA7 /* Line.swift */,
@@ -264,9 +273,11 @@
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
+				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
 				2F27AB541B289E67006501C0 /* FaciesImage.swift in Sources */,
 				2F1286731B0E3A150095D500 /* AppDelegate.swift in Sources */,
+				FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
