@@ -43,12 +43,21 @@ class ImageAnnotationView: MKPinAnnotationView {
             showing = true
             println("Selected")
             
+            self.userInteractionEnabled = true
+            calloutView.userInteractionEnabled = true
+            lineView?.userInteractionEnabled = true
+            
         } else { //remove customView
+            self.userInteractionEnabled = false
+            calloutView.userInteractionEnabled = false
+            lineView?.userInteractionEnabled = false
+            
             lineView?.removeFromSuperview()
             lineView = nil
             calloutView.removeFromSuperview()
             showing = false
             println("Deselected")
+            
         }
         
     }
@@ -67,43 +76,25 @@ class ImageAnnotationView: MKPinAnnotationView {
         
     }
     
-    func rotateMapLineViewDegrees (newOrientation: CLLocationDirection) {
+    func setMapLineViewOrientation (newOrientation: CLLocationDirection) {
         
-        if (lineView == nil || newOrientation == lineView?.viewOrientation) {
+        if (lineView == nil || newOrientation == 0.0) {
             // do nothing orientation already matches or lineView doesn't exist
-            println("LineView doesn't exist or orientation already matches")
         } else {
-            print("rotating: ")
-            println(count)
-            count++
-            let radsToRotate = (newOrientation-lineView!.viewOrientation) * M_PI/180
+            let radsToRotate = (newOrientation) * M_PI/180
             lineView!.transform = CGAffineTransformMakeRotation(CGFloat(-radsToRotate))
-            println(radsToRotate)
-            //lineView?.setNeedsDisplay()
-            self.setMapLineViewOrientation(newOrientation)
+
         }
     }
     
     func rotateMapLineViewRads (newOrientation: Double) {
-        if (lineView == nil || newOrientation == lineView?.viewOrientation) {
-            // do nothing orientation already matches or lineView doesn't exist
-            println("LineView doesn't exist or orientation already matches")
+        if (lineView == nil) {
+            // do nothing lineView doesn't exist
         } else {
-            print("rotating: ")
-            println(count)
-            println(newOrientation)
-            count++
             let transform = lineView!.transform
             lineView!.transform = CGAffineTransformRotate(transform,CGFloat(newOrientation))
-            //lineView?.setNeedsDisplay()
-            lineView!.viewOrientation += newOrientation*180/M_PI
-            print("LineViewOrientation: ")
             
         }
-    }
-    
-    func setMapLineViewOrientation (newOrientation: CLLocationDirection) {
-        lineView?.viewOrientation = newOrientation
     }
     
     func isShowingCallout() -> Bool {
@@ -157,7 +148,6 @@ class ImageAnnotationView: MKPinAnnotationView {
 class MapLineView : UIView {
     let length : Double
     let orientation: Double
-    var viewOrientation : CLLocationDirection
     
     init (length: Double, orientation: CLLocationDegrees) {
         self.length = length
@@ -166,8 +156,6 @@ class MapLineView : UIView {
         } else {
             self.orientation = orientation * M_PI/180;
         }
-        
-        self.viewOrientation = 0.0 //when initialized MapLineView points north
         
         super.init(frame: CGRect(x: 0.0, y: 0.0, width: abs(length*cos(orientation))+20, height: abs(length*sin(orientation))+20))
 

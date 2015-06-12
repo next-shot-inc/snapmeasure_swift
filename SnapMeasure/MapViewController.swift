@@ -77,12 +77,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 as? ImageAnnotationView { // checks to see if an unseen annotation view can be reused
                     dequeuedView.annotation = annotation
                     view = dequeuedView
-                    view.rotateMapLineViewDegrees(self.mapView.camera.heading)
+                    view.setMapLineViewOrientation(self.mapView.camera.heading)
             } else {
                 // create a new MKPinAnnotationView
                 view = ImageAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.canShowCallout = true
-                view.rotateMapLineViewDegrees(self.mapView.camera.heading)
+                view.setMapLineViewOrientation(self.mapView.camera.heading)
                 
                 //view.calloutOffset = CGPoint(x: -5, y: 5)
                 //view.rightCalloutAccessoryView = UIButton.buttonWithType(.DetailDisclosure) as! UIView
@@ -101,7 +101,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
 
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         if view.isMemberOfClass(ImageAnnotationView) {
-            (view as! ImageAnnotationView).rotateMapLineViewDegrees(self.mapView.camera.heading)
+            (view as! ImageAnnotationView).setMapLineViewOrientation(self.mapView.camera.heading)
         }
     } 
     /**
@@ -141,6 +141,24 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 annView?.rotateMapLineViewRads(Double(gestureRecognizer.rotation))
                 rotationRecognizer.rotation = 0
             }
+        }
+    }
+    
+    func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let point = gestureRecognizer.locationInView(mapView)
+        let tappedView = self.mapView.hitTest(point, withEvent: nil)
+        println(tappedView)
+        if gestureRecognizer.isEqual(rotationRecognizer) {
+            //let point = rotationRecognizer.locationInView(mapView)
+            //let tappedView = self.mapView.hitTest(point, withEvent: nil)
+           // println(tappedView)
+            if tappedView!.isKindOfClass(MKMapView) {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return true
         }
     }
     
