@@ -359,7 +359,7 @@ class DrawingViewController: UIViewController {
         if(scale.defined) {
             self.detailedImage!.scale = scale.scale
         } else if (detailedImage!.scale != nil) {
-            
+            //detailedImage was loaded with a scale
         }
         else {
             alert.title = "Save before closing?"

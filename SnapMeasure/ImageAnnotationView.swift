@@ -28,8 +28,8 @@ class ImageAnnotationView: MKPinAnnotationView {
             calloutView.contentMode = UIViewContentMode.ScaleAspectFill
             calloutView.center = CGPoint(x: self.frame.width/2 - 7, y: 125)
             
-            if (ann.length != nil) {
-                lineView = MapLineView(length: ann.length!, orientation: 0.0) //change to due north for testing purposes
+            if (ann.length != nil && ann.compassOrientation != nil) {
+                lineView = MapLineView(length: ann.length!, orientation: ann.compassOrientation!) //change to due north for testing purposes
                 lineView!.center = CGPoint(x: self.frame.width/2-8, y: self.frame.height-4)
                 self.addSubview(lineView!)
                 self.sendSubviewToBack(lineView!)
