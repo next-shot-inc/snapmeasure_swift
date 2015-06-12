@@ -14,7 +14,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     let picker = UIImagePickerController()
     var image :  UIImage?
     var imageInfo = ImageInfo()
-    var lines = [Line]()
     
     @IBOutlet weak var selectExistingButton: UIButton!
     @IBOutlet weak var loadPicture: UIButton!
@@ -72,7 +71,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             let destinationVC = segue.destinationViewController as? DrawingViewController
             if( destinationVC != nil ) {
                 destinationVC!.image = image
-                destinationVC!.lines = lines
                 destinationVC!.imageInfo = imageInfo
             }
         }
@@ -81,55 +79,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBAction func selectFromExisting(sender: AnyObject) {
         //self.performSegueWithIdentifier("toSelectExisting", sender: nil)
     }
-    
-    func read(name: String) -> Bool {
-        // Get the full detailed object from the selected name
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let managedContext = appDelegate.managedObjectContext!
-        
-        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        // TODO: Add Predicate to speed-up the request.
-        
-        var error: NSError?
-        let fetchedResults = managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [NSManagedObject]
-        
-        if let results = fetchedResults {
-            for r in results {
-                let di = r as! DetailedImageObject
-                if( di.name == name ) {
-                    // Get the image
-                    self.image = UIImage(data: di.imageData)!
-                    
-                    // Get the lines via the DetailedView NSSet.
-                    for alo in di.lines {
-                        let lo = alo as? LineObject
-                        var line = Line()
-                        line.name = lo!.name
-                        let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
-                        line.color = color?.CGColor
-                        let arrayData = lo!.pointData
-                        let array = Array(
-                            UnsafeBufferPointer(
-                                start: UnsafePointer<CGPoint>(arrayData.bytes),
-                                count: arrayData.length/sizeof(CGPoint)
-                            )
-                        )
-                        for( var i=0; i < array.count; i++ ) {
-                            line.points.append(array[i])
-                        }
-                        self.lines.append(line)
-                    }
-                    return true
-                }
-            }
-        } else {
-            println("Could not fetch \(error), \(error!.userInfo)")
-            return false
-        }
-        return false
-    }
-    
+       
     @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
     
     }

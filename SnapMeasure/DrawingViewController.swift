@@ -145,7 +145,6 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var setHeightButton : UIButton!
     
     var image : UIImage?
-    var lines = [Line]()
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
     var horizonTypePickerCtrler = HorizonTypePickerController()
@@ -154,11 +153,11 @@ class DrawingViewController: UIViewController {
     //TODO: Add Feature Type Names
     var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
     
-    
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     var managedContext : NSManagedObjectContext!
     var feature : FeatureObject?
     var detailedImage : DetailedImageObject?
+    var newDetailedImage = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -210,6 +209,7 @@ class DrawingViewController: UIViewController {
         if (detailedImage == nil) {
             detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
                 inManagedObjectContext: managedContext) as? DetailedImageObject
+            newDetailedImage = true
         }
     }
     
@@ -226,8 +226,7 @@ class DrawingViewController: UIViewController {
         drawingView.image = image
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
-        drawingView.lineView.lines = lines
-        drawingView.lineView.setNeedsDisplay()
+        drawingView.initFromObject(detailedImage!)
         
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
@@ -349,9 +348,11 @@ class DrawingViewController: UIViewController {
     @IBAction func closeWindow(sender: AnyObject) {
         var inputTextField : UITextField?
         let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textField) in
-            textField.placeholder = "Name"
-            inputTextField = textField
+        if( newDetailedImage ) {
+            alert.addTextFieldWithConfigurationHandler { (textField) in
+                textField.placeholder = "Name"
+                inputTextField = textField
+            }
         }
         let drawingView = self.imageView as! DrawingView
         //get scale for the image
@@ -386,6 +387,8 @@ class DrawingViewController: UIViewController {
             let linesSet = NSMutableSet()
             
             let drawingView = self.imageView as! DrawingView
+            // Always store the coordinates in image coordinates (reverse any viewing transform due to scaling)
+            let affineTransform = CGAffineTransformInvert(drawingView.affineTransform)
             for line in drawingView.lineView.lines  {
                 let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
                     inManagedObjectContext: self.managedContext) as? LineObject
@@ -397,17 +400,31 @@ class DrawingViewController: UIViewController {
                 
                 var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
                 for( var i=0; i < line.points.count; ++i ) {
-                    points[i].x = line.points[i].x
-                    points[i].y = line.points[i].y
+                    points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
                 }
                 lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
                 lineObject!.image = self.detailedImage!
                 linesSet.addObject(lineObject!)
                 println("Added a line")
             }
-            
             self.detailedImage!.lines = linesSet
 
+            
+            let faciesVignetteSet = NSMutableSet()
+            
+            for fc in drawingView.faciesView.faciesColumns {
+                for fv in fc.faciesVignettes {
+                    let faciesVignetteObject = NSEntityDescription.insertNewObjectForEntityForName(
+                        "FaciesVignetteObject", inManagedObjectContext: self.managedContext) as? FaciesVignetteObject
+                    
+                    faciesVignetteObject!.imageName = self.faciesTypePickerCtrler.faciesTypes[fv.imageId]
+                    let scaledRect = CGRectApplyAffineTransform(fv.rect, affineTransform)
+                    faciesVignetteObject!.rect = NSValue(CGRect: scaledRect)
+                    faciesVignetteSet.addObject(faciesVignetteObject!)
+                }
+            }
+            self.detailedImage!.faciesVignettes = faciesVignetteSet
+            
             //save the managedObjectContext
             var error: NSError?
             if !self.managedContext.save(&error) {

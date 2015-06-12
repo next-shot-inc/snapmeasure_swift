@@ -533,6 +533,15 @@ class FaciesView : UIView {
         }
         return 0
     }
+    
+    func imageId(name: String) -> Int {
+        for( var i=0; i < images.count; i++ ) {
+            if( images[i] == name ) {
+                return i;
+            }
+        }
+        return 0
+    }
 }
 
 class DrawingView : UIImageView {
@@ -545,6 +554,7 @@ class DrawingView : UIImageView {
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
     var curColor = UIColor.blackColor().CGColor
+    var affineTransform = CGAffineTransformIdentity
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -580,6 +590,121 @@ class DrawingView : UIImageView {
     func initFrame() {
         self.sizeToFit()
         //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: self.bounds.size)
+    }
+    
+    func initFromObject(detailedImage: DetailedImageObject) {
+        // Get the lines via the DetailedView NSSet.
+        let scalex = self.bounds.width/self.image!.size.width
+        let scaley = self.bounds.height/self.image!.size.height
+        affineTransform = CGAffineTransformMakeScale(scalex, scaley)
+        
+        for alo in detailedImage.lines {
+            let lo = alo as? LineObject
+            var line = Line()
+            line.name = lo!.name
+            let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
+            line.color = color?.CGColor
+            let arrayData = lo!.pointData
+            let array = Array(
+                UnsafeBufferPointer(
+                    start: UnsafePointer<CGPoint>(arrayData.bytes),
+                    count: arrayData.length/sizeof(CGPoint)
+                )
+            )
+            for( var i=0; i < array.count; i++ ) {
+                line.points.append(CGPointApplyAffineTransform(array[i], affineTransform))
+            }
+            lineView.lines.append(line)
+            lineView.setNeedsDisplay()
+        }
+        
+        // Get the facies vignettes
+        for afvo in detailedImage.faciesVignettes {
+            let fvo = afvo as? FaciesVignetteObject
+            let orect = fvo!.rect.CGRectValue()
+            let rect = CGRectApplyAffineTransform(orect, affineTransform)
+            let id = faciesView.imageId(fvo!.imageName)
+            let fv = FaciesVignette(rect: rect, image: id)
+            let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
+            
+            var inserted_in_column = false
+            for fvc in faciesView.faciesColumns {
+                if( fvc.inside(center) ) {
+                    for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                        if( center.y < cfv.rect.minY ) {
+                            fvc.faciesVignettes.insert(fv, atIndex: index)
+                            inserted_in_column = true
+                            break
+                        }
+                    }
+                    if( !inserted_in_column ) {
+                        fvc.faciesVignettes.append(fv)
+                        inserted_in_column = true
+                        break
+                    }
+                }
+            }
+            if( !inserted_in_column ) {
+                let nfc = FaciesColumn()
+                nfc.faciesVignettes.append(fv)
+                faciesView.faciesColumns.append(nfc)
+            }
+            faciesView.setNeedsDisplay()
+        }
+    }
+    
+    override var bounds : CGRect {
+        willSet(newBounds) {
+            // First take the inverse of the previous transform
+            var caffineTransform = CGAffineTransformInvert(self.affineTransform)
+            if( self.image == nil ) {
+                return
+            }
+            
+            
+            // Compute scaling factors
+            let scalex = newBounds.width/self.image!.size.width
+            let scaley = newBounds.height/self.image!.size.height
+            
+            affineTransform = CGAffineTransformIdentity
+            
+            if( self.contentMode == UIViewContentMode.ScaleToFill) {
+                affineTransform = CGAffineTransformMakeScale(scalex, scaley)
+            } else if( self.contentMode == UIViewContentMode.ScaleAspectFill ) {
+                // scale to maximum while keeping aspect ratio
+                let scale = max(scalex, scaley)
+                affineTransform = CGAffineTransformMakeScale(scale, scale)
+        
+                // Center.
+                let tx = (newBounds.width - self.image!.size.width * scale)/2.0
+                let ty = (newBounds.height - self.image!.size.height * scale)/2.0
+                affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
+            } else if( self.contentMode == UIViewContentMode.ScaleAspectFit ) {
+                // scale to minimum
+                let scale = min(scalex, scaley)
+                affineTransform = CGAffineTransformMakeScale(scale, scale)
+                // Center
+                let tx = (newBounds.width - self.image!.size.width * scale)/2.0
+                let ty = (newBounds.height - self.image!.size.height * scale)/2.0
+                affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
+            }
+            
+            // Concatenate the inverse of the previous transform with the new transform
+            caffineTransform = CGAffineTransformConcat(caffineTransform, affineTransform)
+            
+            for( var j=0; j < lineView.lines.count; j++ ) {
+                for( var i=0; i < lineView.lines[j].points.count; i++ ) {
+                    lineView.lines[j].points[i] = CGPointApplyAffineTransform(lineView.lines[j].points[i], caffineTransform)
+                }
+            }
+            for fvc in faciesView.faciesColumns {
+                for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                    fvc.faciesVignettes[index].rect = CGRectApplyAffineTransform(cfv.rect, caffineTransform)
+                }
+            }
+            lineView.setNeedsDisplay()
+            faciesView.setNeedsDisplay()
+        }
     }
     
     func select(point: CGPoint)  -> Line? {

@@ -22,4 +22,5 @@ class DetailedImageObject: NSManagedObject {
     @NSManaged var date: NSDate
     @NSManaged var scale: NSNumber? // in meters per point
 
+    @NSManaged var faciesVignettes: NSSet
 }

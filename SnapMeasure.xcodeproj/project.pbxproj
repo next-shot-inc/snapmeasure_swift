@@ -18,6 +18,8 @@
 		2F1286981B0E3DDF0095D500 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286971B0E3DDF0095D500 /* PreviewView.swift */; };
 		2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286991B0E57C50095D500 /* DrawingViewController.swift */; };
 		2F12869C1B0E60300095D500 /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12869B1B0E60300095D500 /* DrawingView.swift */; };
+		2F27AB541B289E67006501C0 /* FaciesImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F27AB531B289E67006501C0 /* FaciesImage.swift */; };
+		2F27AB561B289E68006501C0 /* FaciesVignetteObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F27AB551B289E68006501C0 /* FaciesVignetteObject.swift */; };
 		2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */; };
 		2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */; };
 		2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F671B1F6169002C1BA7 /* Feature.swift */; };
@@ -56,6 +58,8 @@
 		2F1286971B0E3DDF0095D500 /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		2F1286991B0E57C50095D500 /* DrawingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingViewController.swift; sourceTree = "<group>"; };
 		2F12869B1B0E60300095D500 /* DrawingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingView.swift; sourceTree = "<group>"; };
+		2F27AB531B289E67006501C0 /* FaciesImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesImage.swift; sourceTree = "<group>"; };
+		2F27AB551B289E68006501C0 /* FaciesVignetteObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesVignetteObject.swift; sourceTree = "<group>"; };
 		2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
 		2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = boundaryrep.swift; sourceTree = "<group>"; };
 		2F682F671B1F6169002C1BA7 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Feature.swift; path = ../Feature.swift; sourceTree = "<group>"; };
@@ -128,6 +132,8 @@
 				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
 				2F12867C1B0E3A150095D500 /* Images.xcassets */,
 				2F1286701B0E3A140095D500 /* Supporting Files */,
+				2F27AB551B289E68006501C0 /* FaciesVignetteObject.swift */,
+				2F27AB531B289E67006501C0 /* FaciesImage.swift */,
 			);
 			path = SnapMeasure;
 			sourceTree = "<group>";
@@ -264,6 +270,7 @@
 				2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */,
 				2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */,
 				2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */,
+				2F27AB561B289E68006501C0 /* FaciesVignetteObject.swift in Sources */,
 				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
