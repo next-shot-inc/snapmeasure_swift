@@ -14,7 +14,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "43"
-            endingLineNumber = "43">
+            endingLineNumber = "43"
+            landmarkName = "init(ui:)"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -28,7 +30,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "79"
-            endingLineNumber = "79">
+            endingLineNumber = "79"
+            landmarkName = "fixOrientation()"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -42,7 +46,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "78"
-            endingLineNumber = "78">
+            endingLineNumber = "78"
+            landmarkName = "UIImage"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -72,7 +78,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "98"
-            endingLineNumber = "98">
+            endingLineNumber = "98"
+            landmarkName = "fixOrientation()"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -230,7 +238,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "116"
-            endingLineNumber = "116">
+            endingLineNumber = "116"
+            landmarkName = "fixOrientation()"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -292,7 +302,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "51"
-            endingLineNumber = "51">
+            endingLineNumber = "51"
+            landmarkName = "UIImageOrientation"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -706,7 +718,9 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "240"
-            endingLineNumber = "240">
+            endingLineNumber = "240"
+            landmarkName = "viewWillAppear(_:)"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -732,7 +746,7 @@
                   moduleName = "SnapMeasure"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/next-shot/Desktop/SnapMeasure/SnapMeasure/DrawingViewController.swift"
-                  timestampString = "455839740.338777"
+                  timestampString = "455840994.887464"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "574"
@@ -747,7 +761,7 @@
                   moduleName = "SnapMeasure"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/next-shot/Desktop/SnapMeasure/SnapMeasure/DrawingViewController.swift"
-                  timestampString = "455839740.338945"
+                  timestampString = "455840994.88765"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "574"
@@ -883,6 +897,22 @@
             endingLineNumber = "666"
             landmarkName = "DrawingView"
             landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SnapMeasure/CameraViewController.swift"
+            timestampString = "455840969.51302"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "597"
+            endingLineNumber = "597"
+            landmarkName = "locationManager(_:didUpdateHeading:)"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
