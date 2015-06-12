@@ -142,7 +142,7 @@
                                         <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
                                             <rect key="frame" x="156" y="14" width="287" height="251"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
@@ -304,7 +304,7 @@
                         <viewControllerLayoutGuide type="top" id="k29-4t-8uI"/>
                         <viewControllerLayoutGuide type="bottom" id="rxP-Dv-Dey"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="NHE-DP-mGt">
+                    <view key="view" contentMode="TopLeft" id="NHE-DP-mGt">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -503,6 +503,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ujt-vq-cky"/>
-        <segue reference="LFb-Hb-Otc"/>
+        <segue reference="klv-3J-VMp"/>
     </inferredMetricsTieBreakers>
 </document>

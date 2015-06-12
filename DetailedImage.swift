@@ -18,5 +18,5 @@ class DetailedImageObject: NSManagedObject {
     @NSManaged var longitude: NSNumber
     @NSManaged var lines: NSSet
     @NSManaged var features: NSSet
-
+    @NSManaged var faciesVignettes: NSSet
 }

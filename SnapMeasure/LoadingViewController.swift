@@ -104,31 +104,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
                 destinationDetailedImage = detailedImages[indexPath!.row]
             }
             
-            // Get the lines via the DetailedView NSSet.
-            var lines = [Line]()
-            for alo in destinationDetailedImage.lines {
-                println("got a line")
-                let lo = alo as? LineObject
-                var line = Line()
-                line.name = lo!.name
-                let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
-                line.color = color?.CGColor
-                let arrayData = lo!.pointData
-                let array = Array(
-                    UnsafeBufferPointer(
-                        start: UnsafePointer<CGPoint>(arrayData.bytes),
-                        count: arrayData.length/sizeof(CGPoint)
-                    )
-                )
-                for( var i=0; i < array.count; i++ ) {
-                    line.points.append(array[i])
-                }
-                lines.append(line)
-            }
-            
             drawingVC.detailedImage = destinationDetailedImage
             drawingVC.image = UIImage(data: destinationDetailedImage.imageData)
-            drawingVC.lines = lines
             
             //get ImageInfo
             var imageInfo = ImageInfo()

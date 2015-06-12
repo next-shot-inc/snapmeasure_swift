@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14D136" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7549" systemVersion="14D136" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="DetailedImageObject" representedClassName="SnapMeasure.DetailedImageObject" syncable="YES">
         <attribute name="gpsLocation" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="imageData" attributeType="Binary" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
-        <relationship name="features" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="FeatureObject" inverseName="image" inverseEntity="FeatureObject" syncable="YES"/>
+        <relationship name="faciesVignettes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FaciesVignetteObject" syncable="YES"/>
+        <relationship name="features" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FeatureObject" inverseName="image" inverseEntity="FeatureObject" syncable="YES"/>
         <relationship name="lines" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LineObject" inverseName="image" inverseEntity="LineObject" syncable="YES"/>
+    </entity>
+    <entity name="FaciesImage" representedClassName="SnapMeasure.FaciesImage" syncable="YES">
+        <attribute name="imageData" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="FaciesVignetteObject" representedClassName="SnapMeasure.FaciesVignetteObject" syncable="YES">
+        <attribute name="imageName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="rect" optional="YES" attributeType="Transformable" syncable="YES"/>
     </entity>
     <entity name="FeatureObject" representedClassName="SnapMeasure.FeatureObject" syncable="YES">
         <attribute name="height" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
@@ -22,8 +31,10 @@
         <relationship name="image" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DetailedImageObject" inverseName="lines" inverseEntity="DetailedImageObject" syncable="YES"/>
     </entity>
     <elements>
-        <element name="DetailedImageObject" positionX="-63" positionY="-18" width="128" height="150"/>
-        <element name="FeatureObject" positionX="169" positionY="189" width="128" height="103"/>
-        <element name="LineObject" positionX="-54" positionY="198" width="128" height="103"/>
+        <element name="DetailedImageObject" positionX="-63" positionY="-54" width="128" height="163"/>
+        <element name="FeatureObject" positionX="160" positionY="-58" width="128" height="103"/>
+        <element name="LineObject" positionX="-38" positionY="203" width="128" height="103"/>
+        <element name="FaciesVignetteObject" positionX="162" positionY="99" width="128" height="73"/>
+        <element name="FaciesImage" positionX="-65" positionY="-165" width="128" height="73"/>
     </elements>
 </model>
