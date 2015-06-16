@@ -26,6 +26,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         mapView = CustomMapView(frame: self.view.bounds)
         mapView.delegate = self
         mapView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        mapView.addGestureRecognizer(rotationRecognizer)
         self.view.addSubview(mapView)
         
         
