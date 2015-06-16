@@ -150,7 +150,6 @@ class DrawingViewController: UIViewController {
     var horizonTypePickerCtrler = HorizonTypePickerController()
     var faciesTypePickerCtrler = FaciesTypePickerController()
     static var lineCount = 1
-    //TODO: Add Feature Type Names
     var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
     
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -227,6 +226,7 @@ class DrawingViewController: UIViewController {
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!)
+        drawingView.controller = self
         
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
@@ -316,6 +316,26 @@ class DrawingViewController: UIViewController {
         }
     }
     
+    func askText(label: UILabel) {
+        var inputTextField : UITextField?
+        let alert = UIAlertController(title: "", message: "Please specify text", preferredStyle: .Alert)
+        alert.addTextFieldWithConfigurationHandler { (textField) in
+            textField.placeholder = "Label"
+            inputTextField = textField
+        }
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        }
+        alert.addAction(noAction)
+        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Default) { action -> Void in
+            label.text = inputTextField!.text
+            let drawingView = self.imageView as! DrawingView
+            drawingView.textView.setNeedsDisplay()
+        }
+        alert.addAction(yesAction)
+        
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+    
     @IBAction func pushColButton(sender: AnyObject) {
         colorPickerView.hidden = !colorPickerView.hidden
         let drawingView = imageView as! DrawingView
@@ -379,6 +399,7 @@ class DrawingViewController: UIViewController {
             self.detailedImage!.longitude = self.imageInfo.longitude
             self.detailedImage!.latitude = self.imageInfo.latitude
             self.detailedImage!.compassOrientation = self.imageInfo.compassOrienation
+            self.detailedImage!.altitude = self.imageInfo.altitude
             self.detailedImage!.date = self.imageInfo.date
             if (inputTextField != nil) {
                 self.detailedImage?.name = inputTextField!.text
@@ -423,6 +444,23 @@ class DrawingViewController: UIViewController {
                 }
             }
             self.detailedImage!.faciesVignettes = faciesVignetteSet
+            
+            let textSet = NSMutableSet()
+            for tv in drawingView.textView.subviews {
+                let label = tv as? UILabel
+                if( label != nil ) {
+                    let textObject = NSEntityDescription.insertNewObjectForEntityForName(
+                        "TextObject", inManagedObjectContext: self.managedContext) as? TextObject
+                    
+                    let scaledRect = CGRectApplyAffineTransform(tv.frame, affineTransform)
+                    textObject!.rect = NSValue(CGRect: scaledRect)
+                    
+                    textObject!.string = label!.text!
+                    
+                    textSet.addObject(textObject!)
+                }
+            }
+            self.detailedImage!.texts = textSet
             
             //save the managedObjectContext
             var error: NSError?

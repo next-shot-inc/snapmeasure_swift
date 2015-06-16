@@ -18,13 +18,13 @@
 		2F1286981B0E3DDF0095D500 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286971B0E3DDF0095D500 /* PreviewView.swift */; };
 		2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286991B0E57C50095D500 /* DrawingViewController.swift */; };
 		2F12869C1B0E60300095D500 /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12869B1B0E60300095D500 /* DrawingView.swift */; };
-		2F27AB541B289E67006501C0 /* FaciesImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F27AB531B289E67006501C0 /* FaciesImage.swift */; };
 		2F27AB561B289E68006501C0 /* FaciesVignetteObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F27AB551B289E68006501C0 /* FaciesVignetteObject.swift */; };
 		2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */; };
 		2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */; };
 		2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F671B1F6169002C1BA7 /* Feature.swift */; };
 		2F682F6A1B1F616A002C1BA7 /* DetailedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F691B1F616A002C1BA7 /* DetailedImage.swift */; };
 		2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F6B1B1F616A002C1BA7 /* Line.swift */; };
+		2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11D1B3086A4004308D6 /* TextObject.swift */; };
 		FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */; };
 		FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A714C1B26415400AD51B4 /* MapViewController.swift */; };
 		FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */; };
@@ -65,6 +65,7 @@
 		2F682F671B1F6169002C1BA7 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Feature.swift; path = ../Feature.swift; sourceTree = "<group>"; };
 		2F682F691B1F616A002C1BA7 /* DetailedImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailedImage.swift; path = ../DetailedImage.swift; sourceTree = "<group>"; };
 		2F682F6B1B1F616A002C1BA7 /* Line.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Line.swift; path = ../Line.swift; sourceTree = "<group>"; };
+		2FCDF11D1B3086A4004308D6 /* TextObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObject.swift; sourceTree = "<group>"; };
 		FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTableViewCell.swift; sourceTree = "<group>"; };
 		FD4A714C1B26415400AD51B4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageAnnotation.swift; path = ../ImageAnnotation.swift; sourceTree = "<group>"; };
@@ -129,6 +130,7 @@
 				2F682F671B1F6169002C1BA7 /* Feature.swift */,
 				2F682F691B1F616A002C1BA7 /* DetailedImage.swift */,
 				2F1286741B0E3A150095D500 /* SnapMeasure.xcdatamodeld */,
+				2FCDF11D1B3086A4004308D6 /* TextObject.swift */,
 				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
 				2F12867C1B0E3A150095D500 /* Images.xcassets */,
 				2F1286701B0E3A140095D500 /* Supporting Files */,
@@ -274,6 +276,7 @@
 				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
+				2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */,
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
 				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,

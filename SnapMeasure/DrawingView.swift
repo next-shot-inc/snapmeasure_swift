@@ -544,17 +544,67 @@ class FaciesView : UIView {
     }
 }
 
+class TextDrawTool {
+    var curRect = CGRect()
+    var origin = CGPoint()
+    init(point: CGPoint) {
+        curRect = CGRectMake(point.x, point.y, 0, 0)
+        origin = point
+    }
+    
+    func move(point: CGPoint) {
+        var xmin = min(origin.x, point.x)
+        var xmax = max(origin.x, point.x)
+        var ymin = min(origin.y, point.y)
+        var ymax = max(origin.y, point.y)
+        curRect = CGRectMake(xmin, ymin, xmax-xmin, ymax-ymin)
+    }
+
+}
+
+class TextView : UIView {
+    var drawTool : TextDrawTool?
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func addText(label: String, rect: CGRect) -> UILabel {
+        var uilabel = UILabel(frame: rect)
+        uilabel.adjustsFontSizeToFitWidth = true
+        uilabel.numberOfLines = 0
+        uilabel.text = label
+        self.addSubview(uilabel)
+        return uilabel
+    }
+    
+    override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        CGContextSetLineWidth(context, 2.0)
+        if( drawTool != nil && drawTool!.curRect.width > 0 && drawTool!.curRect.height > 0 ) {
+            CGContextAddRect(context, drawTool!.curRect)
+            CGContextStrokePath(context)
+        }
+    }
+}
+
 class DrawingView : UIImageView {
     enum ToolMode : Int {
-        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4
+        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5
     }
     
     var lineView = LineView()
     var faciesView = FaciesView()
+    var textView = TextView()
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
     var curColor = UIColor.blackColor().CGColor
     var affineTransform = CGAffineTransformIdentity
+    var controller : DrawingViewController?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -568,6 +618,11 @@ class DrawingView : UIImageView {
         faciesView.opaque = false
         faciesView.backgroundColor = nil
         self.addSubview(faciesView)
+        
+        textView = TextView(frame: frame)
+        textView.opaque = false
+        textView.backgroundColor = nil
+        self.addSubview(textView)
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -585,6 +640,12 @@ class DrawingView : UIImageView {
         faciesView.backgroundColor = nil
         faciesView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
         self.addSubview(faciesView)
+        
+        textView = TextView(frame: self.bounds)
+        textView.opaque = false
+        textView.backgroundColor = nil
+        textView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        self.addSubview(textView)
     }
     
     func initFrame() {
@@ -651,9 +712,20 @@ class DrawingView : UIImageView {
             }
             faciesView.setNeedsDisplay()
         }
+        
+        // Get the annotations
+        for ato in detailedImage.texts {
+            let to = ato as? TextObject
+            let orect = to!.rect.CGRectValue()
+            let rect = CGRectApplyAffineTransform(orect, affineTransform)
+            textView.addText(to!.string, rect: rect)
+            textView.setNeedsDisplay()
+        }
     }
     
     override var bounds : CGRect {
+        // Function to transform the coordinates to fit the new bounds
+        // in the same way as the ImageView transform the image.
         willSet(newBounds) {
             // First take the inverse of the previous transform
             var caffineTransform = CGAffineTransformInvert(self.affineTransform)
@@ -702,6 +774,12 @@ class DrawingView : UIImageView {
                     fvc.faciesVignettes[index].rect = CGRectApplyAffineTransform(cfv.rect, caffineTransform)
                 }
             }
+            for( var i=0; i < textView.subviews.count; ++i ) {
+                let rect = CGRectApplyAffineTransform(textView.subviews[i].frame, caffineTransform)
+                var fv = textView.subviews[i] as! UIView
+                fv.frame = rect
+            }
+            
             lineView.setNeedsDisplay()
             faciesView.setNeedsDisplay()
         }
@@ -722,10 +800,10 @@ class DrawingView : UIImageView {
        let touch = touches.first as! UITouch
        let point = touch.locationInView(self)
     
-        if( drawMode != ToolMode.Facies ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
             lineView.currentLine = Line()
             lineView.currentLine.points.append(point)
-        } else {
+        } else if( drawMode == ToolMode.Facies ){
             // See if we are adding a new column or appending to an existing column
             var cc : FaciesColumn?
             for fc in faciesView.faciesColumns {
@@ -739,6 +817,8 @@ class DrawingView : UIImageView {
                 faciesView.faciesColumns.append(cc!)
             }
             faciesView.drawTool = FaciesDrawTool(curColumn: cc!, point: point)
+        } else if( drawMode == ToolMode.Text ) {
+            textView.drawTool = TextDrawTool(point: point)
         }
         
         if( drawMode == ToolMode.Erase ) {
@@ -764,6 +844,13 @@ class DrawingView : UIImageView {
                     }
                 }
             }
+            // Find if there is any text label to remove as well.
+            for lv in textView.subviews {
+                if( lv.frame.intersects(rect) ) {
+                    lv.removeFromSuperview()
+                    break
+                }
+            }
         }
     }
     
@@ -771,14 +858,17 @@ class DrawingView : UIImageView {
         let touch = touches.first as! UITouch
         let point = touch.locationInView(self)
         
-        if( drawMode != ToolMode.Facies ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
            lineView.currentLine.points.append(point)
            if( drawMode != ToolMode.Erase ) {
                 lineView.setNeedsDisplay()
            }
-        } else {
+        } else if( drawMode == ToolMode.Facies ) {
            faciesView.drawTool!.move(point)
            faciesView.setNeedsDisplay()
+        } else if( drawMode == ToolMode.Text ) {
+            textView.drawTool!.move(point)
+            textView.setNeedsDisplay()
         }
         
     }
@@ -830,6 +920,10 @@ class DrawingView : UIImageView {
             }
             faciesView.drawTool = nil
             faciesView.setNeedsDisplay()
+        } else if( drawMode == ToolMode.Text ) {
+            let label = textView.addText("", rect: textView.drawTool!.curRect)
+            textView.drawTool = nil
+            controller?.askText(label)
         }
         lineView.currentLine = Line()
         lineView.setNeedsDisplay()

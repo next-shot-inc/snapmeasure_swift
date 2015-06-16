@@ -22,6 +22,7 @@ struct ImageInfo {
     var longitude : Double? //represents a longitude value in degrees, positive values are east of the prime meridian
     var latitude : Double? //represents a latitude value in degrees, postive  values are north of the equator
     var compassOrienation : Double? //Degrees relative to north
+    var altitude : Double?
     var date : NSDate = NSDate()
     var scale: Double? //in meters per point
 }
@@ -171,6 +172,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     var currentHeading : CLLocationDirection?
     
     @IBOutlet weak var stillButton: UIButton!
+    @IBOutlet weak var locationLabel: UILabel!
     
     @IBOutlet weak var flipCameraButton: UIButton!
     
@@ -244,7 +246,13 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                 locationManager!.requestWhenInUseAuthorization()
             }
         //}
-
+        
+        let radius : CGFloat = 10.0
+        let bgColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+        stillButton.layer.cornerRadius = radius
+        stillButton.backgroundColor = bgColor
+        flipCameraButton.layer.cornerRadius = radius
+        flipCameraButton.backgroundColor = bgColor
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -333,6 +341,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                         if (self.currentHeading != nil) {
                             self.imageInfo.compassOrienation = self.currentHeading!
                         }
+                        self.imageInfo.altitude = self.bestEffortAtLocation!.altitude
                     
                         self.stopUpdatingLocationWithMessage("Still Image Captured:")
                         self.locationManager?.stopUpdatingHeading()
@@ -604,12 +613,48 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     
         self.currentHeading = theHeading;
 
+        var nf = NSNumberFormatter()
+        let number = nf.stringFromNumber(theHeading)
+        let string = number! + "o " + {
+            let definedHeadingsNames = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+            var quad = 360/definedHeadingsNames.count
+            for( var i=0; i < definedHeadingsNames.count; ++i) {
+                var dir = i * quad
+                var vmin = dir - quad/2
+                var vmax = dir + quad/2
+                if( vmin < 0 ) {
+                    vmin = 360-quad/2
+                    if( Int(theHeading) >= vmin || Int(theHeading) < vmax ) {
+                        return definedHeadingsNames[i]
+                    }
+                } else {
+                    if( Int(theHeading) >= vmin && Int(theHeading) < vmax ) {
+                       return definedHeadingsNames[i]
+                    }
+                }
+            }
+            return " "
+        }()
+        
+        var astring = NSMutableAttributedString(
+            string: string,
+            attributes: [NSFontAttributeName: UIFont.systemFontOfSize(20.0)]
+        )
+        
+        var range = (string as NSString).rangeOfString("o")
+        let superAttributes = [
+            NSFontAttributeName: UIFont.systemFontOfSize(10.0),
+            NSBaselineOffsetAttributeName: 10.0
+        ]
+        astring.addAttributes(superAttributes, range: range)
+        self.locationLabel.attributedText = astring
     }
 
     
     func stopUpdatingLocationWithMessage(message: NSString) {
-        self.locationManager!.stopUpdatingLocation()
-        self.locationManager!.delegate = nil;
+        // Do not stop as heading can still change
+        //self.locationManager!.stopUpdatingLocation()
+        //self.locationManager!.delegate = nil;
         print(message)
         let lat : Double = bestEffortAtLocation!.coordinate.latitude
         let long : Double = bestEffortAtLocation!.coordinate.longitude

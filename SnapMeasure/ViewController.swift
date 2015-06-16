@@ -17,6 +17,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     @IBOutlet weak var selectExistingButton: UIButton!
     @IBOutlet weak var loadPicture: UIButton!
+    @IBOutlet weak var newPicture: UIButton!
+    @IBOutlet weak var showHistogram: UIButton!
+    @IBOutlet weak var showMap: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,6 +36,23 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             error: &error)
         selectExistingButton.enabled = fetchedResultsCount > 0
         
+        // Initialize button look
+        let radius : CGFloat = 10.0
+        let bgColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+        //UIButton.appearance().layer.cornerRadius = radius
+        //UIButton.appearance().backgroundColor = bgColor
+        
+        selectExistingButton.layer.cornerRadius = radius
+        selectExistingButton.backgroundColor = bgColor
+        loadPicture.layer.cornerRadius = radius
+        loadPicture.backgroundColor = bgColor
+        newPicture.layer.cornerRadius = radius
+        newPicture.backgroundColor = bgColor
+        showHistogram.layer.cornerRadius = radius
+        showHistogram.backgroundColor = bgColor
+        showMap.layer.cornerRadius = radius
+        showMap.backgroundColor = bgColor
+
     }
 
     override func didReceiveMemoryWarning() {
