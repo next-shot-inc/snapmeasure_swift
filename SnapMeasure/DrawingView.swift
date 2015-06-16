@@ -712,6 +712,15 @@ class DrawingView : UIImageView {
             }
             faciesView.setNeedsDisplay()
         }
+        
+        // Get the annotations
+        for ato in detailedImage.texts {
+            let to = ato as? TextObject
+            let orect = to!.rect.CGRectValue()
+            let rect = CGRectApplyAffineTransform(orect, affineTransform)
+            textView.addText(to!.string, rect: rect)
+            textView.setNeedsDisplay()
+        }
     }
     
     override var bounds : CGRect {

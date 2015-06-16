@@ -22,7 +22,7 @@ struct ImageInfo {
     var longitude : Double? //represents a longitude value in degrees, positive values are east of the prime meridian
     var latitude : Double? //represents a latitude value in degrees, postive  values are north of the equator
     var compassOrienation : Double? //Degrees relative to north
-    var elevation : Double?
+    var altitude : Double?
     var date : NSDate = NSDate()
     var scale: Double? //in meters per point
 }
@@ -341,7 +341,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                         if (self.currentHeading != nil) {
                             self.imageInfo.compassOrienation = self.currentHeading!
                         }
-                        self.imageInfo.elevation = self.bestEffortAtLocation!.altitude
+                        self.imageInfo.altitude = self.bestEffortAtLocation!.altitude
                     
                         self.stopUpdatingLocationWithMessage("Still Image Captured:")
                         self.locationManager?.stopUpdatingHeading()

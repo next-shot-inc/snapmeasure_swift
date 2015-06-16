@@ -400,6 +400,7 @@ class DrawingViewController: UIViewController {
             self.detailedImage!.longitude = self.imageInfo.longitude
             self.detailedImage!.latitude = self.imageInfo.latitude
             self.detailedImage!.compassOrientation = self.imageInfo.compassOrienation
+            self.detailedImage!.altitude = self.imageInfo.altitude
             self.detailedImage!.date = self.imageInfo.date
             if (inputTextField != nil) {
                 self.detailedImage?.name = inputTextField!.text
@@ -444,6 +445,23 @@ class DrawingViewController: UIViewController {
                 }
             }
             self.detailedImage!.faciesVignettes = faciesVignetteSet
+            
+            let textSet = NSMutableSet()
+            for tv in drawingView.textView.subviews {
+                let label = tv as? UILabel
+                if( label != nil ) {
+                    let textObject = NSEntityDescription.insertNewObjectForEntityForName(
+                        "TextObject", inManagedObjectContext: self.managedContext) as? TextObject
+                    
+                    let scaledRect = CGRectApplyAffineTransform(tv.frame, affineTransform)
+                    textObject!.rect = NSValue(CGRect: scaledRect)
+                    
+                    textObject!.string = label!.text!
+                    
+                    textSet.addObject(textObject!)
+                }
+            }
+            self.detailedImage!.texts = textSet
             
             //save the managedObjectContext
             var error: NSError?
