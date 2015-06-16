@@ -38,7 +38,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         // Initialize button look
         let radius : CGFloat = 10.0
-        let bgColor = UIColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1.0)
+        let bgColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
         //UIButton.appearance().layer.cornerRadius = radius
         //UIButton.appearance().backgroundColor = bgColor
         

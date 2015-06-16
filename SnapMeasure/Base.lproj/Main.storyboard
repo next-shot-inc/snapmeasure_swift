@@ -327,16 +327,23 @@
                                 <gestureRecognizers/>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KuA-6A-Z82">
-                                <rect key="frame" x="100" y="555" width="30" height="30"/>
+                                <rect key="frame" x="100" y="554" width="53" height="31"/>
+                                <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <size key="titleShadowOffset" width="2" height="2"/>
-                                <state key="normal" title="Still"/>
+                                <state key="normal" title="Still">
+                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                </state>
                                 <connections>
                                     <action selector="takePhoto:" destination="SuH-D2-ybR" eventType="touchDown" id="eoF-YW-6Co"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zA8-SA-R2H">
-                                <rect key="frame" x="417" y="563" width="83" height="22"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zA8-SA-R2H">
+                                <rect key="frame" x="378" y="554" width="122" height="31"/>
+                                <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
+                                <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Flip Camera">
+                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -595,6 +602,6 @@
         <image name="measure" width="36" height="36"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LFb-Hb-Otc"/>
+        <segue reference="oX2-9E-jws"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -246,7 +246,13 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                 locationManager!.requestWhenInUseAuthorization()
             }
         //}
-
+        
+        let radius : CGFloat = 10.0
+        let bgColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+        stillButton.layer.cornerRadius = radius
+        stillButton.backgroundColor = bgColor
+        flipCameraButton.layer.cornerRadius = radius
+        flipCameraButton.backgroundColor = bgColor
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -616,9 +622,15 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                 var dir = i * quad
                 var vmin = dir - quad/2
                 var vmax = dir + quad/2
-                if( vmin < 0 ) { vmin = 360-quad/2 }
-                if( Int(theHeading) >= vmin && Int(theHeading) < vmax ) {
-                    return definedHeadingsNames[i]
+                if( vmin < 0 ) {
+                    vmin = 360-quad/2
+                    if( Int(theHeading) >= vmin || Int(theHeading) < vmax ) {
+                        return definedHeadingsNames[i]
+                    }
+                } else {
+                    if( Int(theHeading) >= vmin && Int(theHeading) < vmax ) {
+                       return definedHeadingsNames[i]
+                    }
                 }
             }
             return " "
