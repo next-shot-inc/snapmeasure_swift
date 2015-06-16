@@ -150,7 +150,6 @@ class DrawingViewController: UIViewController {
     var horizonTypePickerCtrler = HorizonTypePickerController()
     var faciesTypePickerCtrler = FaciesTypePickerController()
     static var lineCount = 1
-    //TODO: Add Feature Type Names
     var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
     
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -227,6 +226,7 @@ class DrawingViewController: UIViewController {
         drawingView.imageInfo = imageInfo
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!)
+        drawingView.controller = self
         
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
@@ -314,6 +314,26 @@ class DrawingViewController: UIViewController {
             self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
             self.imageView.transform = CGAffineTransformIdentity;
         }
+    }
+    
+    func askText(label: UILabel) {
+        var inputTextField : UITextField?
+        let alert = UIAlertController(title: "", message: "Please specify text", preferredStyle: .Alert)
+        alert.addTextFieldWithConfigurationHandler { (textField) in
+            textField.placeholder = "Label"
+            inputTextField = textField
+        }
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        }
+        alert.addAction(noAction)
+        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Default) { action -> Void in
+            label.text = inputTextField!.text
+            let drawingView = self.imageView as! DrawingView
+            drawingView.textView.setNeedsDisplay()
+        }
+        alert.addAction(yesAction)
+        
+        self.presentViewController(alert, animated: true, completion: nil)
     }
     
     @IBAction func pushColButton(sender: AnyObject) {
