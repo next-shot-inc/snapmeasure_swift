@@ -123,7 +123,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
         
         var error: NSError?
         if !self.managedContext.save(&error) {
-            println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
+            println("Could not save in LoadingingViewController \(error), \(error?.userInfo)")
         } else {
             println("LoadingViewController saved the ManagedObjectContext")
         }

@@ -11,15 +11,24 @@ import UIKit
 import MapKit
 import CoreData
 
-class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate, CustomCalloutViewDelegate {
     
-    @IBOutlet weak var mapView: MKMapView!
+    //@IBOutlet weak var mapView: CustomMapView!
     @IBOutlet var rotationRecognizer: UIRotationGestureRecognizer!
     
+    var mapView: CustomMapView!
     var detailedImages: [DetailedImageObject] = []
     var managedContext: NSManagedObjectContext!
+    var calloutView: CustomCalloutView!
+    var selectedImage: DetailedImageObject?
     
     override func viewDidLoad() {
+        mapView = CustomMapView(frame: self.view.bounds)
+        mapView.delegate = self
+        mapView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        self.view.addSubview(mapView)
+        
+        
         self.loadImages()
         //println("count = ", detailedImages.count)
         if (detailedImages.count > 0) {
@@ -39,6 +48,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         
         //set up rotationRecognizer
         rotationRecognizer.delegate = self
+        
+        self.calloutView = CustomCalloutView()
+        self.calloutView.delegate = self
+        
+        self.mapView.calloutView = self.calloutView
 
     }
     
@@ -81,7 +95,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             } else {
                 // create a new MKPinAnnotationView
                 view = ImageAnnotationView(annotation: annotation, reuseIdentifier: identifier)
-                view.canShowCallout = true
+                view.canShowCallout = false
                 view.setMapLineViewOrientation(self.mapView.camera.heading)
                 
                 //view.calloutOffset = CGPoint(x: -5, y: 5)
@@ -100,35 +114,105 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
 
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        if view.isMemberOfClass(ImageAnnotationView) {
-            (view as! ImageAnnotationView).setMapLineViewOrientation(self.mapView.camera.heading)
-        }
-    } 
-    /**
-    func mapView(mapView: MKMapView!, regionWillChangeAnimated animated: Bool) {
-        
-        for ann in mapView.annotations {
+        if let ann = view as? ImageAnnotationView {
+            ann.setMapLineViewOrientation(self.mapView.camera.heading)
             
-            if ann.isMemberOfClass(ImageAnnotation) {
-                
-                let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
-                
-                annView?.rotateMapLineView(self.mapView.camera.heading)
-            }
+            // apply the MKAnnotationView's basic properties
+            self.calloutView.title = ann.annotation.title;
+            self.calloutView.subtitle = ann.annotation.subtitle;
+            
+            let imageView = UIImageView(image: (ann.annotation as! ImageAnnotation).image)
+            let aspectRatio = imageView.image!.size.height/imageView.image!.size.width
+            imageView.setFrameSize(CGSize(width: 133, height: 133 * aspectRatio))
+            imageView.contentMode = UIViewContentMode.ScaleToFill
+            imageView.userInteractionEnabled = true
+            imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "calloutImageTapped"))
+            self.calloutView.contentView = imageView
+            
+            // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)
+            self.calloutView.calloutOffset = ann.calloutOffset;
+            
+            //set selectedImage
+            self.selectedImage = (ann.annotation as! ImageAnnotation).detailedImage
+            
+            // This does all the magic.
+            self.calloutView.presentCalloutFromRect(ann.bounds, inView:ann, constrainedToView:self.view, animated:true)
         }
     }
     
-    func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
-        for ann in mapView.annotations {
-            
-            if ann.isMemberOfClass(ImageAnnotation) {
-                
-                let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
-                
-                annView?.rotateMapLineView(self.mapView.camera.heading)
-            }
+    func mapView(mapView: MKMapView!, didDeselectAnnotationView view: MKAnnotationView!) {
+        self.calloutView.dismissCalloutAnimated(true)
+        self.calloutView = CustomCalloutView()
+        self.calloutView.delegate = self
+        self.mapView.calloutView = self.calloutView
+    }
+    
+    func calloutImageTapped() {
+        var goToDrawing = false
+        let alert = UIAlertController(
+            title: "Edit this Image?", message: nil, preferredStyle: .Alert
+        )
+        let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
+            //do stuff
         }
-    } **/
+        alert.addAction(cancelAction)
+        
+        let yesAction: UIAlertAction = UIAlertAction(title: "Yes", style: .Default) { action -> Void in
+            self.performSegueWithIdentifier("mapToDrawing", sender: self.mapView)
+        }
+        alert.addAction(yesAction)
+        self.presentViewController(alert, animated: true, completion: nil)
+
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "mapToDrawing" {
+            let drawingVC = segue.destinationViewController as! DrawingViewController
+            
+            drawingVC.detailedImage = self.selectedImage!
+            drawingVC.image = UIImage(data: self.selectedImage!.imageData)
+            
+            //get ImageInfo
+            var imageInfo = ImageInfo()
+            imageInfo.xDimension = Int(drawingVC.image!.size.width)
+            imageInfo.yDimension = Int(drawingVC.image!.size.height)
+            imageInfo.latitude = self.selectedImage!.latitude?.doubleValue
+            imageInfo.longitude = self.selectedImage!.longitude?.doubleValue
+            imageInfo.compassOrienation = self.selectedImage!.compassOrientation?.doubleValue
+            imageInfo.date = self.selectedImage!.date
+            imageInfo.scale = self.selectedImage!.scale?.doubleValue
+            
+            
+            drawingVC.imageInfo = imageInfo
+
+            
+        }
+    }
+    
+    //Mark - CustomCalloutDelegate Methods
+    func calloutView(calloutView: CustomCalloutView, delayForRepositionWithSize offset: CGSize) -> NSTimeInterval {
+        // When the callout is being asked to present in a way where it or its target will be partially offscreen, it asks us
+        // if we'd like to reposition our surface first so the callout is completely visible. Here we scroll the map into view,
+        // but it takes some math because we have to deal in lon/lat instead of the given offset in pixels.
+        
+        var coordinate = self.mapView.centerCoordinate;
+        
+        // where's the center coordinate in terms of our view?
+        var center : CGPoint = self.mapView.convertCoordinate(coordinate, toPointToView:self.view)
+        
+        // move it by the requested offset
+        center.x -= offset.width;
+        center.y -= offset.height;
+        
+        // and translate it back into map coordinates
+        coordinate = self.mapView.convertPoint(center, toCoordinateFromView:self.view)
+        
+        // move the map!
+        self.mapView.setCenterCoordinate(coordinate, animated:true)
+        
+        // tell the callout to wait for a while while we scroll (we assume the scroll delay for MKMapView matches UIScrollView)
+        return (1.0/3.0)
+    }
     
     //Mark - UIGestureRecognizer methods
     @IBAction func rotationDetected (gestureRecognizer: UIRotationGestureRecognizer) {
@@ -143,11 +227,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             }
         }
     }
-    
+    /**
     func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
         let point = gestureRecognizer.locationInView(mapView)
         let tappedView = self.mapView.hitTest(point, withEvent: nil)
-        println(tappedView)
+        //println(tappedView)
         if gestureRecognizer.isEqual(rotationRecognizer) {
             //let point = rotationRecognizer.locationInView(mapView)
             //let tappedView = self.mapView.hitTest(point, withEvent: nil)
@@ -160,10 +244,34 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         } else {
             return true
         }
-    }
+    } **/
+
     
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true;
     }
 
+}
+
+class CustomMapView: MKMapView {
+    var calloutView : CustomCalloutView!
+    
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
+        
+        if (touch.view.isKindOfClass(UIControl)) {
+            return false
+        } else {
+            return super.gestureRecognizerShouldBegin(gestureRecognizer)
+        }
+    }
+    
+    override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
+        
+        let calloutMaybe = self.calloutView.hitTest(self.calloutView.convertPoint(point, fromView: self), withEvent: event)
+        if (calloutMaybe != nil) {
+            return calloutMaybe
+        } else {
+            return super.hitTest(point, withEvent: event)
+        }
+    }
 }

@@ -11,22 +11,16 @@ import MapKit
 import UIKit
 
 class ImageAnnotationView: MKPinAnnotationView {
-    
-    let calloutView : UIImageView = UIImageView()
+
     var showing : Bool = false
     var lineView : MapLineView?
     var count : Int = 0
     
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        //self.setNeedsDisplay()
         
         let ann = self.annotation as! ImageAnnotation
         if (selected) { //add customView
-            calloutView.image = ann.image
-            calloutView.frame = CGRect(x: -75, y: 75, width: 150, height: 150)
-            calloutView.contentMode = UIViewContentMode.ScaleAspectFill
-            calloutView.center = CGPoint(x: self.frame.width/2 - 7, y: 125)
             
             if (ann.length != nil && ann.compassOrientation != nil) {
                 lineView = MapLineView(length: ann.length!, orientation: ann.compassOrientation!) //change to due north for testing purposes
@@ -37,27 +31,13 @@ class ImageAnnotationView: MKPinAnnotationView {
                 //no line
             }
             
-            self.animateCalloutAppearance()
-            
-            self.addSubview(calloutView)
             showing = true
-            println("Selected")
-            
-            self.userInteractionEnabled = true
-            calloutView.userInteractionEnabled = true
-            lineView?.userInteractionEnabled = true
             
         } else { //remove customView
-            self.userInteractionEnabled = false
-            calloutView.userInteractionEnabled = false
-            lineView?.userInteractionEnabled = false
-            
+
             lineView?.removeFromSuperview()
             lineView = nil
-            calloutView.removeFromSuperview()
             showing = false
-            println("Deselected")
-            
         }
         
     }
@@ -100,49 +80,6 @@ class ImageAnnotationView: MKPinAnnotationView {
     func isShowingCallout() -> Bool {
         return showing
     }
-    
-    func animateCalloutAppearance() {
-        let scale : CGFloat = 0.001
-        calloutView.transform = CGAffineTransformMake(scale, 0, 0, scale, 0, -50)
-        
-        UIView.animateWithDuration(0.15, delay: 0.0, options: UIViewAnimationOptions.CurveEaseOut, animations: {
-            let scale : CGFloat = 1.1
-            self.calloutView.transform = CGAffineTransformMake(scale, 0.0, 0.0, scale, 0.0, 2.0)
-            }, completion: { (value: Bool) in
-                UIView.animateWithDuration(0.1, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-                    let scale : CGFloat = 0.95
-                    self.calloutView.transform = CGAffineTransformMake(scale, 0, 0, scale, 0, -2)
-                    }, completion: { (value : Bool) in
-                        UIView.animateWithDuration(0.075, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: {
-                            let scale : CGFloat = 1.0
-                            self.calloutView.transform = CGAffineTransformMake(scale, 0, 0, scale, 0, 0)
-                        }, completion: nil)
-                })
-        })
-    }
-    
-    
-    /**
-    - (void)animateCalloutAppearance {
-    CGFloat scale = 0.001f;
-    calloutView.transform = CGAffineTransformMake(scale, 0.0f, 0.0f, scale, 0, -50);
-    
-    [UIView animateWithDuration:0.15 delay:0 options:UIViewAnimationCurveEaseOut animations:^{
-    CGFloat scale = 1.1f;
-    calloutView.transform = CGAffineTransformMake(scale, 0.0f, 0.0f, scale, 0, 2);
-    } completion:^(BOOL finished) {
-    [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
-    CGFloat scale = 0.95;
-    calloutView.transform = CGAffineTransformMake(scale, 0.0f, 0.0f, scale, 0, -2);
-    } completion:^(BOOL finished) {
-    [UIView animateWithDuration:0.075 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
-    CGFloat scale = 1.0;
-    calloutView.transform = CGAffineTransformMake(scale, 0.0f, 0.0f, scale, 0, 0);
-    } completion:nil];
-    }];
-    }];
-    }
-**/
 }
 
 class MapLineView : UIView {

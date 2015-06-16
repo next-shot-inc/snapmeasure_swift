@@ -11,6 +11,7 @@ import UIKit
 
 class ImageAnnotation: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
+    let detailedImage : DetailedImageObject
     let image : UIImage
     let compassOrientation: CLLocationDirection?
     let name : String
@@ -27,6 +28,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
     }
         **/
     init(detailedImage: DetailedImageObject) {
+        self.detailedImage = detailedImage
         self.name = detailedImage.name
         self.image = UIImage(data: detailedImage.imageData)!
         self.compassOrientation = detailedImage.compassOrientation?.doubleValue

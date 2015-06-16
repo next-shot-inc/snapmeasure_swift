@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -66,7 +66,7 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
                                 <rect key="frame" x="116" y="199" width="123" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -143,7 +143,7 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zZL-2J-885" id="4ph-hl-cNB">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
+                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
                                             <rect key="frame" x="156" y="14" width="287" height="251"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
@@ -256,22 +256,7 @@
                     <view key="view" contentMode="scaleToFill" id="cVx-28-iwZ">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="a4c-T0-8FP">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                                <gestureRecognizers/>
-                                <connections>
-                                    <outletCollection property="gestureRecognizers" destination="Tfc-9g-WWQ" appends="YES" id="fC9-br-S28"/>
-                                </connections>
-                            </mapView>
-                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="a4c-T0-8FP" firstAttribute="bottom" secondItem="qVc-IJ-ZbE" secondAttribute="top" id="R8b-Ii-5Ao"/>
-                            <constraint firstAttribute="trailing" secondItem="a4c-T0-8FP" secondAttribute="trailing" id="T6e-Sq-d2B"/>
-                            <constraint firstItem="a4c-T0-8FP" firstAttribute="top" secondItem="cVx-28-iwZ" secondAttribute="top" id="XOa-g5-pIB"/>
-                            <constraint firstItem="a4c-T0-8FP" firstAttribute="leading" secondItem="cVx-28-iwZ" secondAttribute="leading" id="ev6-TR-DCi"/>
-                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="ccI-ZC-yL9">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="P61-RX-swy">
@@ -281,8 +266,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="mapView" destination="a4c-T0-8FP" id="pZm-SM-V5N"/>
                         <outlet property="rotationRecognizer" destination="Tfc-9g-WWQ" id="L2m-PM-LgA"/>
+                        <segue destination="KD6-M1-rG7" kind="presentation" identifier="mapToDrawing" id="0z3-db-DKN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="v9Q-Iq-JfW" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -293,7 +278,7 @@
                     </connections>
                 </rotationGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="1412" y="1860"/>
+            <point key="canvasLocation" x="1524" y="1860"/>
         </scene>
         <!--Camera View Controller-->
         <scene sceneID="xjT-1d-DpE">
@@ -573,6 +558,6 @@
         <image name="measure" width="36" height="36"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="klv-3J-VMp"/>
+        <segue reference="0z3-db-DKN"/>
     </inferredMetricsTieBreakers>
 </document>
