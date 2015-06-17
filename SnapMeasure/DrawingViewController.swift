@@ -178,7 +178,7 @@ class DrawingViewController: UIViewController {
         drawingView.imageInfo = imageInfo
         drawingView.controller = self
         drawingView.initFrame()
-        drawingView.initFromObject(detailedImage!)
+        drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
         
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor

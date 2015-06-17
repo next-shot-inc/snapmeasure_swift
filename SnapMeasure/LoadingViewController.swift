@@ -15,6 +15,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     var filteredDetailedImages: [DetailedImageObject] = []
     var searchController = UISearchController()
     var managedContext : NSManagedObjectContext!
+    var faciesCatalog = FaciesCatalog()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,6 +39,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
         })()
         
         loadImages()
+        faciesCatalog.loadImages()
+        
         self.tableView.reloadData()
     }
     
@@ -75,6 +78,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
+        cell.faciesCatalog = faciesCatalog
         
         var detailedImage: DetailedImageObject
         if (searchController.active) {

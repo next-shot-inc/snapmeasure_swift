@@ -410,11 +410,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SnapMeasure/DrawingView.swift"
-            timestampString = "456192216.033447"
+            timestampString = "456193848.635527"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "647"
-            endingLineNumber = "647"
+            startingLineNumber = "645"
+            endingLineNumber = "645"
             landmarkName = "initFrame()"
             landmarkType = "5">
          </BreakpointContent>
@@ -815,7 +815,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "652"
             endingLineNumber = "652"
-            landmarkName = "initFromObject(_:)"
+            landmarkName = "initFromObject(_:catalog:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

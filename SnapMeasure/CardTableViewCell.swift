@@ -14,6 +14,8 @@ class CardTableViewCell: UITableViewCell {
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var myImageView: DrawingView!
     
+    var faciesCatalog: FaciesCatalog?
+    
     func useImage(detailedImage : DetailedImageObject) {
         // Round those corners
         mainView.layer.cornerRadius = 10;
@@ -23,7 +25,7 @@ class CardTableViewCell: UITableViewCell {
         nameLabel.text = detailedImage.name
         myImageView.image = UIImage(data: detailedImage.imageData)
         myImageView.initFrame()
-        myImageView.initFromObject(detailedImage)
+        myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
         
         //myImageView.center = CGPointMake(CGRectGetMidX(self.mainView.bounds), CGRectGetMidY(self.mainView.bounds))
         //let scaleFactorX = mainView.bounds.width/myImageView.image!.size.width*mainView.contentScaleFactor

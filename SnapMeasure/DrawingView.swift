@@ -642,12 +642,12 @@ class DrawingView : UIImageView {
     
     func initFrame() {
         self.sizeToFit()
-        faciesView.faciesCatalog = controller?.faciesCatalog
-        
         //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: self.bounds.size)
     }
     
-    func initFromObject(detailedImage: DetailedImageObject) {
+    func initFromObject(detailedImage: DetailedImageObject, catalog: FaciesCatalog) {
+        faciesView.faciesCatalog = catalog
+        
         // Get the lines via the DetailedView NSSet.
         let scalex = self.bounds.width/self.image!.size.width
         let scaley = self.bounds.height/self.image!.size.height
