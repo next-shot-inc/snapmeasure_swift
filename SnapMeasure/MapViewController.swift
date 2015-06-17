@@ -146,6 +146,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         self.calloutView = CustomCalloutView()
         self.calloutView.delegate = self
         self.mapView.calloutView = self.calloutView
+        self.selectedImage = nil
     }
     
     func calloutImageTapped() {
@@ -224,10 +225,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
                 let annView = mapView.viewForAnnotation(ann as! ImageAnnotation) as? ImageAnnotationView
                 
                 annView?.rotateMapLineViewRads(Double(gestureRecognizer.rotation))
-                rotationRecognizer.rotation = 0
+                //rotationRecognizer.rotation = 0
             }
         }
+        rotationRecognizer.rotation = 0
     }
+
     /**
     func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
         let point = gestureRecognizer.locationInView(mapView)
@@ -247,16 +250,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         }
     } **/
 
-    
+
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true;
     }
 
 }
 
-class CustomMapView: MKMapView {
-    var calloutView : CustomCalloutView!
-    
+class CustomMapView: MKMapView , UIGestureRecognizerDelegate{
+    var calloutView : CustomCalloutView?
+
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
         
         if (touch.view.isKindOfClass(UIControl)) {
@@ -266,9 +269,13 @@ class CustomMapView: MKMapView {
         }
     }
     
+    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            return true
+    }
+    
     override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
         
-        let calloutMaybe = self.calloutView.hitTest(self.calloutView.convertPoint(point, fromView: self), withEvent: event)
+        let calloutMaybe = self.calloutView!.hitTest(self.calloutView!.convertPoint(point, fromView: self), withEvent: event)
         if (calloutMaybe != nil) {
             return calloutMaybe
         } else {
