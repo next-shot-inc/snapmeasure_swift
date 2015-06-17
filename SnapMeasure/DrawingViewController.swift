@@ -81,49 +81,6 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class FaciesTypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    let faciesTypes = ["sand", "mud", "grading", "lamination" ]
-    var typeButton : UIButton?
-    var drawingView: DrawingView?
-    
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
-        typeButton?.setTitle(faciesTypes[row], forState: UIControlState.Normal)
-        drawingView?.faciesView.curImageName = faciesTypes[row]
-    }
-    
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return faciesTypes.count
-    }
-    
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return faciesTypes[row]
-    }
-    
-    func pickerView(
-        pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView!
-        ) -> UIView {
-            var pickerImage = view as? UIImageView
-            if( pickerImage == nil ) {
-                pickerImage = UIImageView()
-                pickerImage!.autoresizingMask = UIViewAutoresizing.None
-            }
-            pickerImage?.image = UIImage(named: faciesTypes[row])
-            return pickerImage!
-    }
-    
-    func pickerView(pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
-        return 36
-    }
-    func pickerView(pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
-        return 36
-    }
-
-}
-
-
 class DrawingViewController: UIViewController {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
@@ -138,8 +95,6 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var typePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     
-    @IBOutlet weak var faciesTypePickerView: UIPickerView!
-    
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
     @IBOutlet weak var setHeightButton : UIButton!
@@ -148,9 +103,9 @@ class DrawingViewController: UIViewController {
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
     var horizonTypePickerCtrler = HorizonTypePickerController()
-    var faciesTypePickerCtrler = FaciesTypePickerController()
     static var lineCount = 1
     var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
+    var faciesCatalog = FaciesCatalog()
     
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     var managedContext : NSManagedObjectContext!
@@ -185,11 +140,6 @@ class DrawingViewController: UIViewController {
         typePickerView.delegate = horizonTypePickerCtrler
         typePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = typeButton
-        
-        faciesTypePickerView.delegate = faciesTypePickerCtrler
-        faciesTypePickerView.dataSource = faciesTypePickerCtrler
-        faciesTypePickerCtrler.typeButton = typeButton
-        faciesTypePickerCtrler.drawingView = imageView as? DrawingView
 
         //make sure all buttons are in the right state
         self.colButton.userInteractionEnabled = true
@@ -210,6 +160,8 @@ class DrawingViewController: UIViewController {
                 inManagedObjectContext: managedContext) as? DetailedImageObject
             newDetailedImage = true
         }
+        
+        faciesCatalog.loadImages()
     }
     
     override func didReceiveMemoryWarning() {
@@ -224,13 +176,12 @@ class DrawingViewController: UIViewController {
         let drawingView = imageView as! DrawingView
         drawingView.image = image
         drawingView.imageInfo = imageInfo
+        drawingView.controller = self
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!)
-        drawingView.controller = self
         
         drawingView.lineView.currentLineName = referenceSizeTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
-
     }
     
     
@@ -274,7 +225,6 @@ class DrawingViewController: UIViewController {
         referenceSizeTextField.resignFirstResponder()
         colorPickerView.hidden = true
         typePickerView.hidden = true
-        faciesTypePickerView.hidden = true
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
@@ -359,7 +309,20 @@ class DrawingViewController: UIViewController {
         if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             typePickerView.hidden = !typePickerView.hidden
         } else {
-            faciesTypePickerView.hidden = !faciesTypePickerView.hidden
+            //faciesTypePickerView.hidden = !faciesTypePickerView.hidden
+            let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("FaciesPixmapController") as! FaciesPixmapViewController
+            ctrler.typeButton = self.typeButton
+            ctrler.drawingView = drawingView
+            ctrler.faciesCatalog = faciesCatalog
+            
+            ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
+            ctrler.preferredContentSize.width = 150
+            ctrler.preferredContentSize.height = 400
+            ctrler.popoverPresentationController?.sourceView = sender as! UIView
+            ctrler.popoverPresentationController?.sourceRect = sender.bounds
+            ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+            
+            self.presentViewController(ctrler, animated: true, completion: nil)
         }
         
         //let drawingView = imageView as! DrawingView
@@ -438,7 +401,7 @@ class DrawingViewController: UIViewController {
                     let faciesVignetteObject = NSEntityDescription.insertNewObjectForEntityForName(
                         "FaciesVignetteObject", inManagedObjectContext: self.managedContext) as? FaciesVignetteObject
                     
-                    faciesVignetteObject!.imageName = self.faciesTypePickerCtrler.faciesTypes[fv.imageId]
+                    faciesVignetteObject!.imageName = fv.imageName
                     let scaledRect = CGRectApplyAffineTransform(fv.rect, affineTransform)
                     faciesVignetteObject!.rect = NSValue(CGRect: scaledRect)
                     faciesVignetteSet.addObject(faciesVignetteObject!)

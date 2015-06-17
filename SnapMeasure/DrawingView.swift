@@ -350,11 +350,11 @@ class LineView : UIView {
 
 class FaciesVignette {
     var rect: CGRect = CGRect()
-    var imageId : Int = -1
+    var imageName = String()
     
-    init(rect: CGRect, image: Int) {
+    init(rect: CGRect, image: String) {
         self.rect = rect
-        self.imageId = image
+        self.imageName = image
     }
 }
 
@@ -459,14 +459,14 @@ class FaciesDrawTool {
         curRect = curColumn!.snap(origin, point: point)
     }
     
-    func end(#imageId: Int) {
+    func end(#imageName: String) {
         if( append ) {
             curColumn!.faciesVignettes.append(
-                FaciesVignette(rect: curRect, image: imageId)
+                FaciesVignette(rect: curRect, image: imageName)
             )
         } else {
             curColumn!.faciesVignettes.insert(
-                FaciesVignette(rect: curRect, image: imageId), atIndex: 0
+                FaciesVignette(rect: curRect, image: imageName), atIndex: 0
             )
         }
     }
@@ -475,7 +475,7 @@ class FaciesDrawTool {
 class FaciesView : UIView {
     var faciesColumns = [FaciesColumn]()
     var drawTool : FaciesDrawTool?
-    var images = ["sand", "mud", "grading", "lamination" ]
+    var faciesCatalog : FaciesCatalog?
     var curImageName = String()
     
     override init(frame: CGRect) {
@@ -492,16 +492,26 @@ class FaciesView : UIView {
         
         for fc in faciesColumns {
             for v in fc.faciesVignettes{
-                let uiimage = UIImage(named: images[v.imageId])
-                if( uiimage != nil ) {
-                    let cgimage = uiimage!.CGImage
+                let imageinfo = faciesCatalog?.image(v.imageName)
+                if( imageinfo != nil && imageinfo!.image != nil ) {
+                    let uiimage = imageinfo!.image!
+                    let cgimage = uiimage.CGImage
                     CGContextSaveGState(context)
                     CGContextSetAlpha(context, 0.4)
-                    CGContextClipToRect(context, v.rect)
-                    CGContextDrawTiledImage(context,
-                        CGRect(x:0, y:0, width: uiimage!.size.width, height: uiimage!.size.height),
-                        cgimage
-                    )
+                    if( imageinfo!.tile ) {
+                        CGContextClipToRect(context, v.rect)
+                        let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, v.rect.size.height)
+                        CGContextConcatCTM(context, flipVertical)
+                        CGContextDrawTiledImage(
+                            context,
+                            CGRect(x:0, y:0, width: uiimage.size.width, height: uiimage.size.height),
+                            cgimage
+                        )
+                    } else {
+                        let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, v.rect.size.height+2.0*v.rect.origin.y)
+                        CGContextConcatCTM(context, flipVertical)
+                        CGContextDrawImage(context, v.rect, cgimage)
+                    }
                     CGContextRestoreGState(context)
                 }
                 CGContextAddRect(context, v.rect)
@@ -522,26 +532,8 @@ class FaciesView : UIView {
         CGContextAddLineToPoint(context, 10, bounds.height - 10.0)
         CGContextAddLineToPoint(context, 10, 10)
         CGContextStrokePath(context)
-
     }
     
-    func imageId() -> Int {
-        for( var i=0; i < images.count; i++ ) {
-            if( images[i] == curImageName ) {
-                return i;
-            }
-        }
-        return 0
-    }
-    
-    func imageId(name: String) -> Int {
-        for( var i=0; i < images.count; i++ ) {
-            if( images[i] == name ) {
-                return i;
-            }
-        }
-        return 0
-    }
 }
 
 class TextDrawTool {
@@ -650,6 +642,8 @@ class DrawingView : UIImageView {
     
     func initFrame() {
         self.sizeToFit()
+        faciesView.faciesCatalog = controller?.faciesCatalog
+        
         //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: self.bounds.size)
     }
     
@@ -684,8 +678,7 @@ class DrawingView : UIImageView {
             let fvo = afvo as? FaciesVignetteObject
             let orect = fvo!.rect.CGRectValue()
             let rect = CGRectApplyAffineTransform(orect, affineTransform)
-            let id = faciesView.imageId(fvo!.imageName)
-            let fv = FaciesVignette(rect: rect, image: id)
+            let fv = FaciesVignette(rect: rect, image: fvo!.imageName)
             let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
             
             var inserted_in_column = false
@@ -916,7 +909,7 @@ class DrawingView : UIImageView {
             }
         } else if( drawMode == ToolMode.Facies ) {
             if( faciesView.drawTool != nil ) {
-                faciesView.drawTool!.end(imageId: faciesView.imageId())
+                faciesView.drawTool!.end(imageName: faciesView.curImageName)
             }
             faciesView.drawTool = nil
             faciesView.setNeedsDisplay()

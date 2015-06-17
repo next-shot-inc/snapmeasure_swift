@@ -96,6 +96,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
+    override func viewDidAppear(animated: Bool) {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let managedContext = appDelegate.managedObjectContext!
+        
+        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
+        var error: NSError?
+        let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+            error: &error)
+        selectExistingButton.enabled = fetchedResultsCount > 0
+    }
+    
     @IBAction func selectFromExisting(sender: AnyObject) {
         //self.performSegueWithIdentifier("toSelectExisting", sender: nil)
     }

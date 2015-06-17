@@ -14,12 +14,13 @@
         <relationship name="lines" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="LineObject" inverseName="image" inverseEntity="LineObject" syncable="YES"/>
         <relationship name="texts" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TextObject" syncable="YES"/>
     </entity>
-    <entity name="FaciesImage" representedClassName="SnapMeasure.FaciesImage" syncable="YES">
+    <entity name="FaciesImageObject" representedClassName="SnapMeasure.FaciesImageObject" syncable="YES">
         <attribute name="imageData" optional="YES" attributeType="Binary" syncable="YES"/>
-        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+        <attribute name="tilePixmap" optional="YES" attributeType="Boolean" defaultValueString="YES" syncable="YES"/>
     </entity>
     <entity name="FaciesVignetteObject" representedClassName="SnapMeasure.FaciesVignetteObject" syncable="YES">
-        <attribute name="imageName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="imageName" attributeType="String" syncable="YES"/>
         <attribute name="rect" optional="YES" attributeType="Transformable" syncable="YES"/>
     </entity>
     <entity name="FeatureObject" representedClassName="SnapMeasure.FeatureObject" syncable="YES">
@@ -40,7 +41,7 @@
     </entity>
     <elements>
         <element name="DetailedImageObject" positionX="-63" positionY="-45" width="128" height="223"/>
-        <element name="FaciesImage" positionX="-65" positionY="-165" width="128" height="73"/>
+        <element name="FaciesImageObject" positionX="-65" positionY="-165" width="128" height="88"/>
         <element name="FaciesVignetteObject" positionX="162" positionY="99" width="128" height="73"/>
         <element name="FeatureObject" positionX="160" positionY="-58" width="128" height="103"/>
         <element name="LineObject" positionX="-38" positionY="203" width="128" height="103"/>
