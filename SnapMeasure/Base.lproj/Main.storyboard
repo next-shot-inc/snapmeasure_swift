@@ -280,17 +280,11 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="rotationRecognizer" destination="Tfc-9g-WWQ" id="L2m-PM-LgA"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="mapToDrawing" id="0z3-db-DKN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="v9Q-Iq-JfW" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="tJh-eH-YeA" userLabel="Exit" sceneMemberID="exit"/>
-                <rotationGestureRecognizer id="Tfc-9g-WWQ">
-                    <connections>
-                        <action selector="rotationDetected:" destination="7hD-ub-mNa" id="XuI-IX-SQ4"/>
-                    </connections>
-                </rotationGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1524" y="1860"/>
         </scene>
