@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 next-shot. All rights reserved.
 //
 
+//TODO: Fix callout moving the map when too high so that the whole callout is displayed
 import Foundation
 import UIKit
 import QuartzCore

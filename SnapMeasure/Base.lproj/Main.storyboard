@@ -334,7 +334,34 @@
                     <view key="view" contentMode="scaleToFill" id="cVx-28-iwZ">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="cHn-Fh-vlF" customClass="CustomMapView" customModule="SnapMeasure" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="64" width="600" height="492"/>
+                            </mapView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DZp-01-Mes">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="ZH2-SB-5zi"/>
+                                </constraints>
+                                <items>
+                                    <barButtonItem title="Filter by Date:" id="hbn-Bp-8h2">
+                                        <connections>
+                                            <action selector="tappedFilterByDate:" destination="7hD-ub-mNa" id="FWe-fv-nJX"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="cHn-Fh-vlF" firstAttribute="top" secondItem="Iti-wz-T5U" secondAttribute="bottom" id="E6R-H7-siA"/>
+                            <constraint firstItem="cHn-Fh-vlF" firstAttribute="leading" secondItem="cVx-28-iwZ" secondAttribute="leading" id="Has-p1-GaE"/>
+                            <constraint firstItem="DZp-01-Mes" firstAttribute="leading" secondItem="cVx-28-iwZ" secondAttribute="leading" id="QLN-MK-g6z"/>
+                            <constraint firstAttribute="trailing" secondItem="DZp-01-Mes" secondAttribute="trailing" id="VTN-ce-NaR"/>
+                            <constraint firstItem="cHn-Fh-vlF" firstAttribute="centerX" secondItem="DZp-01-Mes" secondAttribute="centerX" id="b8z-ZA-FpG"/>
+                            <constraint firstItem="cHn-Fh-vlF" firstAttribute="bottom" secondItem="DZp-01-Mes" secondAttribute="top" id="tmt-TJ-D00"/>
+                            <constraint firstItem="qVc-IJ-ZbE" firstAttribute="top" secondItem="DZp-01-Mes" secondAttribute="bottom" id="y38-2K-VsK"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="ccI-ZC-yL9">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="P61-RX-swy">
@@ -344,13 +371,15 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="filterByDateButton" destination="hbn-Bp-8h2" id="c6U-vx-YFh"/>
+                        <outlet property="mapView" destination="cHn-Fh-vlF" id="mzs-3u-aOr"/>
                         <segue destination="KD6-M1-rG7" kind="presentation" identifier="mapToDrawing" id="0z3-db-DKN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="v9Q-Iq-JfW" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="tJh-eH-YeA" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1524" y="1860"/>
+            <point key="canvasLocation" x="1510" y="1860"/>
         </scene>
         <!--Camera View Controller-->
         <scene sceneID="xjT-1d-DpE">

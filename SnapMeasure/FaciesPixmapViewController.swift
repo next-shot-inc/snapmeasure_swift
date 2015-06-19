@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import CoreData
 
+
 class FaciesCatalog {
     let faciesTypes = ["sand", "mud", "grading", "lamination" ]
     var faciesImages = [FaciesImageObject]()

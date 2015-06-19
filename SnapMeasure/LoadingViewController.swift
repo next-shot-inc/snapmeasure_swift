@@ -20,13 +20,12 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        super.viewDidLoad()
-        
         // appearance and layout customization
         self.tableView.backgroundView = UIImageView(image:UIImage(named:"loadingBackground"))
         self.tableView.estimatedRowHeight = 280
         self.tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         self.tableView.rowHeight = UITableViewAutomaticDimension
+        self.tableView.alwaysBounceVertical = false
         //self.tableView.allowsSelection = false
         
         self.searchController = ({
