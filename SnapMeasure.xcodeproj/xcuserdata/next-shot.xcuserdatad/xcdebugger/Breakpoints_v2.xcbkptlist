@@ -737,6 +737,38 @@
             endingLineNumber = "575"
             landmarkName = "pushSetWdithButton(_:)"
             landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "SnapMeasure.DrawingViewController.pushSetWdithButton (SnapMeasure.DrawingViewController)(Swift.AnyObject) -&gt; ()"
+                  moduleName = "SnapMeasure"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/next-shot/Desktop/SnapMeasure/SnapMeasure/DrawingViewController.swift"
+                  timestampString = "456350326.467964"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "575"
+                  endingLineNumber = "575"
+                  offsetFromSymbolStart = "6876">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "SnapMeasure.DrawingViewController.(pushSetWdithButton (SnapMeasure.DrawingViewController) -&gt; (Swift.AnyObject) -&gt; ()).(closure #2)"
+                  moduleName = "SnapMeasure"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/next-shot/Desktop/SnapMeasure/SnapMeasure/DrawingViewController.swift"
+                  timestampString = "456350326.468119"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "575"
+                  endingLineNumber = "575"
+                  offsetFromSymbolStart = "1284">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -1088,6 +1120,54 @@
             startingLineNumber = "44"
             endingLineNumber = "44"
             landmarkName = "image(_:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SnapMeasure/CardTableViewCell.swift"
+            timestampString = "456350310.743899"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "39"
+            endingLineNumber = "39"
+            landmarkName = "shareButtonPushed(_:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SnapMeasure/export.swift"
+            timestampString = "456437910.528547"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "18"
+            endingLineNumber = "18"
+            landmarkName = "export(_:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SnapMeasure/export.swift"
+            timestampString = "456440404.336116"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
+            landmarkName = "computeFileLength()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

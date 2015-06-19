@@ -13,10 +13,13 @@ class CardTableViewCell: UITableViewCell {
     @IBOutlet var mainView: UIView!
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var myImageView: DrawingView!
-    
+    @IBOutlet weak var shareButton: UIButton!
+    var detailedImage : DetailedImageObject?
     var faciesCatalog: FaciesCatalog?
     
     func useImage(detailedImage : DetailedImageObject) {
+        self.detailedImage = detailedImage
+        
         // Round those corners
         mainView.layer.cornerRadius = 10;
         mainView.layer.masksToBounds = true;
@@ -34,4 +37,7 @@ class CardTableViewCell: UITableViewCell {
         //myImageView.transform = CGAffineTransformMakeScale(scaleFactor*5, scaleFactor*5);
     }
     
+    @IBAction func shareButtonPushed(sender: AnyObject) {
+        println(nameLabel.text)
+    }
 }

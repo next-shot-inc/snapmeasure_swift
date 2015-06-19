@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -42,8 +42,8 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oea-fH-bxA">
-                                <rect key="frame" x="116" y="377" width="58" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oea-fH-bxA">
+                                <rect key="frame" x="116" y="377" width="56" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Map">
@@ -54,20 +54,20 @@
                                     <segue destination="wi2-b7-hAm" kind="presentation" id="dP0-Kl-K5D"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="New Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
-                                <rect key="frame" x="116" y="248" width="102" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
+                                <rect key="frame" x="116" y="249" width="102" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
-                                <rect key="frame" x="116" y="197" width="123" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
+                                <rect key="frame" x="116" y="198" width="123" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
-                                <rect key="frame" x="247" y="192" width="73" height="31"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
+                                <rect key="frame" x="247" y="193" width="73" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Select">
@@ -152,13 +152,13 @@
                             </connections>
                         </searchBar>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="Card" rowHeight="280" id="zZL-2J-885" customClass="CardTableViewCell" customModule="SnapMeasure" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="Card" rowHeight="280" id="zZL-2J-885" customClass="CardTableViewCell" customModule="SnapMeasure" customModuleProvider="target">
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zZL-2J-885" id="4ph-hl-cNB">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
-                                            <rect key="frame" x="156" y="14" width="287" height="251"/>
+                                        <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
+                                            <rect key="frame" x="137" y="14" width="287" height="250"/>
                                             <subviews>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
                                                     <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
@@ -166,8 +166,8 @@
                                                         <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
                                                     </constraints>
                                                 </imageView>
-                                                <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
-                                                    <rect key="frame" x="0.0" y="200" width="287" height="51"/>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
+                                                    <rect key="frame" x="0.0" y="200" width="287" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ImageName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="urp-OZ-iI3" userLabel="nameLabel">
                                                             <rect key="frame" x="97" y="14" width="93" height="22"/>
@@ -197,9 +197,20 @@
                                                 <constraint firstItem="jBS-1W-do2" firstAttribute="top" secondItem="vwZ-BT-aWo" secondAttribute="top" id="zUc-EO-Ins"/>
                                             </constraints>
                                         </view>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="et0-or-oIR">
+                                            <rect key="frame" x="18" y="125" width="40" height="30"/>
+                                            <state key="normal" title="Share">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="shareButtonPushed:" destination="zZL-2J-885" eventType="touchDown" id="F3x-hM-TxP"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
+                                        <constraint firstItem="et0-or-oIR" firstAttribute="leading" secondItem="4ph-hl-cNB" secondAttribute="leadingMargin" constant="10" id="FTY-AO-C2a"/>
+                                        <constraint firstAttribute="centerY" secondItem="et0-or-oIR" secondAttribute="centerY" id="JpH-sq-4ao"/>
                                         <constraint firstAttribute="centerX" secondItem="vwZ-BT-aWo" secondAttribute="centerX" id="Ngz-TT-Khr"/>
                                         <constraint firstAttribute="bottom" secondItem="vwZ-BT-aWo" secondAttribute="bottom" constant="15" id="jDg-Bw-do8"/>
                                         <constraint firstItem="vwZ-BT-aWo" firstAttribute="top" secondItem="4ph-hl-cNB" secondAttribute="top" constant="14" id="slf-0s-MQV"/>
@@ -209,6 +220,7 @@
                                     <outlet property="mainView" destination="vwZ-BT-aWo" id="EHL-l9-rDh"/>
                                     <outlet property="myImageView" destination="jBS-1W-do2" id="M8d-bG-Xms"/>
                                     <outlet property="nameLabel" destination="urp-OZ-iI3" id="V8B-5K-MXA"/>
+                                    <outlet property="shareButton" destination="et0-or-oIR" id="5Sp-TZ-07h"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -279,7 +291,7 @@
                                 <rect key="frame" x="0.0" y="44" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="PixmapCell" textLabel="zFe-cq-p24" style="IBUITableViewCellStyleDefault" id="7D1-Mv-fuZ">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="checkmark" indentationWidth="10" reuseIdentifier="PixmapCell" textLabel="zFe-cq-p24" style="IBUITableViewCellStyleDefault" id="7D1-Mv-fuZ">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="7D1-Mv-fuZ" id="mPr-c7-VUy">
@@ -467,15 +479,15 @@
                                     <outletCollection property="gestureRecognizers" destination="jtK-wk-2vq" appends="YES" id="r8I-Eg-AOe"/>
                                 </connections>
                             </imageView>
-                            <pickerView hidden="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
-                                <rect key="frame" x="376" y="55" width="100" height="162"/>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
+                                <rect key="frame" x="427" y="55" width="100" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="u6m-L5-SJL"/>
                                 </constraints>
                             </pickerView>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
-                                <rect key="frame" x="411" y="25" width="30" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-vU-sig">
+                                <rect key="frame" x="462" y="25" width="30" height="30"/>
                                 <state key="normal" title="Col">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -483,8 +495,8 @@
                                     <action selector="pushColButton:" destination="KD6-M1-rG7" eventType="touchDown" id="64X-as-XpB"/>
                                 </connections>
                             </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
-                                <rect key="frame" x="310" y="25" width="91" height="30"/>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size/Name" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="i07-eQ-9as">
+                                <rect key="frame" x="361" y="25" width="91" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="decimalPad"/>
                             </textField>
@@ -497,8 +509,8 @@
                                     <action selector="closeWindow:" destination="KD6-M1-rG7" eventType="touchDown" id="F6O-7c-LYs"/>
                                 </connections>
                             </button>
-                            <segmentedControl opaque="NO" contentMode="center" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
-                                <rect key="frame" x="61" y="26" width="198" height="29"/>
+                            <segmentedControl opaque="NO" contentMode="center" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="bar" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="SBq-9U-Dsq">
+                                <rect key="frame" x="61" y="26" width="249" height="29"/>
                                 <segments>
                                     <segment title="" image="Pencil" width="36"/>
                                     <segment title="" image="erase" width="36"/>
@@ -511,8 +523,8 @@
                                     <action selector="toolChanged:" destination="KD6-M1-rG7" eventType="valueChanged" id="aZ6-D7-upH"/>
                                 </connections>
                             </segmentedControl>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0V3-cV-DX3">
-                                <rect key="frame" x="269" y="25" width="31" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0V3-cV-DX3">
+                                <rect key="frame" x="320" y="25" width="31" height="30"/>
                                 <state key="normal" title="New">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -520,8 +532,8 @@
                                     <action selector="pushNewLine:" destination="KD6-M1-rG7" eventType="touchDown" id="4SN-b1-TcO"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HHQ-8o-Zsd">
-                                <rect key="frame" x="451" y="26" width="32" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HHQ-8o-Zsd">
+                                <rect key="frame" x="502" y="26" width="32" height="30"/>
                                 <state key="normal" title="Type">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -529,8 +541,8 @@
                                     <action selector="pushTypeButton:" destination="KD6-M1-rG7" eventType="touchDown" id="TS0-yY-DlA"/>
                                 </connections>
                             </button>
-                            <pickerView hidden="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
-                                <rect key="frame" x="307" y="56" width="320" height="162"/>
+                            <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vx2-ax-Iw8">
+                                <rect key="frame" x="358" y="56" width="320" height="162"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </pickerView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PoK-3P-TM8">
@@ -646,6 +658,6 @@
         <image name="measure" width="36" height="36"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="0z3-db-DKN"/>
+        <segue reference="klv-3J-VMp"/>
     </inferredMetricsTieBreakers>
 </document>
