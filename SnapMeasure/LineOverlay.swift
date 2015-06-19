@@ -34,17 +34,6 @@ class MapLineOverlay: NSObject, MKOverlay {
         self.coordinate = coordinate
         self.mapLength = length/scale
         self.angle = orientation
-        
-        print("meteredWidth ")
-        println(meteredWidth)
-        print("meteredHeight ")
-        println(meteredHeight)
-        print("length ")
-        println(length)
-        print("Angle: " )
-        println(orientation)
-        print("mapLength: ")
-        println(self.mapLength)
     }
 }
 
