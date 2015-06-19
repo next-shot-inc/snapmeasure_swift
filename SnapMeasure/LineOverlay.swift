@@ -47,25 +47,10 @@ class MapLineOverlayView: MKOverlayRenderer {
         
             let cgmapRect = rectForMapRect(mapRect)
             
-            /**
-            CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
-            CGContextFillRect(context, cgRect)
-        
-            CGContextSetLineWidth(context, 50.0)
-            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
-            let coordinateMapPoint = MKMapPointForCoordinate(overlay.coordinate)
-            let coordinatePoint = pointForMapPoint(coordinateMapPoint)
-
-            CGContextAddEllipseInRect(context, CGRect(x: coordinatePoint.x-1000, y: coordinatePoint.y-1000,width: 2000,height: 2000))
-**/
             let coordinateMapPoint = MKMapPointForCoordinate(overlay.coordinate)
             let coordinatePoint = pointForMapPoint(coordinateMapPoint)
         
             CGContextSetLineWidth(context, 50.0)
-            //NSLog("Angle: ")
-            //NSLog(lineOverlay.angle.description)
-            //NSLog("Length: ")
-            //NSLog(lineOverlay.mapLength.description)
         
             //draw line representing length
             //first get map points
