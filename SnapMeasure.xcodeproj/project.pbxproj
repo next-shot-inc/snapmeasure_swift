@@ -25,14 +25,14 @@
 		2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F6B1B1F616A002C1BA7 /* Line.swift */; };
 		2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11D1B3086A4004308D6 /* TextObject.swift */; };
 		2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */; };
-		2FCDF1241B30E3D6004308D6 /* FaciesImageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF1231B30E3D6004308D6 /* FaciesImageObject.swift */; };
 		2FCDF1261B30E3D6004308D6 /* FaciesVignetteObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF1251B30E3D6004308D6 /* FaciesVignetteObject.swift */; };
 		2FCDF1281B34ADD7004308D6 /* export.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF1271B34ADD7004308D6 /* export.swift */; };
 		FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */; };
 		FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A714C1B26415400AD51B4 /* MapViewController.swift */; };
 		FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */; };
-		FD4A71571B2790AC00AD51B4 /* ImageAnnotationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */; };
 		FD4A71591B2B8A6A00AD51B4 /* CustomCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */; };
+		FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD89543A1B33433D006D78B2 /* PopupMenuController.swift */; };
+		FDC9066D1B31E7F700465D43 /* LineOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC9066C1B31E7F700465D43 /* LineOverlay.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,14 +68,14 @@
 		2F682F6B1B1F616A002C1BA7 /* Line.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Line.swift; path = ../Line.swift; sourceTree = "<group>"; };
 		2FCDF11D1B3086A4004308D6 /* TextObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObject.swift; sourceTree = "<group>"; };
 		2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesPixmapViewController.swift; sourceTree = "<group>"; };
-		2FCDF1231B30E3D6004308D6 /* FaciesImageObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesImageObject.swift; sourceTree = "<group>"; };
 		2FCDF1251B30E3D6004308D6 /* FaciesVignetteObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesVignetteObject.swift; sourceTree = "<group>"; };
 		2FCDF1271B34ADD7004308D6 /* export.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = export.swift; sourceTree = "<group>"; };
 		FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTableViewCell.swift; sourceTree = "<group>"; };
 		FD4A714C1B26415400AD51B4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageAnnotation.swift; path = ../ImageAnnotation.swift; sourceTree = "<group>"; };
-		FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageAnnotationView.swift; sourceTree = "<group>"; };
 		FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomCalloutView.swift; sourceTree = "<group>"; };
+		FD89543A1B33433D006D78B2 /* PopupMenuController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopupMenuController.swift; sourceTree = "<group>"; };
+		FDC9066C1B31E7F700465D43 /* LineOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineOverlay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,7 +127,8 @@
 				FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */,
 				FD4A714C1B26415400AD51B4 /* MapViewController.swift */,
 				FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */,
-				FD4A71561B2790AC00AD51B4 /* ImageAnnotationView.swift */,
+				FD89543A1B33433D006D78B2 /* PopupMenuController.swift */,
+				FDC9066C1B31E7F700465D43 /* LineOverlay.swift */,
 				FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */,
 				2F1286791B0E3A150095D500 /* Main.storyboard */,
 				2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */,
@@ -135,10 +136,10 @@
 				2F682F6B1B1F616A002C1BA7 /* Line.swift */,
 				2F682F671B1F6169002C1BA7 /* Feature.swift */,
 				2F682F691B1F616A002C1BA7 /* DetailedImage.swift */,
-				2F1286741B0E3A150095D500 /* SnapMeasure.xcdatamodeld */,
 				2FCDF1251B30E3D6004308D6 /* FaciesVignetteObject.swift */,
-				2FCDF1231B30E3D6004308D6 /* FaciesImageObject.swift */,
+				FD44BFF71B3322A500339F98 /* FaciesImageObject.swift */,
 				2FCDF11D1B3086A4004308D6 /* TextObject.swift */,
+				2F1286741B0E3A150095D500 /* SnapMeasure.xcdatamodeld */,
 				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
 				2F12867C1B0E3A150095D500 /* Images.xcassets */,
 				2F1286701B0E3A140095D500 /* Supporting Files */,
@@ -275,6 +276,7 @@
 			files = (
 				2F12869C1B0E60300095D500 /* DrawingView.swift in Sources */,
 				2F1286981B0E3DDF0095D500 /* PreviewView.swift in Sources */,
+				FDC9066D1B31E7F700465D43 /* LineOverlay.swift in Sources */,
 				2F682F6A1B1F616A002C1BA7 /* DetailedImage.swift in Sources */,
 				2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */,
 				2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */,
@@ -288,10 +290,10 @@
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2FCDF1281B34ADD7004308D6 /* export.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
+				FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */,
 				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
-				FD4A71571B2790AC00AD51B4 /* ImageAnnotationView.swift in Sources */,
-				2FCDF1241B30E3D6004308D6 /* FaciesImageObject.swift in Sources */,
+				FD44BFF81B3322A500339F98 /* FaciesImageObject.swift in Sources */,
 				FD4A71591B2B8A6A00AD51B4 /* CustomCalloutView.swift in Sources */,
 				2F1286731B0E3A150095D500 /* AppDelegate.swift in Sources */,
 				FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */,
@@ -423,6 +425,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = SnapMeasure/Info.plist;
@@ -430,6 +433,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -437,6 +441,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = SnapMeasure/Info.plist;

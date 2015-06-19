@@ -11,50 +11,103 @@ import UIKit
 import MapKit
 import CoreData
 
-class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate, CustomCalloutViewDelegate {
+class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewDelegate {
     
     //@IBOutlet weak var mapView: CustomMapView!
-    @IBOutlet var rotationRecognizer: UIRotationGestureRecognizer!
+    @IBOutlet weak var mapView: CustomMapView!
+    //@IBOutlet var rotationRecognizer: UIRotationGestureRecognizer!
+    @IBOutlet weak var filterByDateButton: UIBarButtonItem!
     
-    var mapView: CustomMapView!
+    //var mapView: CustomMapView!
     var detailedImages: [DetailedImageObject] = []
     var managedContext: NSManagedObjectContext!
     var calloutView: CustomCalloutView!
     var selectedImage: DetailedImageObject?
+    var overlay : MapLineOverlay?
+    
+    var menuController: PopupMenuController?
+    
+    var testImages : [DetailedImageObject] = []
     
     override func viewDidLoad() {
-        mapView = CustomMapView(frame: self.view.bounds)
         mapView.delegate = self
-        mapView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
-        mapView.addGestureRecognizer(rotationRecognizer)
-        self.view.addSubview(mapView)
-        
-        
+        /**
         self.loadImages()
         //println("count = ", detailedImages.count)
         if (detailedImages.count > 0) {
             
-            let initialLocation = CLLocation(latitude: detailedImages[0].latitude!.doubleValue, longitude: detailedImages[0].longitude!.doubleValue)
-            //println("latitude: %d\nlongitude: %d",detailedImages[0].latitude!.doubleValue,detailedImages[0].longitude!.doubleValue)
-            self.centerMapOnLocation(initialLocation, withRadius: CLLocationDistance(1.0))
-            
-            mapView.delegate = self
+            self.centerMapOnLocation(detailedImages[0].coordinate!, withRadius: CLLocationDistance(1.0))
+        
             for detailedImage in detailedImages {
                 let annotation = ImageAnnotation(detailedImage: detailedImage)
                 mapView.addAnnotation(annotation)
             }
         } else {
             println("No DetailedImageObjects with a location")
-        }
+        } **/
         
-        //set up rotationRecognizer
-        rotationRecognizer.delegate = self
+        self.initTestImages()
+        self.showAll()
+        
+        self.seeAllAnnotations(mapView.annotations as! [MKAnnotation])
         
         self.calloutView = CustomCalloutView()
         self.calloutView.delegate = self
         
         self.mapView.calloutView = self.calloutView
 
+    }
+    
+    func initTestImages() {
+        let dateFormater = NSDateFormatter()
+        dateFormater.dateFormat = "MM/dd/yyyy hh:mm a"
+        dateFormater.locale = NSLocale.currentLocale()
+        
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        managedContext = appDelegate.managedObjectContext!
+
+        
+        let t1 = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
+            inManagedObjectContext: managedContext) as! DetailedImageObject
+        t1.setCoordinate(30.0, longitude: -100.0)
+        t1.date = dateFormater.dateFromString("6/19/2015 09:00 AM")!
+        t1.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t1.scale = 0.005
+        t1.compassOrientation = 0
+        t1.name = "Day"
+        self.testImages.append(t1)
+        
+        let t2 = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
+            inManagedObjectContext: managedContext) as! DetailedImageObject
+        t2.setCoordinate(35.0, longitude: -120.0)
+        t2.date = dateFormater.dateFromString("6/13/2015 09:00 AM")!
+        t2.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t2.scale = 0.005
+        t2.compassOrientation = 0
+        t2.name = "Week"
+        self.testImages.append(t2)
+        
+        let t3 = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
+            inManagedObjectContext: managedContext) as! DetailedImageObject
+        t3.setCoordinate(45.0, longitude: -70.0)
+        t3.date = dateFormater.dateFromString("5/25/2015 09:00 AM")!
+        t3.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t3.scale = 0.005
+        t3.compassOrientation = 0
+        t3.name = "Month"
+        self.testImages.append(t3)
+        
+        let t4 = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
+            inManagedObjectContext: managedContext) as! DetailedImageObject
+        t4.setCoordinate(40.0, longitude: -100.0)
+        t4.date = dateFormater.dateFromString("9/8/2014 09:00 AM")!
+        t4.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t4.scale = 0.005
+        t4.compassOrientation = 0
+        t4.name = "Year"
+        self.testImages.append(t4)
+
+        //managedContext.rollback()
     }
     
     func loadImages() {
@@ -75,11 +128,152 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             error: &error) as? [DetailedImageObject])!
     }
     
-    func centerMapOnLocation(location: CLLocation, withRadius radius: CLLocationDistance) {
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(location.coordinate,
+    func centerMapOnLocation(coordinate: CLLocationCoordinate2D, withRadius radius: CLLocationDistance) {
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(coordinate,
             radius * 2.0, radius * 2.0)
         mapView.setRegion(coordinateRegion, animated: true)
     }
+    
+    func seeAllAnnotations(annotations: [MKAnnotation]) {
+        if (annotations.count > 1) {
+            var upper = annotations[0].coordinate
+            var lower = annotations[0].coordinate
+            
+            for ann in annotations {
+                if ann.coordinate.latitude > upper.latitude {
+                    upper.latitude = ann.coordinate.latitude
+                }
+                if ann.coordinate.latitude < lower.latitude {
+                    lower.latitude = ann.coordinate.latitude
+                }
+                if ann.coordinate.longitude > upper.longitude {
+                    upper.longitude = ann.coordinate.longitude
+                }
+                if ann.coordinate.longitude < lower.longitude {
+                    lower.longitude = ann.coordinate.longitude
+                }
+            }
+            var locationSpan = MKCoordinateSpan()
+            locationSpan.latitudeDelta = upper.latitude - lower.latitude
+            locationSpan.longitudeDelta = upper.longitude - lower.longitude
+            
+            var locationCenter = CLLocationCoordinate2D()
+            locationCenter.latitude = (upper.latitude + lower.latitude)/2
+            locationCenter.longitude = (upper.longitude + lower.longitude)/2
+            let region = MKCoordinateRegionMake(locationCenter, locationSpan)
+            
+            mapView.setRegion(region, animated: true)
+        } else if annotations.count == 1 {
+            let region = MKCoordinateRegionMake(annotations[0].coordinate, MKCoordinateSpanMake(2.0, 2.0))
+            mapView.setRegion(region, animated: true)
+        } else {
+            // no annotations set to default
+            mapView.setRegion(MKMapView().region, animated: true)
+        }
+    }
+    
+    func removeAll() {
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.removeOverlays(mapView.overlays)
+    }
+    
+    func showAll() {
+        self.removeAll()
+        for detailedImage in detailedImages {
+            let annotation = ImageAnnotation(detailedImage: detailedImage)
+            mapView.addAnnotation(annotation)
+        }
+    }
+    
+    //Mark: - Actions: Filtering by Date
+    @IBAction func tappedFilterByDate(sender: UIBarButtonItem) {
+        let width = 150
+        let height = 45
+        menuController = PopupMenuController()
+        
+        //Add Filter Options
+        let mostRecentButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        mostRecentButton.setTitle("Last Day", forState: UIControlState.Normal)
+        mostRecentButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        mostRecentButton.addTarget(self, action: "showAnnotationsForLatestDay:", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents.append(mostRecentButton)
+        
+        let lastWeekButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        lastWeekButton.setTitle("Last Week", forState: UIControlState.Normal)
+        lastWeekButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        lastWeekButton.addTarget(self, action: "showAnnotationsForLatestWeek", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents.append(lastWeekButton)
+        
+        let lastMonthButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        lastMonthButton.setTitle("Last Month", forState: UIControlState.Normal)
+        lastMonthButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        lastMonthButton.addTarget(self, action: "showAnnotationsForLatestMonth", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents.append(lastMonthButton)
+        
+        let lastYearButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        lastYearButton.setTitle("Last Year", forState: UIControlState.Normal)
+        lastYearButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        lastYearButton.addTarget(self, action: "showAnnotationsForLatestYear", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents.append(lastYearButton)
+
+        let AllButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        AllButton.setTitle("All", forState: UIControlState.Normal)
+        AllButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        AllButton.addTarget(self, action: "showAll", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents.append(AllButton)
+        
+        let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
+        textFeild.placeholder = "MM/DD/YYYY"
+        menuController!.cellContents.append(textFeild)
+
+
+        //set up menu Controller
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        menuController!.preferredContentSize.width = 150
+        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        menuController!.popoverPresentationController?.barButtonItem = sender
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        
+        self.presentViewController(menuController!, animated: true, completion: nil)
+    }
+    
+    func showAnnotationsForTimeIntervalFromCurrentDate(interval: NSTimeInterval) {
+        self.removeAll()
+        let currentDate = NSDate()
+        for detailedImage in detailedImages {
+            //if the date is later in time than the earliestAllowedDate
+            if currentDate.timeIntervalSinceDate(detailedImage.date) < interval {
+                let annotation = ImageAnnotation(detailedImage: detailedImage)
+                mapView.addAnnotation(annotation)
+            }
+        }
+    }
+    
+    func showAnnotationsForLatestDay(sender: UIButton) {
+        //24hours/day * 60min/hour * 60sec/min
+        let dayInterval : NSTimeInterval = 86400 //secs
+        self.showAnnotationsForTimeIntervalFromCurrentDate(dayInterval)
+    }
+    
+    func showAnnotationsForLatestWeek() {
+        //7days/week * 24hours/day * 60min/hour * 60sec/min
+        let weekInterval : NSTimeInterval = 604800 //secs
+        self.showAnnotationsForTimeIntervalFromCurrentDate(weekInterval)
+    }
+    
+    func showAnnotationsForLatestMonth() {
+        //30.5 days/month * 24hours/day * 60min/hour * 60sec/min
+        let monthInterval : NSTimeInterval = 2635200 //secs
+        self.showAnnotationsForTimeIntervalFromCurrentDate(monthInterval)
+    }
+    
+    func showAnnotationsForLatestYear() {
+        //24hours/day * 60min/hour * 60sec/min
+        let yearInterval : NSTimeInterval = 31536000 //secs
+        self.showAnnotationsForTimeIntervalFromCurrentDate(yearInterval)
+    }
+    
+    
     
     //Mark: - MKMapViewDelegate methods
     
@@ -87,17 +281,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
         if let annotation = annotation as? ImageAnnotation {
             let identifier = "ImageAnnotationView"
-            var view: ImageAnnotationView
+            var view: MKPinAnnotationView
             if let dequeuedView = mapView.dequeueReusableAnnotationViewWithIdentifier(identifier)
-                as? ImageAnnotationView { // checks to see if an unseen annotation view can be reused
+                as? MKPinAnnotationView { // checks to see if an unseen annotation view can be reused
                     dequeuedView.annotation = annotation
                     view = dequeuedView
-                    view.setMapLineViewOrientation(self.mapView.camera.heading)
+                    //view.setMapLineViewOrientation(self.mapView.camera.heading)
             } else {
                 // create a new MKPinAnnotationView
-                view = ImageAnnotationView(annotation: annotation, reuseIdentifier: identifier)
+                view = MKPinAnnotationView(annotation: annotation, reuseIdentifier: identifier)
                 view.canShowCallout = false
-                view.setMapLineViewOrientation(self.mapView.camera.heading)
+                //view.setMapLineViewOrientation(self.mapView.camera.heading)
                 
                 //view.calloutOffset = CGPoint(x: -5, y: 5)
                 //view.rightCalloutAccessoryView = UIButton.buttonWithType(.DetailDisclosure) as! UIView
@@ -115,14 +309,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
     }
 
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        if let ann = view as? ImageAnnotationView {
-            ann.setMapLineViewOrientation(self.mapView.camera.heading)
+        if let ann = view.annotation as? ImageAnnotation {
+            //annView.setMapLineViewOrientation(self.mapView.camera.heading)
             
             // apply the MKAnnotationView's basic properties
-            self.calloutView.title = ann.annotation.title;
-            self.calloutView.subtitle = ann.annotation.subtitle;
+            self.calloutView.title = ann.title;
+            self.calloutView.subtitle = ann.subtitle;
             
-            let imageView = UIImageView(image: (ann.annotation as! ImageAnnotation).image)
+            
+            let imageView = UIImageView(image: ann.image)
             let aspectRatio = imageView.image!.size.height/imageView.image!.size.width
             imageView.setFrameSize(CGSize(width: 133, height: 133 * aspectRatio))
             imageView.contentMode = UIViewContentMode.ScaleToFill
@@ -131,13 +326,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             self.calloutView.contentView = imageView
             
             // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)
-            self.calloutView.calloutOffset = ann.calloutOffset;
+            self.calloutView.calloutOffset = view.calloutOffset;
             
             //set selectedImage
-            self.selectedImage = (ann.annotation as! ImageAnnotation).detailedImage
+            self.selectedImage = ann.detailedImage
             
             // This does all the magic.
-            self.calloutView.presentCalloutFromRect(ann.bounds, inView:ann, constrainedToView:self.view, animated:true)
+            self.calloutView.presentCalloutFromRect(view.bounds, inView:view, constrainedToView:self.view, animated:true)
+            
+            if (ann.length != nil && ann.compassOrientation != nil) {
+                self.overlay = MapLineOverlay(length: ann.length!, compassOrientation: ann.compassOrientation!, coordinate: ann.coordinate)
+                mapView.addOverlay(overlay)
+            }
         }
     }
     
@@ -147,6 +347,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         self.calloutView.delegate = self
         self.mapView.calloutView = self.calloutView
         self.selectedImage = nil
+        
+        if (overlay != nil) {
+            mapView.removeOverlay(overlay!)
+        }
+    }
+    
+    func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
+        if overlay is MapLineOverlay {
+            let overlayView = MapLineOverlayView(overlay: overlay)
+            return overlayView
+        } else {
+            return nil
+        }
     }
     
     func calloutImageTapped() {
@@ -215,7 +428,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         // tell the callout to wait for a while while we scroll (we assume the scroll delay for MKMapView matches UIScrollView)
         return (1.0/3.0)
     }
-    
+    /**
     //Mark - UIGestureRecognizer methods
     @IBAction func rotationDetected (gestureRecognizer: UIRotationGestureRecognizer) {
         for ann in mapView.annotations {
@@ -229,7 +442,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
             }
         }
         rotationRecognizer.rotation = 0
-    }
+    } **/
 
     /**
     func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -250,11 +463,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, UIGestureRecognize
         }
     } **/
 
-
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true;
-    }
-
 }
 
 class CustomMapView: MKMapView , UIGestureRecognizerDelegate{
@@ -269,10 +477,6 @@ class CustomMapView: MKMapView , UIGestureRecognizerDelegate{
         }
     }
     
-    func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-            return true
-    }
-    
     override func hitTest(point: CGPoint, withEvent event: UIEvent?) -> UIView? {
         
         let calloutMaybe = self.calloutView!.hitTest(self.calloutView!.convertPoint(point, fromView: self), withEvent: event)
@@ -282,4 +486,5 @@ class CustomMapView: MKMapView , UIGestureRecognizerDelegate{
             return super.hitTest(point, withEvent: event)
         }
     }
+
 }
