@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import UIKit
+import MessageUI
 
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
@@ -81,7 +82,7 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class DrawingViewController: UIViewController {
+class DrawingViewController: UIViewController, MFMailComposeViewControllerDelegate {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
@@ -95,6 +96,7 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var typePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     
+    @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
     @IBOutlet weak var setHeightButton : UIButton!
@@ -162,6 +164,11 @@ class DrawingViewController: UIViewController {
         }
         
         faciesCatalog.loadImages()
+        
+        if( detailedImage!.scale == nil || detailedImage!.scale! == 0 || !MFMailComposeViewController.canSendMail()
+        ) {
+            emailButton.enabled = false
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -342,8 +349,6 @@ class DrawingViewController: UIViewController {
         let scale = drawingView.getScale()
         if(scale.defined) {
             self.detailedImage!.scale = scale.scale
-        } else if (detailedImage!.scale != 0 ) {
-            // Existing image with an existing scaled defined
         } else {
             alert.title = "Save before closing?"
             alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
@@ -351,7 +356,6 @@ class DrawingViewController: UIViewController {
         let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
             self.managedContext.rollback()
             self.dismissViewControllerAnimated(true, completion: nil)
-
         }
         alert.addAction(noAction)
         let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
@@ -606,6 +610,56 @@ class DrawingViewController: UIViewController {
     
     @IBAction func unwindToDrawing (segue: UIStoryboardSegue) {
         
+    }
+    
+    
+    @IBAction func shareButtonPushed(sender: AnyObject) {
+        let format = 1
+        var filename: NSURL
+        var formatUserName : String
+        if( format == 0 ) {
+            var exporter = ExportAsShapeFile(detailedImage: detailedImage!)
+            filename = exporter.export()
+            formatUserName = "Shape"
+        } else {
+            var exporter = ExportAsGocadFile(detailedImage: detailedImage!)
+            filename = exporter.export()
+            formatUserName = "Gocad"
+        }
+        
+        
+        var error : NSError?
+        let fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions(0), error: &error)
+        if( fileData == nil ) {
+            println("Could not read data to send")
+            return
+        }
+        
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.setSubject("Sending " + formatUserName + " file for Outcrop " + detailedImage!.name)
+
+        if( format == 0 ) {
+           mailComposer.addAttachmentData(
+               fileData, mimeType: "application/shp", fileName: detailedImage!.name + ".shp"
+            )
+        } else {
+           mailComposer.addAttachmentData(
+             fileData, mimeType: "text/plain", fileName: detailedImage!.name + "_gocad.txt"
+           )
+        }
+        mailComposer.addAttachmentData(
+            detailedImage!.imageData, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
+        )
+        
+        mailComposer.setToRecipients([String]())
+        mailComposer.mailComposeDelegate = self
+        
+        self.presentViewController(mailComposer, animated: true, completion: nil)
+    }
+
+    func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
+        println(result)
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
 }
 

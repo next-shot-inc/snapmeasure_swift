@@ -647,6 +647,20 @@ class DrawingView : UIImageView {
     
     func initFromObject(detailedImage: DetailedImageObject, catalog: FaciesCatalog) {
         faciesView.faciesCatalog = catalog
+        if( detailedImage.scale != nil && detailedImage.scale!.floatValue != 0 ) {
+            // Draw scale at approximatevely 10% of image width
+            let refValue = Float(self.image!.size.width)*0.1*detailedImage.scale!.floatValue
+            // Compute a nice reference number to draw
+            let niceRefValue = getNiceNumber(refValue)
+            // Recompute image pixel distance from this reference number and scale
+            let dist = niceRefValue / detailedImage.scale!.floatValue
+            lineView.refMeasureValue = niceRefValue
+            let p1 = CGPoint(x: self.image!.size.width-100.0, y: self.image!.size.height-100.0)
+            var p0 = p1
+            p0.x -= CGFloat(dist)
+            lineView.refMeasurePoints.append(p0)
+            lineView.refMeasurePoints.append(p1)
+        }
         
         // Get the lines via the DetailedView NSSet.
         let scalex = self.bounds.width/self.image!.size.width
@@ -771,6 +785,10 @@ class DrawingView : UIImageView {
                 let rect = CGRectApplyAffineTransform(textView.subviews[i].frame, caffineTransform)
                 var fv = textView.subviews[i] as! UIView
                 fv.frame = rect
+            }
+            
+            for( var i=0; i < lineView.refMeasurePoints.count; ++i ) {
+                lineView.refMeasurePoints[i] = CGPointApplyAffineTransform(lineView.refMeasurePoints[i], caffineTransform)
             }
             
             lineView.setNeedsDisplay()
@@ -924,14 +942,34 @@ class DrawingView : UIImageView {
     
     func getScale() -> (defined: Bool, scale: Double) {
         if( lineView.refMeasurePoints.count > 1 && lineView.refMeasureValue > 0.0 ) {
-            let dx = lineView.refMeasurePoints[1].x - lineView.refMeasurePoints[0].x
-            let dy = lineView.refMeasurePoints[1].y - lineView.refMeasurePoints[0].y
+            let aft = CGAffineTransformInvert(affineTransform)
+            let p0 = CGPointApplyAffineTransform(lineView.refMeasurePoints[0], aft)
+            let p1 = CGPointApplyAffineTransform(lineView.refMeasurePoints[1], aft)
+            let dx = p1.x - p0.x
+            let dy = p1.y - p0.y
             let dist = sqrt(dx*dx + dy*dy)
             let scale = Double(lineView.refMeasureValue)/Double(dist)
             return (true, scale)
         } else {
             return (false, 0.0)
         }
+    }
+    
+    func getNiceNumber(v: Float) -> Float {
+       let expt = floor(log10(v))
+       let frac = v/pow(10, expt)
+       let nice : Float = {
+            if( frac <= 1.0 ) {
+            return 1.0
+            } else if( frac <= 2.0 ) {
+                return 2.0
+            } else if( frac <= 5.0 ) {
+                return 5.0
+            } else {
+                return 10.0
+            }
+        }()
+        return nice*pow(10, expt)
     }
     
     /**
