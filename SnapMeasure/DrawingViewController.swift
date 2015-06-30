@@ -91,11 +91,15 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     @IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var referenceSizeTextField: UITextField!
+    @IBOutlet weak var lineNameTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
     @IBOutlet weak var typeButton: UIButton!
     @IBOutlet weak var typePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     
+    @IBOutlet weak var referenceSizeContainerView: UIView!
+    @IBOutlet weak var faciesTypeContainerView: UIView!
+    @IBOutlet weak var lineContainerView: UIView!
     @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
@@ -124,9 +128,12 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         
         // Initialize widgets at the top
         // 1. Text field
-        referenceSizeTextField.keyboardType = UIKeyboardType.Default
-        referenceSizeTextField.placeholder = "Name"
-        referenceSizeTextField.text = "H1"
+        lineNameTextField.keyboardType = UIKeyboardType.Default
+        lineNameTextField.placeholder = "Name"
+        lineNameTextField.text = "H1"
+        
+        referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
+        referenceSizeTextField.placeholder = "Size"
         
         // 2. Color picker
         colorPickerView.delegate = colorPickerCtrler
@@ -142,17 +149,20 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         typePickerView.delegate = horizonTypePickerCtrler
         typePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = typeButton
+        
+        referenceSizeContainerView.hidden = true
+        faciesTypeContainerView.hidden = true
 
         //make sure all buttons are in the right state
-        self.colButton.userInteractionEnabled = true
-        self.newLineButton.userInteractionEnabled = true
-        self.toolbarSegmentedControl.userInteractionEnabled = true
+        self.colButton.enabled = true
+        self.newLineButton.enabled = true
+        self.toolbarSegmentedControl.enabled = true
 
-        self.defineFeatureButton.userInteractionEnabled = true
+        self.defineFeatureButton.enabled = true
         self.defineFeatureButton.hidden = false
-        self.setWidthButton.userInteractionEnabled = false
+        self.setWidthButton.enabled = false
         self.setWidthButton.hidden = true
-        self.setHeightButton.userInteractionEnabled = false
+        self.setHeightButton.enabled = false
         self.setHeightButton.hidden = true
 
         managedContext = appDelegate.managedObjectContext!
@@ -187,7 +197,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
         
-        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.lineView.currentLineName = lineNameTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
     }
     
@@ -197,19 +207,24 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         drawingView.drawMode =
             DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
         
+        referenceSizeContainerView.hidden = true
+        faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+        
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
             
-            referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
-            referenceSizeTextField.placeholder = "Size"
             let nf = NSNumberFormatter()
-            referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            referenceSizeTextField.text =
+                nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            referenceSizeContainerView.hidden = false
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             
-            referenceSizeTextField.keyboardType = UIKeyboardType.Default
-            referenceSizeTextField.placeholder = "Name"
-            referenceSizeTextField.text = drawingView.lineView.currentLineName
+            lineNameTextField.text = drawingView.lineView.currentLineName
+            lineContainerView.hidden = false
             
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
+            faciesTypeContainerView.hidden = false
         }
     }
     
@@ -230,6 +245,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     @IBAction func handleTap(sender: AnyObject) {
         // Dismiss UI elements (end editing)
         referenceSizeTextField.resignFirstResponder()
+        lineNameTextField.resignFirstResponder()
         colorPickerView.hidden = true
         typePickerView.hidden = true
         
@@ -243,7 +259,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
                 drawingView.lineView.refMeasureValue = ns!.floatValue
             }
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.currentLineName = referenceSizeTextField.text
+            drawingView.lineView.currentLineName = lineNameTextField.text
             drawingView.curColor = colButton.backgroundColor?.CGColor
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
@@ -261,7 +277,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         
         if( line != nil && drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             // Initialize UI with selected object
-            referenceSizeTextField.text = line!.name
+            lineNameTextField.text = line!.name
             colButton.backgroundColor = UIColor(CGColor: line!.color)
             
             // Initialize drawing information
@@ -300,14 +316,14 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     }
     
     @IBAction func pushNewLine(sender: AnyObject) {
-        referenceSizeTextField.text = String("H") +
+        lineNameTextField.text = String("H") +
                                       String(++DrawingViewController.lineCount)
         
         let drawingView = imageView as! DrawingView
         let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
         colButton.backgroundColor = color
-        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.lineView.currentLineName = lineNameTextField.text
         drawingView.curColor = color.CGColor
     }
     
@@ -478,8 +494,6 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             
             self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Reference
-            referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
-            referenceSizeTextField.placeholder = "Size"
             let nf = NSNumberFormatter()
             referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
             
