@@ -12,7 +12,9 @@ import CoreData
 
 
 class FaciesCatalog {
-    let faciesTypes = ["sand", "mud", "grading", "lamination" ]
+    let faciesTypes = [
+        "sandstone", "shale", "conglomerate", "limestone", "dolomite", "granites"
+    ]
     var faciesImages = [FaciesImageObject]()
     
     func count() -> Int {

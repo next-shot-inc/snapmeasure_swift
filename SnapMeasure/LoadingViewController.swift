@@ -16,6 +16,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     var searchController = UISearchController()
     var managedContext : NSManagedObjectContext!
     var faciesCatalog = FaciesCatalog()
+    var edited = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -124,13 +125,14 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             drawingVC.imageInfo = imageInfo
         }
         
-        var error: NSError?
-        if !self.managedContext.save(&error) {
-            println("Could not save in LoadingingViewController \(error), \(error?.userInfo)")
-        } else {
-            println("LoadingViewController saved the ManagedObjectContext")
+        if( edited ) {
+            var error: NSError?
+            if !self.managedContext.save(&error) {
+                println("Could not save in LoadingingViewController \(error), \(error?.userInfo)")
+            } else {
+                println("LoadingViewController saved the ManagedObjectContext")
+            }
         }
-        
     }
     
     // Mark: - Deletion
@@ -150,6 +152,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
                 
                 detailedImages.removeAtIndex(indexPath.row)
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                
+                edited = true
             }
         }
     }
@@ -170,6 +174,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             return (stringMatch != nil)
         })
     }
+    
+    
     
     /** Deprecated
     func searchDisplayController(controller: UISearchDisplayController, shouldReloadTableForSearchString searchString: String!) -> Bool {

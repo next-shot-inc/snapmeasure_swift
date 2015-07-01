@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import UIKit
+import MessageUI
 
 var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
 
@@ -83,7 +84,7 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class DrawingViewController: UIViewController {
+class DrawingViewController: UIViewController, MFMailComposeViewControllerDelegate {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
@@ -92,11 +93,16 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var referenceSizeTextField: UITextField!
+    @IBOutlet weak var lineNameTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
     @IBOutlet weak var typeButton: UIButton!
     @IBOutlet weak var typePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     
+    @IBOutlet weak var referenceSizeContainerView: UIView!
+    @IBOutlet weak var faciesTypeContainerView: UIView!
+    @IBOutlet weak var lineContainerView: UIView!
+    @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
     @IBOutlet weak var setHeightButton : UIButton!
@@ -124,9 +130,12 @@ class DrawingViewController: UIViewController {
         
         // Initialize widgets at the top
         // 1. Text field
-        referenceSizeTextField.keyboardType = UIKeyboardType.Default
-        referenceSizeTextField.placeholder = "Name"
-        referenceSizeTextField.text = "H1"
+        lineNameTextField.keyboardType = UIKeyboardType.Default
+        lineNameTextField.placeholder = "Name"
+        lineNameTextField.text = "H1"
+        
+        referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
+        referenceSizeTextField.placeholder = "Size"
         
         // 2. Color picker
         colorPickerView.delegate = colorPickerCtrler
@@ -142,17 +151,20 @@ class DrawingViewController: UIViewController {
         typePickerView.delegate = horizonTypePickerCtrler
         typePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = typeButton
+        
+        referenceSizeContainerView.hidden = true
+        faciesTypeContainerView.hidden = true
 
         //make sure all buttons are in the right state
-        self.colButton.userInteractionEnabled = true
-        self.newLineButton.userInteractionEnabled = true
-        self.toolbarSegmentedControl.userInteractionEnabled = true
+        self.colButton.enabled = true
+        self.newLineButton.enabled = true
+        self.toolbarSegmentedControl.enabled = true
 
-        self.defineFeatureButton.userInteractionEnabled = true
+        self.defineFeatureButton.enabled = true
         self.defineFeatureButton.hidden = false
-        self.setWidthButton.userInteractionEnabled = false
+        self.setWidthButton.enabled = false
         self.setWidthButton.hidden = true
-        self.setHeightButton.userInteractionEnabled = false
+        self.setHeightButton.enabled = false
         self.setHeightButton.hidden = true
 
         managedContext = appDelegate.managedObjectContext!
@@ -164,6 +176,11 @@ class DrawingViewController: UIViewController {
         }
         
         faciesCatalog.loadImages()
+        
+        if( detailedImage!.scale == nil || detailedImage!.scale! == 0 || !MFMailComposeViewController.canSendMail()
+        ) {
+            emailButton.enabled = false
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -182,7 +199,7 @@ class DrawingViewController: UIViewController {
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
         
-        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.lineView.currentLineName = lineNameTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
     }
     
@@ -192,19 +209,24 @@ class DrawingViewController: UIViewController {
         drawingView.drawMode =
             DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
         
+        referenceSizeContainerView.hidden = true
+        faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+        
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
             
-            referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
-            referenceSizeTextField.placeholder = "Size"
             let nf = NSNumberFormatter()
-            referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            referenceSizeTextField.text =
+                nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            referenceSizeContainerView.hidden = false
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             
-            referenceSizeTextField.keyboardType = UIKeyboardType.Default
-            referenceSizeTextField.placeholder = "Name"
-            referenceSizeTextField.text = drawingView.lineView.currentLineName
+            lineNameTextField.text = drawingView.lineView.currentLineName
+            lineContainerView.hidden = false
             
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
+            faciesTypeContainerView.hidden = false
         }
     }
     
@@ -225,6 +247,7 @@ class DrawingViewController: UIViewController {
     @IBAction func handleTap(sender: AnyObject) {
         // Dismiss UI elements (end editing)
         referenceSizeTextField.resignFirstResponder()
+        lineNameTextField.resignFirstResponder()
         colorPickerView.hidden = true
         typePickerView.hidden = true
         
@@ -238,7 +261,7 @@ class DrawingViewController: UIViewController {
                 drawingView.lineView.refMeasureValue = ns!.floatValue
             }
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.currentLineName = referenceSizeTextField.text
+            drawingView.lineView.currentLineName = lineNameTextField.text
             drawingView.curColor = colButton.backgroundColor?.CGColor
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
@@ -256,7 +279,7 @@ class DrawingViewController: UIViewController {
         
         if( line != nil && drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             // Initialize UI with selected object
-            referenceSizeTextField.text = line!.name
+            lineNameTextField.text = line!.name
             colButton.backgroundColor = UIColor(CGColor: line!.color)
             
             // Initialize drawing information
@@ -295,14 +318,14 @@ class DrawingViewController: UIViewController {
     }
     
     @IBAction func pushNewLine(sender: AnyObject) {
-        referenceSizeTextField.text = String("H") +
+        lineNameTextField.text = String("H") +
                                       String(++DrawingViewController.lineCount)
         
         let drawingView = imageView as! DrawingView
         let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
         colButton.backgroundColor = color
-        drawingView.lineView.currentLineName = referenceSizeTextField.text
+        drawingView.lineView.currentLineName = lineNameTextField.text
         drawingView.curColor = color.CGColor
     }
     
@@ -344,8 +367,6 @@ class DrawingViewController: UIViewController {
         let scale = drawingView.getScale()
         if(scale.defined) {
             self.detailedImage!.scale = scale.scale
-        } else if (detailedImage!.scale != 0 ) {
-            // Existing image with an existing scaled defined
         } else {
             alert.title = "Save before closing?"
             alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
@@ -353,7 +374,6 @@ class DrawingViewController: UIViewController {
         let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
             self.managedContext.rollback()
             self.dismissViewControllerAnimated(true, completion: nil)
-
         }
         alert.addAction(noAction)
         
@@ -482,8 +502,6 @@ class DrawingViewController: UIViewController {
             
             self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Reference
-            referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
-            referenceSizeTextField.placeholder = "Size"
             let nf = NSNumberFormatter()
             referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
             
@@ -614,6 +632,56 @@ class DrawingViewController: UIViewController {
     
     @IBAction func unwindToDrawing (segue: UIStoryboardSegue) {
         
+    }
+    
+    
+    @IBAction func shareButtonPushed(sender: AnyObject) {
+        let format = 1
+        var filename: NSURL
+        var formatUserName : String
+        if( format == 0 ) {
+            var exporter = ExportAsShapeFile(detailedImage: detailedImage!)
+            filename = exporter.export()
+            formatUserName = "Shape"
+        } else {
+            var exporter = ExportAsGocadFile(detailedImage: detailedImage!)
+            filename = exporter.export()
+            formatUserName = "Gocad"
+        }
+        
+        
+        var error : NSError?
+        let fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions(0), error: &error)
+        if( fileData == nil ) {
+            println("Could not read data to send")
+            return
+        }
+        
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.setSubject("Sending " + formatUserName + " file for Outcrop " + detailedImage!.name)
+
+        if( format == 0 ) {
+           mailComposer.addAttachmentData(
+               fileData, mimeType: "application/shp", fileName: detailedImage!.name + ".shp"
+            )
+        } else {
+           mailComposer.addAttachmentData(
+             fileData, mimeType: "text/plain", fileName: detailedImage!.name + "_gocad.txt"
+           )
+        }
+        mailComposer.addAttachmentData(
+            detailedImage!.imageData, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
+        )
+        
+        mailComposer.setToRecipients([String]())
+        mailComposer.mailComposeDelegate = self
+        
+        self.presentViewController(mailComposer, animated: true, completion: nil)
+    }
+
+    func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
+        println(result)
+        self.dismissViewControllerAnimated(true, completion: nil)
     }
 }
 
