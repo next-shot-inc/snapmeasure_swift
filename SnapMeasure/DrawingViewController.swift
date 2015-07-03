@@ -11,6 +11,8 @@ import CoreData
 import UIKit
 import MessageUI
 
+var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
+
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
     var colorButton : UIButton?
@@ -111,7 +113,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     var colorPickerCtrler = ColorPickerController()
     var horizonTypePickerCtrler = HorizonTypePickerController()
     static var lineCount = 1
-    var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
+
     var faciesCatalog = FaciesCatalog()
     
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -372,6 +374,12 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             self.dismissViewControllerAnimated(true, completion: nil)
         }
         alert.addAction(noAction)
+        
+        let cancelAction : UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
+            alert.dismissViewControllerAnimated(true, completion: nil)
+        }
+        alert.addAction(cancelAction)
+        
         let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
             
             //update detailedImage and lines

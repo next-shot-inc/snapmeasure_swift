@@ -15,6 +15,7 @@ class MapLineOverlay: NSObject, MKOverlay {
     var mapLength : Double
     var angle : Double
     
+    //length represents the length of the line in meters
     init(length: Double, compassOrientation: CLLocationDirection, coordinate: CLLocationCoordinate2D) {
         let orientation : Double
         if (compassOrientation < 0) {

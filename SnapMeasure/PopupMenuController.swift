@@ -30,6 +30,7 @@ class PopupMenuController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         
         if (cellContents.count > 0) {
+            cellContents[indexPath.row].center = cell.contentView.center
             cell.contentView.addSubview(cellContents[indexPath.row])
           if (indexPath.row < cellContents.count-1) {
                 let lineView = UIView(frame: CGRectMake(0, cell.contentView.frame.size.height - 1.0, cell.contentView.frame.size.width, 1))
