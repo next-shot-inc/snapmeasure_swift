@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreLocation
 
 struct Line {
     enum Role : Int {
@@ -584,14 +585,120 @@ class TextView : UIView {
     }
 }
 
+struct DipMarkerPoint {
+    var loc: CGPoint
+    var normal : Vector3
+    var realLocation : CLLocation
+}
+
+class DipMarkerPickTool {
+    var normal : Vector3
+    var previousToolMode : Int
+    var curPoint = CGPoint()
+    var realLocation : CLLocation?
+    
+    init( normal: Vector3, realLocation: CLLocation?, toolMode: Int){
+        self.normal = normal
+        self.previousToolMode = toolMode
+        self.realLocation = realLocation
+    }
+    
+    func move(point: CGPoint) {
+        curPoint = point
+    }
+}
+
+class DipMarkerView : UIView {
+    var points = [DipMarkerPoint]()
+    var normal = Vector3(x: 0, y: 0, z: 0)
+    var pickTool : DipMarkerPickTool?
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        CGContextSetLineWidth(context, 2.0)
+
+        for p in points {
+            if( p.loc.x == 0 && p.loc.y == 0 ) {
+                continue
+            }
+            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            let hl : CGFloat = 4
+            CGContextMoveToPoint (context, p.loc.x - hl, p.loc.y - hl);
+            CGContextAddLineToPoint(context, p.loc.x - hl, p.loc.y + hl);
+            CGContextAddLineToPoint(context, p.loc.x + hl, p.loc.y + hl)
+            CGContextAddLineToPoint(context, p.loc.x + hl, p.loc.y - hl)
+            CGContextAddLineToPoint(context, p.loc.x - hl, p.loc.y - hl)
+            CGContextStrokePath(context)
+            
+            //Project normal vector onto plane
+            //B = A - (A.dot.N)N
+            let dot = normal.x*p.normal.x + normal.y*p.normal.y + normal.z*p.normal.z
+            let b = Vector3(x: p.normal.x - dot * normal.x, y: p.normal.y - dot * normal.y, z: p.normal.z - dot * normal.z)
+            let adip = asin(sqrt(b.x*b.x+b.y*b.y)/sqrt(b.x*b.x+b.y*b.y+b.z*b.z))
+            let dmhl : Double = 20
+            CGContextMoveToPoint (context, p.loc.x - CGFloat(dmhl * cos(adip)), p.loc.y - CGFloat(dmhl * sin(adip)))
+            CGContextAddLineToPoint(context, p.loc.x + CGFloat(dmhl * cos(adip)), p.loc.y + CGFloat(dmhl * sin(adip)))
+            CGContextStrokePath(context)
+        }
+
+        if( pickTool != nil ) {
+            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            CGContextMoveToPoint (context, pickTool!.curPoint.x - 50, pickTool!.curPoint.y);
+            CGContextAddLineToPoint(context, pickTool!.curPoint.x + 50, pickTool!.curPoint.y)
+            CGContextStrokePath(context)
+            CGContextMoveToPoint (context, pickTool!.curPoint.x, pickTool!.curPoint.y - 50);
+            CGContextAddLineToPoint(context, pickTool!.curPoint.x, pickTool!.curPoint.y + 50)
+            CGContextStrokePath(context)
+        }
+    }
+    
+    func initializeNormal(orientation: Float?) {
+        if( orientation != nil ) {
+            normal.x = Double(cos(orientation!)) // x is along North
+            normal.y = Double(sin(orientation!))
+        }
+    }
+    
+    // Add a point located in the current picture
+    func addPoint(loc: CGPoint) {
+        if( pickTool != nil ) {
+            var dm = DipMarkerPoint(
+                loc: loc, normal: pickTool!.normal,
+                realLocation: pickTool!.realLocation == nil ? CLLocation() : pickTool!.realLocation!
+            )
+           points.append(dm)
+        }
+    }
+    
+    // Add a point related to the current picture but not localized in the picture
+    func addPoint(#realLocation: CLLocation, normal: Vector3) {
+        var dm = DipMarkerPoint(
+            loc: CGPoint(), normal: normal,
+            realLocation: realLocation
+        )
+        points.append(dm)
+    }
+    
+}
+
 class DrawingView : UIImageView {
     enum ToolMode : Int {
-        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5
+        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5, DipMarker = 6
     }
     
     var lineView = LineView()
     var faciesView = FaciesView()
     var textView = TextView()
+    var dipMarkerView = DipMarkerView()
+    
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
     var curColor = UIColor.blackColor().CGColor
@@ -615,6 +722,12 @@ class DrawingView : UIImageView {
         textView.opaque = false
         textView.backgroundColor = nil
         self.addSubview(textView)
+        
+        dipMarkerView = DipMarkerView(frame: frame)
+        dipMarkerView.opaque = false
+        dipMarkerView.backgroundColor = nil
+        self.addSubview(dipMarkerView)
+
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -638,6 +751,12 @@ class DrawingView : UIImageView {
         textView.backgroundColor = nil
         textView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
         self.addSubview(textView)
+        
+        dipMarkerView = DipMarkerView(frame: self.bounds)
+        dipMarkerView.opaque = false
+        dipMarkerView.backgroundColor = nil
+        dipMarkerView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        self.addSubview(dipMarkerView)
     }
     
     func initFrame() {
@@ -728,6 +847,25 @@ class DrawingView : UIImageView {
             textView.addText(to!.string, rect: rect)
             textView.setNeedsDisplay()
         }
+        
+        // Initialize the dip markers
+        for admpo in detailedImage.dipMeterPoints {
+            let dmpo = admpo as? DipMeterPointObject
+            var loc = dmpo!.locationInImage.CGPointValue()
+            if( loc.x != 0 && loc.y != 0 ) {
+                loc = CGPointApplyAffineTransform(loc, affineTransform)
+            }
+            let strike = dmpo!.strike.doubleValue * M_PI/180
+            let dip = dmpo!.dip.doubleValue * M_PI / 180
+            dipMarkerView.points.append(DipMarkerPoint(
+                loc: loc,
+                normal: Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip)),
+                realLocation: dmpo!.realLocation as! CLLocation)
+            )
+            dipMarkerView.setNeedsDisplay()
+        }
+        
+        dipMarkerView.initializeNormal(detailedImage.compassOrientation?.floatValue)
     }
     
     override var bounds : CGRect {
@@ -786,6 +924,11 @@ class DrawingView : UIImageView {
                 var fv = textView.subviews[i] as! UIView
                 fv.frame = rect
             }
+            for( var i=0; i < dipMarkerView.points.count; ++i ) {
+                if( dipMarkerView.points[i].loc.x != 0 && dipMarkerView.points[i].loc.y != 0 ) {
+                    dipMarkerView.points[i].loc = CGPointApplyAffineTransform(dipMarkerView.points[i].loc, caffineTransform)
+                }
+            }
             
             for( var i=0; i < lineView.refMeasurePoints.count; ++i ) {
                 lineView.refMeasurePoints[i] = CGPointApplyAffineTransform(lineView.refMeasurePoints[i], caffineTransform)
@@ -811,7 +954,9 @@ class DrawingView : UIImageView {
        let touch = touches.first as! UITouch
        let point = touch.locationInView(self)
     
-        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
+            drawMode != ToolMode.DipMarker
+        ) {
             lineView.currentLine = Line()
             lineView.currentLine.points.append(point)
         } else if( drawMode == ToolMode.Facies ){
@@ -830,6 +975,9 @@ class DrawingView : UIImageView {
             faciesView.drawTool = FaciesDrawTool(curColumn: cc!, point: point)
         } else if( drawMode == ToolMode.Text ) {
             textView.drawTool = TextDrawTool(point: point)
+        } else if( drawMode == ToolMode.DipMarker ) {
+            dipMarkerView.pickTool!.move(point)
+            dipMarkerView.setNeedsDisplay()
         }
         
         if( drawMode == ToolMode.Erase ) {
@@ -869,7 +1017,9 @@ class DrawingView : UIImageView {
         let touch = touches.first as! UITouch
         let point = touch.locationInView(self)
         
-        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
+            drawMode != ToolMode.DipMarker
+        ) {
            lineView.currentLine.points.append(point)
            if( drawMode != ToolMode.Erase ) {
                 lineView.setNeedsDisplay()
@@ -880,6 +1030,9 @@ class DrawingView : UIImageView {
         } else if( drawMode == ToolMode.Text ) {
             textView.drawTool!.move(point)
             textView.setNeedsDisplay()
+        } else if( drawMode == ToolMode.DipMarker ) {
+            dipMarkerView.pickTool!.move(point)
+            dipMarkerView.setNeedsDisplay()
         }
         
     }
@@ -935,6 +1088,11 @@ class DrawingView : UIImageView {
             let label = textView.addText("", rect: textView.drawTool!.curRect)
             textView.drawTool = nil
             controller?.askText(label)
+        } else if( drawMode == ToolMode.DipMarker ) {
+            drawMode = ToolMode(rawValue: dipMarkerView.pickTool!.previousToolMode)!
+            dipMarkerView.addPoint(point)
+            dipMarkerView.pickTool = nil
+            dipMarkerView.setNeedsDisplay()
         }
         lineView.currentLine = Line()
         lineView.setNeedsDisplay()

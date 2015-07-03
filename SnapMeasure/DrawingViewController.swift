@@ -93,9 +93,10 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     @IBOutlet weak var referenceSizeTextField: UITextField!
     @IBOutlet weak var lineNameTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
-    @IBOutlet weak var typeButton: UIButton!
-    @IBOutlet weak var typePickerView: UIPickerView!
+    @IBOutlet weak var faciesTypeButton: UIButton!
+    @IBOutlet weak var horizonTypePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
+    @IBOutlet weak var horizonTypeButton: UIButton!
     
     @IBOutlet weak var referenceSizeContainerView: UIView!
     @IBOutlet weak var faciesTypeContainerView: UIView!
@@ -146,9 +147,9 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         colorPickerCtrler.colorButton = colButton
         
         //4. Type pickers
-        typePickerView.delegate = horizonTypePickerCtrler
-        typePickerView.dataSource = horizonTypePickerCtrler
-        horizonTypePickerCtrler.typeButton = typeButton
+        horizonTypePickerView.delegate = horizonTypePickerCtrler
+        horizonTypePickerView.dataSource = horizonTypePickerCtrler
+        horizonTypePickerCtrler.typeButton = horizonTypeButton
         
         referenceSizeContainerView.hidden = true
         faciesTypeContainerView.hidden = true
@@ -247,7 +248,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         referenceSizeTextField.resignFirstResponder()
         lineNameTextField.resignFirstResponder()
         colorPickerView.hidden = true
-        typePickerView.hidden = true
+        horizonTypePickerView.hidden = true
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
@@ -263,7 +264,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             drawingView.curColor = colButton.backgroundColor?.CGColor
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
-            drawingView.faciesView.curImageName = typeButton.titleForState(UIControlState.Normal)!
+            drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
         }
     }
     
@@ -329,28 +330,25 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     
     @IBAction func pushTypeButton(sender: AnyObject) {
         let drawingView = imageView as! DrawingView
-        if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            typePickerView.hidden = !typePickerView.hidden
-        } else {
-            //faciesTypePickerView.hidden = !faciesTypePickerView.hidden
-            let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("FaciesPixmapController") as! FaciesPixmapViewController
-            ctrler.typeButton = self.typeButton
-            ctrler.drawingView = drawingView
-            ctrler.faciesCatalog = faciesCatalog
-            
-            ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
-            ctrler.preferredContentSize.width = 150
-            ctrler.preferredContentSize.height = 400
-            ctrler.popoverPresentationController?.sourceView = sender as! UIView
-            ctrler.popoverPresentationController?.sourceRect = sender.bounds
-            ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
-            
-            self.presentViewController(ctrler, animated: true, completion: nil)
-        }
+        let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("FaciesPixmapController") as! FaciesPixmapViewController
+        ctrler.typeButton = self.faciesTypeButton
+        ctrler.drawingView = drawingView
+        ctrler.faciesCatalog = faciesCatalog
         
-        //let drawingView = imageView as! DrawingView
+        ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
+        ctrler.preferredContentSize.width = 150
+        ctrler.preferredContentSize.height = 400
+        ctrler.popoverPresentationController?.sourceView = sender as! UIView
+        ctrler.popoverPresentationController?.sourceRect = sender.bounds
+        ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        
+        self.presentViewController(ctrler, animated: true, completion: nil)
     }
 
+    @IBAction func pushLineTypeButton(sender: AnyObject) {
+        horizonTypePickerView.hidden = !horizonTypePickerView.hidden
+    }
+    
     @IBAction func closeWindow(sender: AnyObject) {
         var inputTextField : UITextField?
         let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
@@ -444,6 +442,23 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
                 }
             }
             self.detailedImage!.texts = textSet
+            
+            let dipMeterPoints = NSMutableSet()
+            for dmp in drawingView.dipMarkerView.points {
+                let dmpo = NSEntityDescription.insertNewObjectForEntityForName(
+                        "DipMeterPointObject", inManagedObjectContext: self.managedContext) as? DipMeterPointObject
+                var tpoint = dmp.loc
+                if( dmp.loc.x != 0 && dmp.loc.y != 0 ) {
+                   tpoint = CGPointApplyAffineTransform(dmp.loc, affineTransform)
+                }
+                dmpo!.locationInImage = NSValue(CGPoint: tpoint)
+                dmpo!.realLocation = dmp.realLocation
+                let sad = dmp.normal.strikeAndDip()
+                dmpo!.strike = sad.strike
+                dmpo!.dip = sad.dip
+                dipMeterPoints.addObject(dmpo!)
+            }
+            self.detailedImage!.dipMeterPoints = dipMeterPoints
             
             //save the managedObjectContext
             var error: NSError?
@@ -626,6 +641,18 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         
     }
     
+    @IBAction func doMeasureDipAndStrike(sender: AnyObject) {
+        let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("OrientationController") as! OrientationController
+        
+        ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
+        ctrler.popoverPresentationController?.sourceView = sender as! UIView
+        ctrler.popoverPresentationController?.sourceRect = sender.bounds
+        ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+        ctrler.preferredContentSize = size
+        
+        self.presentViewController(ctrler, animated: true, completion: nil)
+    }
     
     @IBAction func shareButtonPushed(sender: AnyObject) {
         let format = 1
