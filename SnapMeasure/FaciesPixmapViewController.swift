@@ -55,6 +55,23 @@ class FaciesCatalog {
         return (nil,false)
     }
     
+    func imageIndex(name: String) -> Int {
+        var index = 0
+        for n in faciesTypes {
+            if( n == name ) {
+                return index
+            }
+            index++
+        }
+        for fio in faciesImages {
+            if( name == fio.name ) {
+                return index
+            }
+            index++
+        }
+        return -1
+    }
+    
     func remove(index: Int) {
         faciesImages.removeAtIndex(index - faciesTypes.count)
     }

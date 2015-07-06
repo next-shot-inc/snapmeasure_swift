@@ -18,6 +18,7 @@ struct DPoint3 {
 
 class Exporter {
     let object : DetailedImageObject
+    let faciesCatalog : FaciesCatalog?
     let startMapPoint : MKMapPoint
     let endMapPoint : MKMapPoint
     let elevation : Double
@@ -28,8 +29,9 @@ class Exporter {
     // Need detailedImage.scale != nil
     // Need detailedImage.longitude != nil
     
-    init(detailedImage: DetailedImageObject) {
+    init(detailedImage: DetailedImageObject, faciesCatalog: FaciesCatalog?) {
         self.object = detailedImage
+        self.faciesCatalog = faciesCatalog
         
         let image = UIImage(data: detailedImage.imageData)!
         let length = detailedImage.scale!.doubleValue * Double(image.size.width)
@@ -48,7 +50,49 @@ class Exporter {
             
             let scale = MKMetersPerMapPointAtLatitude(coordinate.latitude)
             
-            let centerMapPoint = MKMapPointForCoordinate(coordinate)
+            var centerMapPoint = MKMapPointForCoordinate(coordinate)
+            
+            // Look at dip meter points to better locate the image
+            var minLoc : CGFloat = CGFloat(xLength)
+            var maxLoc : CGFloat = 0.0
+            var minPoint = MKMapPoint()
+            var maxPoint = MKMapPoint()
+            for adpo in object.dipMeterPoints  {
+                let dpo = adpo as! DipMeterPointObject
+                var loc = dpo.locationInImage.CGPointValue()
+                if( loc.x != 0 && loc.y != 0 ) {
+                    var rloc = dpo.realLocation as! CLLocation
+                    if( rloc.horizontalAccuracy > 0 ) {
+                       let mapPoint = MKMapPointForCoordinate(rloc.coordinate)
+                        if( loc.x < minLoc ) {
+                            minLoc = loc.x
+                            minPoint = mapPoint
+                        }
+                        if( loc.x > maxLoc ) {
+                            maxLoc = loc.x
+                            maxPoint = mapPoint
+                        }
+                    }
+                }
+            }
+            
+            if( maxLoc != CGFloat(0.0) ) {
+                if( maxLoc != minLoc ) {
+                    // If we have two located points on the image
+                    // Compute the location of the center of the image
+                    let s = Double(CGFloat(xLength)/2 - minLoc)/Double(maxLoc - minLoc)
+                    centerMapPoint.x = minPoint.x + s*(maxPoint.x - minPoint.x)
+                    centerMapPoint.y = minPoint.y + s*(maxPoint.y - minPoint.y)
+                } else {
+                    // Compute the distance of the point to the camera position
+                    let dx = centerMapPoint.x-minPoint.x
+                    let dy = centerMapPoint.y-minPoint.y
+                    let d = sqrt(dx*dx + dy*dy)
+                    // Move the center by the distance perpendicular to the orientation
+                    centerMapPoint.x += d*cos(orientation)
+                    centerMapPoint.y += d*sin(orientation)
+                }
+            }
             
             let mapLength = length/scale
             
@@ -73,17 +117,13 @@ class Exporter {
         let y = Double(point.x)/xLength * (endMapPoint.y - startMapPoint.y) + startMapPoint.y
         
         // Need to add camera tilt and distance of camera to outcrop to compute z more accurately.
-        let z = Double(point.y) * pixelToMeterForZ + elevation
+        let z = (Double(-point.y) + yHeight/2.0) * pixelToMeterForZ + elevation
         return DPoint3(x: x,y: y,z: z)
     }
 
 }
 
 class ExportAsShapeFile : Exporter {
-    override init(detailedImage: DetailedImageObject) {
-        super.init(detailedImage: detailedImage)
-    }
-    
     func export() -> NSURL {
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let url_shp = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent("export.shp")
@@ -517,6 +557,152 @@ class ExportAsGocadFile : Exporter {
         file?.writeData(data!)
         data = ("END\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
         file?.writeData(data!)
+        
+        // Write dip meter points (organized by feature)
+        var writtenFeature = Set<NSString>()
+        for adpo in object.dipMeterPoints  {
+            let dpo = adpo as! DipMeterPointObject
+            if( writtenFeature.contains(dpo.feature) ) {
+                continue
+            }
+            writtenFeature.insert(dpo.feature)
+
+            data = ("GOCAD VSet 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("name: " + dpo.feature).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("\n}\nPROPERTIES normal\nPROPERTY_CLASSES vector3d\nESIZES 3\nSUBVSET\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            
+            for iadpo in object.dipMeterPoints  {
+                let idpo = adpo as! DipMeterPointObject
+                if( idpo.feature != dpo.feature ) {
+                    continue;
+                }
+                data = ("PVRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                
+                // gather information about the point
+                var loc = idpo.locationInImage.CGPointValue()
+                let strike = idpo.strike.doubleValue * M_PI/180
+                let dip = idpo.dip.doubleValue * M_PI / 180
+                let normal = Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip))
+                var p : DPoint3
+                if( loc.x != 0 && loc.y != 0 ) {
+                    // locate from the picture
+                    p = zpoint(loc)
+                } else {
+                    // locate using real location
+                    var rloc = idpo.realLocation as! CLLocation
+                    let centerMapPoint = MKMapPointForCoordinate(rloc.coordinate)
+                    p = DPoint3(x: centerMapPoint.x, y: centerMapPoint.y, z: rloc.altitude)
+                }
+                var data = ((p.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                data = ((p.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                data = ((p.z as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                data = ((normal.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                data = ((normal.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                data = ((normal.z as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+            }
+            data = ("END\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+        }
+        
+        // Write facies columns 
+        var columns = [FaciesColumn]()
+        // Get the facies vignettes
+        for afvo in object.faciesVignettes {
+            let fvo = afvo as? FaciesVignetteObject
+            let rect = fvo!.rect.CGRectValue()
+            let fv = FaciesVignette(rect: rect, image: fvo!.imageName)
+            let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
+            
+            var inserted_in_column = false
+            for fvc in columns {
+                if( fvc.inside(center) ) {
+                    for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                        if( center.y < cfv.rect.minY ) {
+                            fvc.faciesVignettes.insert(fv, atIndex: index)
+                            inserted_in_column = true
+                            break
+                        }
+                    }
+                    if( !inserted_in_column ) {
+                        fvc.faciesVignettes.append(fv)
+                        inserted_in_column = true
+                        break
+                    }
+                }
+            }
+            if( !inserted_in_column ) {
+                let nfc = FaciesColumn()
+                nfc.faciesVignettes.append(fv)
+                columns.append(nfc)
+            }
+        }
+        for col in columns {
+            data = ("GOCAD Well 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("name: " + object.name).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            
+            // Write first point of path
+            var fv0 = col.faciesVignettes[0]
+            var top = CGPoint(x: (fv0.rect.minX + fv0.rect.maxX)/2.0, y: fv0.rect.minY)
+            var topp = zpoint(top)
+            data = ("\n}\nWREF" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            writePoint(file, p: topp)
+
+            // Write last point
+            var fv1 = col.faciesVignettes[col.faciesVignettes.count-1]
+            var bot = CGPoint(x: top.x, y: fv1.rect.maxY)
+            var botp = zpoint(bot)
+            data = ("VRTX" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            writePoint(file, p: botp)
+            
+            data = ("\nWELL_CURVE\nPROPERTY facies\nINTERPOLATION Block\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            for fv in col.faciesVignettes {
+                let ftop = CGPoint(x: top.x, y: fv.rect.minY)
+                let ftopp = zpoint(ftop)
+                let zm = topp.z - ftopp.z
+                data = ("REC " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                data = ((zm as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
+                var index =  -1
+                if( faciesCatalog != nil ) {
+                    index = faciesCatalog!.imageIndex(fv.imageName)
+                }
+                data = ((index as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+            }
+            data = ("END_CURVE\nEND\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+        }
+
         
         file?.closeFile()
     }

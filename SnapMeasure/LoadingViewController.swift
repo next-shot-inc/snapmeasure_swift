@@ -79,6 +79,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
         cell.faciesCatalog = faciesCatalog
+        cell.controller = self
         
         var detailedImage: DetailedImageObject
         if (searchController.active) {

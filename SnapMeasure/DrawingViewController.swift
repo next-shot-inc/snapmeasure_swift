@@ -9,9 +9,9 @@
 import Foundation
 import CoreData
 import UIKit
-import MessageUI
 
 var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
+let horizonTypes = ["Top", "Unconformity", "Fault"]
 
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
@@ -65,14 +65,16 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
 }
 
 class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
-    let horizonTypes = ["Top", "Unconformity", "Fault"]
+    
     var typeButton : UIButton?
+    var drawingView: DrawingView?
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
     }
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
         typeButton?.setTitle(horizonTypes[row], forState: UIControlState.Normal)
+        drawingView?.lineView.tool.lineType = horizonTypes[row]
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -84,7 +86,7 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class DrawingViewController: UIViewController, MFMailComposeViewControllerDelegate {
+class DrawingViewController: UIViewController {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
@@ -152,6 +154,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         horizonTypePickerView.delegate = horizonTypePickerCtrler
         horizonTypePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = horizonTypeButton
+        horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
         
         referenceSizeContainerView.hidden = true
         faciesTypeContainerView.hidden = true
@@ -177,11 +180,6 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         }
         
         faciesCatalog.loadImages()
-        
-        if( detailedImage!.scale == nil || detailedImage!.scale! == 0 || !MFMailComposeViewController.canSendMail()
-        ) {
-            emailButton.enabled = false
-        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -200,8 +198,12 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         drawingView.initFrame()
         drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
         
-        drawingView.lineView.currentLineName = lineNameTextField.text
+        drawingView.lineView.tool.lineName = lineNameTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
+        drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
+        
+        colorPickerCtrler.drawingView = drawingView
+        horizonTypePickerCtrler.drawingView = drawingView
     }
     
     
@@ -223,7 +225,6 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             
-            lineNameTextField.text = drawingView.lineView.currentLineName
             lineContainerView.hidden = false
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
@@ -262,9 +263,8 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
                 drawingView.lineView.refMeasureValue = ns!.floatValue
             }
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.currentLineName = lineNameTextField.text
-            drawingView.curColor = colButton.backgroundColor?.CGColor
-            
+            drawingView.lineView.tool.lineName = lineNameTextField.text
+                    
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
             drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
         }
@@ -284,8 +284,10 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             colButton.backgroundColor = UIColor(CGColor: line!.color)
             
             // Initialize drawing information
-            drawingView.lineView.currentLineName = line!.name
+            drawingView.lineView.tool.lineName = line!.name
             drawingView.curColor = line!.color
+            drawingView.lineView.tool.lineType = LineViewTool.typeName(line!.role)
+            horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, forState: UIControlState.Normal)
         } else {
             self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
             self.imageView.transform = CGAffineTransformIdentity;
@@ -326,7 +328,8 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
         colButton.backgroundColor = color
-        drawingView.lineView.currentLineName = lineNameTextField.text
+        drawingView.lineView.tool.lineName = lineNameTextField.text
+        drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
         drawingView.curColor = color.CGColor
     }
     
@@ -406,6 +409,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
                 lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
                     UIColor(CGColor: line.color)!
                 )
+                lineObject!.type = LineViewTool.typeName(line.role)
                 
                 var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
                 for( var i=0; i < line.points.count; ++i ) {
@@ -464,6 +468,11 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
                 let sad = dmp.normal.strikeAndDip()
                 dmpo!.strike = sad.strike
                 dmpo!.dip = sad.dip
+                if( dmp.snappedLine != nil ) {
+                    dmpo!.feature = dmp.snappedLine!.name
+                } else {
+                    dmpo!.feature = "unassigned"
+                }
                 dipMeterPoints.addObject(dmpo!)
             }
             self.detailedImage!.dipMeterPoints = dipMeterPoints
@@ -662,54 +671,6 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         self.presentViewController(ctrler, animated: true, completion: nil)
     }
     
-    @IBAction func shareButtonPushed(sender: AnyObject) {
-        let format = 1
-        var filename: NSURL
-        var formatUserName : String
-        if( format == 0 ) {
-            var exporter = ExportAsShapeFile(detailedImage: detailedImage!)
-            filename = exporter.export()
-            formatUserName = "Shape"
-        } else {
-            var exporter = ExportAsGocadFile(detailedImage: detailedImage!)
-            filename = exporter.export()
-            formatUserName = "Gocad"
-        }
-        
-        
-        var error : NSError?
-        let fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions(0), error: &error)
-        if( fileData == nil ) {
-            println("Could not read data to send")
-            return
-        }
-        
-        let mailComposer = MFMailComposeViewController()
-        mailComposer.setSubject("Sending " + formatUserName + " file for Outcrop " + detailedImage!.name)
-
-        if( format == 0 ) {
-           mailComposer.addAttachmentData(
-               fileData, mimeType: "application/shp", fileName: detailedImage!.name + ".shp"
-            )
-        } else {
-           mailComposer.addAttachmentData(
-             fileData, mimeType: "text/plain", fileName: detailedImage!.name + "_gocad.txt"
-           )
-        }
-        mailComposer.addAttachmentData(
-            detailedImage!.imageData, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
-        )
-        
-        mailComposer.setToRecipients([String]())
-        mailComposer.mailComposeDelegate = self
-        
-        self.presentViewController(mailComposer, animated: true, completion: nil)
-    }
-
-    func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
-        println(result)
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
 }
 
 

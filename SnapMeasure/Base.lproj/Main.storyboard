@@ -247,15 +247,27 @@
                                                 <constraint firstItem="jBS-1W-do2" firstAttribute="top" secondItem="vwZ-BT-aWo" secondAttribute="top" id="zUc-EO-Ins"/>
                                             </constraints>
                                         </view>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUq-92-gMW">
+                                            <rect key="frame" x="17" y="119" width="42" height="42"/>
+                                            <state key="normal" image="message">
+                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
+                                            <connections>
+                                                <action selector="sendMail:" destination="zZL-2J-885" eventType="touchDown" id="vDg-kW-AIq"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                     <constraints>
+                                        <constraint firstAttribute="centerY" secondItem="PUq-92-gMW" secondAttribute="centerY" id="Jpe-e2-u8i"/>
                                         <constraint firstAttribute="centerX" secondItem="vwZ-BT-aWo" secondAttribute="centerX" id="Ngz-TT-Khr"/>
+                                        <constraint firstItem="PUq-92-gMW" firstAttribute="leading" secondItem="4ph-hl-cNB" secondAttribute="leadingMargin" constant="9" id="dHS-Qn-ama"/>
                                         <constraint firstAttribute="bottom" secondItem="vwZ-BT-aWo" secondAttribute="bottom" constant="15" id="jDg-Bw-do8"/>
                                         <constraint firstItem="vwZ-BT-aWo" firstAttribute="top" secondItem="4ph-hl-cNB" secondAttribute="top" constant="14" id="slf-0s-MQV"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
+                                    <outlet property="mailButton" destination="PUq-92-gMW" id="YVH-P7-kle"/>
                                     <outlet property="mainView" destination="vwZ-BT-aWo" id="EHL-l9-rDh"/>
                                     <outlet property="myImageView" destination="jBS-1W-do2" id="M8d-bG-Xms"/>
                                     <outlet property="nameLabel" destination="urp-OZ-iI3" id="V8B-5K-MXA"/>
@@ -780,15 +792,6 @@
                                     <action selector="pushSetHeightButton:" destination="KD6-M1-rG7" eventType="touchUpInside" id="igD-OK-X0w"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KIf-D2-qIp">
-                                <rect key="frame" x="16" y="538" width="87" height="42"/>
-                                <state key="normal" title="Email" image="message">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="shareButtonPushed:" destination="KD6-M1-rG7" eventType="touchUpInside" id="sbN-vq-UKt"/>
-                                </connections>
-                            </button>
                             <view alpha="0.49999999999999961" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7Ln-g8-wlv">
                                 <rect key="frame" x="51" y="154" width="226" height="61"/>
                                 <subviews>
@@ -916,9 +919,7 @@
                             <constraint firstItem="u4C-tu-Tbg" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" constant="5" id="6bf-g5-LA8"/>
                             <constraint firstItem="SBq-9U-Dsq" firstAttribute="centerY" secondItem="PoK-3P-TM8" secondAttribute="centerY" id="748-Aj-lo2"/>
                             <constraint firstAttribute="trailing" secondItem="osR-9M-AcR" secondAttribute="trailing" constant="10" id="8MW-zU-8la"/>
-                            <constraint firstItem="KIf-D2-qIp" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leadingMargin" id="9Kb-s5-2jA"/>
                             <constraint firstItem="7Ln-g8-wlv" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="2" id="BiA-hR-ZsK"/>
-                            <constraint firstItem="rxP-Dv-Dey" firstAttribute="top" secondItem="KIf-D2-qIp" secondAttribute="bottom" constant="20" id="Csk-7F-HM4"/>
                             <constraint firstAttribute="trailing" secondItem="5Va-oC-eeB" secondAttribute="trailing" constant="10" id="Czy-bD-6qG"/>
                             <constraint firstItem="8uk-qr-frP" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="3" id="Eqw-BV-OLl"/>
                             <constraint firstItem="EaD-SD-Xzk" firstAttribute="top" secondItem="SBq-9U-Dsq" secondAttribute="bottom" constant="5" id="Iw1-vN-D33"/>
@@ -943,7 +944,6 @@
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
                         <outlet property="defineFeatureButton" destination="PoK-3P-TM8" id="jmc-9o-GsW"/>
-                        <outlet property="emailButton" destination="KIf-D2-qIp" id="NVn-v6-Nt1"/>
                         <outlet property="faciesTypeButton" destination="HHQ-8o-Zsd" id="sxu-oJ-Z0G"/>
                         <outlet property="faciesTypeContainerView" destination="8uk-qr-frP" id="iPG-2a-67U"/>
                         <outlet property="horizonTypeButton" destination="4QH-PT-ktZ" id="oUx-v2-NT8"/>

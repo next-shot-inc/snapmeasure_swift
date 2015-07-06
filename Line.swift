@@ -16,6 +16,7 @@ class LineObject : NSManagedObject {
     @NSManaged var name: String
     @NSManaged var point: CGPoint
     @NSManaged var colorData: NSData
+    @NSManaged var type : String
     @NSManaged var image: DetailedImageObject
 
 }

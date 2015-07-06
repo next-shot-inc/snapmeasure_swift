@@ -164,6 +164,36 @@ struct Line {
     }
 }
 
+
+class LineViewTool {
+    var lineName = String()
+    var lineType = String()
+    
+    static func role(lineType: String) -> Line.Role {
+        if( lineType == horizonTypes[0] ) {
+            return Line.Role.Horizon
+        } else if( lineType == horizonTypes[1] ) {
+            return Line.Role.Unconformity
+        } else if( lineType == horizonTypes[2] ) {
+            return Line.Role.Fault
+        } else {
+            return Line.Role.Border
+        }
+    }
+    
+    static func typeName(role: Line.Role) -> String {
+        if( role == Line.Role.Horizon ) {
+            return horizonTypes[0]
+        } else if( role == Line.Role.Unconformity ) {
+            return horizonTypes[1]
+        } else if( role == Line.Role.Fault ) {
+            return horizonTypes[2]
+        } else {
+            return horizonTypes[0]
+        }
+    }
+}
+
 class LineView : UIView {
     var lines = [Line]()
     var measure = [CGPoint]()
@@ -172,7 +202,7 @@ class LineView : UIView {
     var label = UILabel()
     var refLabel = UILabel()
     var refMeasureValue : Float = 0.0
-    var currentLineName = String()
+    var tool = LineViewTool()
     var polygons : Polygons?
     
     override init(frame: CGRect) {
@@ -589,6 +619,7 @@ struct DipMarkerPoint {
     var loc: CGPoint
     var normal : Vector3
     var realLocation : CLLocation
+    var snappedLine : Line?
 }
 
 class DipMarkerPickTool {
@@ -629,7 +660,11 @@ class DipMarkerView : UIView {
             if( p.loc.x == 0 && p.loc.y == 0 ) {
                 continue
             }
-            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            if( p.snappedLine != nil ) {
+                 CGContextSetStrokeColorWithColor(context, p.snappedLine!.color)
+            } else {
+                 CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            }
             let hl : CGFloat = 4
             CGContextMoveToPoint (context, p.loc.x - hl, p.loc.y - hl);
             CGContextAddLineToPoint(context, p.loc.x - hl, p.loc.y + hl);
@@ -668,11 +703,12 @@ class DipMarkerView : UIView {
     }
     
     // Add a point located in the current picture
-    func addPoint(loc: CGPoint) {
+    func addPoint(loc: CGPoint, line: Line?) {
         if( pickTool != nil ) {
             var dm = DipMarkerPoint(
                 loc: loc, normal: pickTool!.normal,
-                realLocation: pickTool!.realLocation == nil ? CLLocation() : pickTool!.realLocation!
+                realLocation: pickTool!.realLocation == nil ? CLLocation() : pickTool!.realLocation!,
+                snappedLine: line
             )
            points.append(dm)
         }
@@ -682,7 +718,8 @@ class DipMarkerView : UIView {
     func addPoint(#realLocation: CLLocation, normal: Vector3) {
         var dm = DipMarkerPoint(
             loc: CGPoint(), normal: normal,
-            realLocation: realLocation
+            realLocation: realLocation,
+            snappedLine: nil
         )
         points.append(dm)
     }
@@ -792,6 +829,7 @@ class DrawingView : UIImageView {
             line.name = lo!.name
             let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
             line.color = color?.CGColor
+            line.role = LineViewTool.role(lo!.type)
             let arrayData = lo!.pointData
             let array = Array(
                 UnsafeBufferPointer(
@@ -857,11 +895,21 @@ class DrawingView : UIImageView {
             }
             let strike = dmpo!.strike.doubleValue * M_PI/180
             let dip = dmpo!.dip.doubleValue * M_PI / 180
+            var line : Line?
+            if( dmpo?.feature != "unassigned" ) {
+                for l in lineView.lines {
+                    if( l.name == dmpo?.feature ) {
+                        line = l
+                        break
+                    }
+                }
+            }
             dipMarkerView.points.append(DipMarkerPoint(
                 loc: loc,
                 normal: Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip)),
-                realLocation: dmpo!.realLocation as! CLLocation)
-            )
+                realLocation: dmpo!.realLocation as! CLLocation,
+                snappedLine: line
+            ))
             dipMarkerView.setNeedsDisplay()
         }
         
@@ -1050,7 +1098,8 @@ class DrawingView : UIImageView {
             }
         } else if( drawMode == ToolMode.Draw) {
             lineView.currentLine.color = curColor
-            lineView.currentLine.name = lineView.currentLineName
+            lineView.currentLine.name = lineView.tool.lineName
+            lineView.currentLine.role = LineViewTool.role(lineView.tool.lineType)
             lineView.currentLine.cleanOrientation()
             lineView.add(lineView.currentLine)
             lineView.computePolygon()
@@ -1077,6 +1126,13 @@ class DrawingView : UIImageView {
                         break
                     }
                 }
+                for( var i=0; i < dipMarkerView.points.count; i++ ) {
+                    if( rect.contains(dipMarkerView.points[i].loc) ) {
+                        dipMarkerView.points.removeAtIndex(i)
+                        dipMarkerView.setNeedsDisplay()
+                        break
+                    }
+                }
             }
         } else if( drawMode == ToolMode.Facies ) {
             if( faciesView.drawTool != nil ) {
@@ -1090,7 +1146,14 @@ class DrawingView : UIImageView {
             controller?.askText(label)
         } else if( drawMode == ToolMode.DipMarker ) {
             drawMode = ToolMode(rawValue: dipMarkerView.pickTool!.previousToolMode)!
-            dipMarkerView.addPoint(point)
+            let rect = CGRectMake(point.x-10.0, point.y-10, 20.0, 20.0)
+            var snappedLine : Line?
+            for l in lineView.lines {
+                if( l.intersectBox(rect) ) {
+                    snappedLine = l
+                }
+            }
+            dipMarkerView.addPoint(point, line: snappedLine)
             dipMarkerView.pickTool = nil
             dipMarkerView.setNeedsDisplay()
         }
