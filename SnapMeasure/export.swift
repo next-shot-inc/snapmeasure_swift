@@ -469,7 +469,7 @@ class ExportAsGocadFile : Exporter {
         var data = ("# Geometry of picks and image\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
         file?.writeData(data!)
         if( object.latitude != nil && object.longitude != nil ) {
-            data = ("#Coordinate system is epsg:3857. Lat: " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            data = ("# Coordinate system is epsg:3857. Lat: " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             data = ((object.latitude!).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
@@ -480,6 +480,8 @@ class ExportAsGocadFile : Exporter {
             data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
         }
+        data = ("# GOCAD Project must be setup with Z axis up\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+        file?.writeData(data!)
         
         
         // Write lines
@@ -528,15 +530,17 @@ class ExportAsGocadFile : Exporter {
         file?.writeData(data!)
         let p0 = zpoint(CGPoint(x: 0,y: 0))
         writePoint(file, p: p0)
+        // U is along the vertical axis
         data = ("AXIS_U" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
         file?.writeData(data!)
-        let px = zpoint(CGPoint(x: yHeight, y: 0))
-        let du = DPoint3(x: px.x - p0.x, y: px.y - p0.y, z: px.z - p0.z)
+        let py = zpoint(CGPoint(x: 0, y: yHeight))
+        let du = DPoint3(x: py.x - p0.x, y: py.y - p0.y, z: py.z - p0.z)
         writePoint(file, p: du)
+        // V is along the horizontal axis
         data = ("AXIS_V" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
         file?.writeData(data!)
-        let py = zpoint(CGPoint(x: 0, y: xLength))
-        let dv = DPoint3(x: py.x - p0.x, y: py.y - p0.y, z: py.z - p0.z)
+        let px = zpoint(CGPoint(x: xLength, y: 0))
+        let dv = DPoint3(x: px.x - p0.x, y: px.y - p0.y, z: px.z - p0.z)
         writePoint(file, p: dv)
         data = ("AXIS_W" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
         file?.writeData(data!)
@@ -573,9 +577,13 @@ class ExportAsGocadFile : Exporter {
             file?.writeData(data!)
             data = ("name: " + dpo.feature).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
-            data = ("\n}\nPROPERTIES normal\nPROPERTY_CLASSES vector3d\nESIZES 3\nSUBVSET\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            // display normal vectors as dip plane
+            data = ("\n*vectors3d: true\n*vectors3d*mode: npolygon\n*vectors3d*variable: normal\n}" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            data = ("\nPROPERTIES normal\nPROPERTY_CLASSES vector3d\nESIZES 3\nSUBVSET\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             
+            var vrtx_id = 0
             for iadpo in object.dipMeterPoints  {
                 let idpo = adpo as! DipMeterPointObject
                 if( idpo.feature != dpo.feature ) {
@@ -583,6 +591,9 @@ class ExportAsGocadFile : Exporter {
                 }
                 data = ("PVRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)
+                data = ((vrtx_id++ as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                file?.writeData(data!)
+                file?.writeData(space!)
                 
                 // gather information about the point
                 var loc = idpo.locationInImage.CGPointValue()
@@ -599,7 +610,7 @@ class ExportAsGocadFile : Exporter {
                     let centerMapPoint = MKMapPointForCoordinate(rloc.coordinate)
                     p = DPoint3(x: centerMapPoint.x, y: centerMapPoint.y, z: rloc.altitude)
                 }
-                var data = ((p.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                data = ((p.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)
                 file?.writeData(space!)
                 data = ((p.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
@@ -670,6 +681,9 @@ class ExportAsGocadFile : Exporter {
             data = ("\n}\nWREF" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             writePoint(file, p: topp)
+            data = ("VRTX" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            file?.writeData(data!)
+            writePoint(file, p: topp)
 
             // Write last point
             var fv1 = col.faciesVignettes[col.faciesVignettes.count-1]
@@ -679,7 +693,7 @@ class ExportAsGocadFile : Exporter {
             file?.writeData(data!)
             writePoint(file, p: botp)
             
-            data = ("\nWELL_CURVE\nPROPERTY facies\nINTERPOLATION Block\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+            data = ("\nWELL_CURVE\nPROPERTY facies\nINTERPOLATION Block\nBLOCKED_INTERPOLATION_METHOD Below\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             for fv in col.faciesVignettes {
                 let ftop = CGPoint(x: top.x, y: fv.rect.minY)
