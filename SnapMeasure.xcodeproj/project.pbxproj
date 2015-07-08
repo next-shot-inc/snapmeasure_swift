@@ -158,12 +158,12 @@
 				2FCDF11D1B3086A4004308D6 /* TextObject.swift */,
 				2F1286741B0E3A150095D500 /* SnapMeasure.xcdatamodeld */,
 				2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */,
-				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
-				2F12867C1B0E3A150095D500 /* Images.xcassets */,
-				2F1286701B0E3A140095D500 /* Supporting Files */,
 				2FCD8F8C1B444532009F6E07 /* OrientationController.swift */,
 				2FCD8F8E1B44767F009F6E07 /* utils.swift */,
 				2FCD8F921B473CB4009F6E07 /* export.swift */,
+				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
+				2F12867C1B0E3A150095D500 /* Images.xcassets */,
+				2F1286701B0E3A140095D500 /* Supporting Files */,
 			);
 			path = SnapMeasure;
 			sourceTree = "<group>";

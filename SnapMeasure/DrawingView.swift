@@ -229,21 +229,8 @@ class LineView : UIView {
             CGContextStrokePath(context)
         }
         
-        // Fill color between two path
-        if( polygons == nil ) {
-            for var i=0; i < lines.count-1; i++  {
-                CGContextSetAlpha(context, 0.3)
-                CGContextSetFillColorWithColor(context, lines[i].color)
-                CGContextMoveToPoint (context, lines[i].points[0].x, lines[i].points[0].y)
-                for ( var k = 1; k < lines[i].points.count; k++) {
-                    CGContextAddLineToPoint (context, lines[i].points[k].x, lines[i].points[k].y);
-                }
-                for ( var k=lines[i+1].points.count-1; k >= 0 ; k--) {
-                    CGContextAddLineToPoint (context, lines[i+1].points[k].x, lines[i+1].points[k].y);
-                }
-                CGContextFillPath(context)
-            }
-        } else {
+        // Fill color
+        if( polygons != nil ) {
             for p in polygons!.polygons  {
                 CGContextSetAlpha(context, 0.3)
                 CGContextSetFillColorWithColor(context, p.color)
@@ -302,6 +289,17 @@ class LineView : UIView {
             CGContextMoveToPoint (context, refMeasurePoints[0].x, refMeasurePoints[0].y);
             CGContextAddLineToPoint (context, refMeasurePoints[1].x, refMeasurePoints[1].y);
             CGContextStrokePath(context)
+            
+            // Draw scale
+            if( refMeasurePoints[0].y == refMeasurePoints[1].y ) {
+               let minp = CGPoint(x: min(refMeasurePoints[0].x, refMeasurePoints[1].x), y: refMeasurePoints[0].y)
+               let width = abs(refMeasurePoints[0].x-refMeasurePoints[1].x)
+                let height : CGFloat = 5
+               CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
+               CGContextFillRect(context, CGRectMake(minp.x, refMeasurePoints[0].y-height, width/2, height))
+               CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
+               CGContextFillRect(context, CGRectMake(minp.x+width/2, refMeasurePoints[0].y-height, width/2, height))
+            }
             
             let dx = refMeasurePoints[1].x - refMeasurePoints[0].x
             let dy = refMeasurePoints[1].y - refMeasurePoints[0].y
@@ -985,8 +983,11 @@ class DrawingView : UIImageView {
                 lineView.refMeasurePoints[i] = CGPointApplyAffineTransform(lineView.refMeasurePoints[i], caffineTransform)
             }
             
-            lineView.setNeedsDisplay()
             faciesView.setNeedsDisplay()
+        }
+        didSet(bounds) {
+            lineView.computePolygon()
+            lineView.setNeedsDisplay()
         }
     }
     
