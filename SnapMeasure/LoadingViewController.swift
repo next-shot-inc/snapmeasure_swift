@@ -90,6 +90,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
         cell.faciesCatalog = faciesCatalog
+        cell.controller = self
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
         var detailedImage: DetailedImageObject

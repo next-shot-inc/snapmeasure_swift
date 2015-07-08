@@ -25,6 +25,7 @@ class DetailedImageObject: NSManagedObject {
     @NSManaged var scale: NSNumber? // in meters per point
     @NSManaged var faciesVignettes: NSSet
     @NSManaged var texts : NSSet
+    @NSManaged var dipMeterPoints: NSSet
     @NSManaged var project : ProjectObject
 
     

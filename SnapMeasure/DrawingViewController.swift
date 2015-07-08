@@ -355,6 +355,10 @@ class DrawingViewController: UIViewController {
         
         self.presentViewController(ctrler, animated: true, completion: nil)
     }
+
+    @IBAction func pushLineTypeButton(sender: AnyObject) {
+        horizonTypePickerView.hidden = !horizonTypePickerView.hidden
+    }
     
     @IBAction func closeWindow(sender: AnyObject) {
         var inputTextField : UITextField?
