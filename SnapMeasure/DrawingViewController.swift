@@ -102,6 +102,7 @@ class DrawingViewController: UIViewController {
     @IBOutlet weak var newLineButton: UIButton!
     @IBOutlet weak var horizonTypeButton: UIButton!
     
+    @IBOutlet weak var addDipMeterPointButton: UIButton!
     @IBOutlet weak var referenceSizeContainerView: UIView!
     @IBOutlet weak var faciesTypeContainerView: UIView!
     @IBOutlet weak var lineContainerView: UIView!
@@ -506,9 +507,8 @@ class DrawingViewController: UIViewController {
     
     @IBAction func pushDefineFeatureButton(sender : AnyObject) {
         //disable all other buttons until Feature definition is complete
-        self.colButton.enabled = false
-        self.newLineButton.enabled = false
         self.toolbarSegmentedControl.enabled = false
+        self.addDipMeterPointButton.enabled = false
         
         //create a new Feature
         feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
@@ -532,9 +532,8 @@ class DrawingViewController: UIViewController {
         } else {
             self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Measure
-            self.defineFeatureButton.userInteractionEnabled = false
             self.defineFeatureButton.hidden = true
-            self.setHeightButton.userInteractionEnabled = true
+            self.setHeightButton.enabled = true
             self.setHeightButton.hidden = false
         }
     }
@@ -568,7 +567,7 @@ class DrawingViewController: UIViewController {
             println("height: ", height.floatValue)
             self.setHeightButton.userInteractionEnabled = false
             self.setHeightButton.hidden = true
-            self.setWidthButton.userInteractionEnabled = true
+            self.setWidthButton.enabled = true
             self.setWidthButton.hidden = false
             
             //Remove measurement line to force user to draw a new line to define the width
@@ -603,7 +602,7 @@ class DrawingViewController: UIViewController {
                 feature!.width = width
             }
             println("width: ",width.floatValue)
-            self.setWidthButton.userInteractionEnabled = false
+            self.setWidthButton.enabled = false
             self.setWidthButton.hidden = true
             
             let nf = NSNumberFormatter()
@@ -640,13 +639,12 @@ class DrawingViewController: UIViewController {
             self.presentViewController(alert, animated: true, completion: nil)
             
             // Manage UI components
-            self.defineFeatureButton.userInteractionEnabled = true
+            self.defineFeatureButton.enabled = true
             self.defineFeatureButton.hidden = false
             
             //Re-enable all other buttons until Feature definition is complete
-            self.colButton.enabled = true
-            self.newLineButton.enabled = true
             self.toolbarSegmentedControl.enabled = true
+            self.addDipMeterPointButton.enabled = true
             
             // Remove measurement line
             drawingView.lineView.measure.removeAll(keepCapacity: true)

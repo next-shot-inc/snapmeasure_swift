@@ -210,12 +210,6 @@
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
                                             <rect key="frame" x="123" y="14" width="287" height="250"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
-                                                    <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
-                                                    </constraints>
-                                                </imageView>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="b9R-Kb-D9Q" userLabel="namebg">
                                                     <rect key="frame" x="0.0" y="200" width="287" height="50"/>
                                                     <subviews>
@@ -234,6 +228,12 @@
                                                         <constraint firstAttribute="centerY" secondItem="urp-OZ-iI3" secondAttribute="centerY" id="bcS-EI-XXn"/>
                                                     </constraints>
                                                 </view>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                                    <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
+                                                    </constraints>
+                                                </imageView>
                                             </subviews>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <constraints>
@@ -941,6 +941,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="addDipMeterPointButton" destination="Fxj-Vm-6c5" id="ZPP-Zs-scA"/>
                         <outlet property="colButton" destination="7Ua-vU-sig" id="DZa-Yl-3HU"/>
                         <outlet property="colorPickerView" destination="wev-s6-Qso" id="gmh-om-oTT"/>
                         <outlet property="defineFeatureButton" destination="PoK-3P-TM8" id="jmc-9o-GsW"/>

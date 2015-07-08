@@ -343,6 +343,7 @@ class LineView : UIView {
             if( value.name == line.name ) {
                 var newline = value
                 newline.color = line.color // Take latest color
+                newline.role = line.role // Take latest role
                 newline.merge(line)
                 lines.removeAtIndex(index)
                 lines.insert(newline, atIndex: index)
