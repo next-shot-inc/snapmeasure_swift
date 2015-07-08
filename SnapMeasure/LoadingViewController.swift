@@ -10,13 +10,14 @@ import Foundation
 import UIKit
 import CoreData
 
-class LoadingViewController: UITableViewController, UISearchResultsUpdating {
+class LoadingViewController: UITableViewController, UISearchResultsUpdating, UISearchBarDelegate {
     var detailedImages: [DetailedImageObject] = []
     var filteredDetailedImages: [DetailedImageObject] = []
     var searchController = UISearchController()
     var managedContext : NSManagedObjectContext!
     var faciesCatalog = FaciesCatalog()
     var edited = false
+    var scopeSelected = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,10 +34,20 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
             let controller = UISearchController(searchResultsController: nil)
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
-            controller.searchBar.sizeToFit()            
+            controller.searchBar.showsScopeBar = true
+            controller.searchBar.scopeButtonTitles = ["All"]
+            for project in projects {
+                controller.searchBar.scopeButtonTitles!.append(project.name)
+            }
+            controller.searchBar.delegate = self
+            controller.hidesNavigationBarDuringPresentation = false
+            controller.searchBar.sizeToFit()
+
             self.tableView.tableHeaderView = controller.searchBar
             return controller
         })()
+        
+    
         
         loadImages()
         faciesCatalog.loadImages()
@@ -68,7 +79,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if searchController.active {
+        if searchController.active || scopeSelected {
             return filteredDetailedImages.count
         } else {
             return detailedImages.count
@@ -79,9 +90,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
         cell.faciesCatalog = faciesCatalog
+        cell.selectionStyle = UITableViewCellSelectionStyle.None
         
         var detailedImage: DetailedImageObject
-        if (searchController.active) {
+        if (searchController.active || scopeSelected) {
             detailedImage = filteredDetailedImages[indexPath.row]
         } else {
             detailedImage = detailedImages[indexPath.row]
@@ -143,7 +155,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if (editingStyle == UITableViewCellEditingStyle.Delete) {
             
-            if (self.searchController.active) {
+            if (self.searchController.active || scopeSelected) {
                 
             } else {
                 
@@ -161,20 +173,47 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating {
     // Mark: - Filtering
     func updateSearchResultsForSearchController(searchController: UISearchController) {
         filteredDetailedImages.removeAll(keepCapacity: false)
-        self.filterContentForSearchText(searchController.searchBar.text)
+        let scopes = self.searchController.searchBar.scopeButtonTitles as! [String]
+        let selectedScope = scopes[self.searchController.searchBar.selectedScopeButtonIndex]
+        self.filterContentForSearchText(searchController.searchBar.text, scope: selectedScope)
         self.tableView.reloadData();
     }
     
-    func filterContentForSearchText(searchText: String) {
+    func filterContentForSearchText(searchText: String, scope: String = "All") {
         // Filter the array using the filter method
         self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageObject) -> Bool in
-            //let categoryMatch = (scope == "All") || (candy.category == scope)
+            let categoryMatch = (scope == "All") || (detailedImage.project.name == scope)
             let stringMatch = detailedImage.name.rangeOfString(searchText)
-            //return categoryMatch && (stringMatch != nil)
-            return (stringMatch != nil)
+            return categoryMatch && (stringMatch != nil)
+            //return (stringMatch != nil)
         })
     }
     
+    func filterContentForScope(scope: String = "All") {
+        self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageObject) -> Bool in
+            let categoryMatch = (scope == "All") || (detailedImage.project.name == scope)
+            return categoryMatch
+        })
+    }
+    
+
+    func searchBar(searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        print(selectedScope)
+        if self.searchController.active {
+            self.updateSearchResultsForSearchController(self.searchController)
+        } else {
+            let scopes = self.searchController.searchBar.scopeButtonTitles as! [String]
+            let scope = scopes[selectedScope]
+            scopeSelected = true
+            self.filterContentForScope(scope: scope)
+            self.tableView.reloadData()
+        }
+    }
+    
+    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+        scopeSelected = false
+    }
+
     
     
     /** Deprecated

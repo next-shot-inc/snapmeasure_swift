@@ -13,6 +13,7 @@ import MessageUI
 
 var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
 
+
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
     var colorButton : UIButton?
@@ -121,6 +122,8 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
     var detailedImage : DetailedImageObject?
     var newDetailedImage = false
     
+    var saveMenuController : PopupMenuController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -173,6 +176,8 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
             detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
                 inManagedObjectContext: managedContext) as? DetailedImageObject
             newDetailedImage = true
+            detailedImage!.project = currentProject
+            //detailedImage!.features = NSSet()
         }
         
         faciesCatalog.loadImages()
@@ -352,7 +357,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         
         //let drawingView = imageView as! DrawingView
     }
-
+    
     @IBAction func closeWindow(sender: AnyObject) {
         var inputTextField : UITextField?
         let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
@@ -480,6 +485,15 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         } **/
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "showSavePopover" {
+            let savePopover = segue.destinationViewController as! SavePopoverViewController
+            savePopover.drawingVC = self
+            savePopover.popoverPresentationController!.permittedArrowDirections = nil
+        }
+    }
+    
     @IBAction func pushDefineFeatureButton(sender : AnyObject) {
         //disable all other buttons until Feature definition is complete
         self.colButton.enabled = false
@@ -490,6 +504,7 @@ class DrawingViewController: UIViewController, MFMailComposeViewControllerDelega
         feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
             inManagedObjectContext: managedContext) as? FeatureObject
         feature!.image = detailedImage!
+        //detailedImage!.features.setByAddingObject(feature!)
         
         let drawingView = imageView as! DrawingView
         if (drawingView.lineView.refMeasureValue.isZero || drawingView.lineView.refMeasureValue.isNaN) {

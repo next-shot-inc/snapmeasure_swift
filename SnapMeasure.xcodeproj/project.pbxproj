@@ -29,6 +29,7 @@
 		FD19C5501B38AB52008B2D02 /* HistogramSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD19C54F1B38AB52008B2D02 /* HistogramSplitViewController.swift */; };
 		FD19C5521B38AB66008B2D02 /* HistogramMasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD19C5511B38AB66008B2D02 /* HistogramMasterViewController.swift */; };
 		FD19C5541B38AB76008B2D02 /* HistogramDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD19C5531B38AB76008B2D02 /* HistogramDetailViewController.swift */; };
+		FD335FD21B4DA8000075E3B8 /* SavePopoverViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD335FD11B4DA8000075E3B8 /* SavePopoverViewController.swift */; };
 		FD44BFF81B3322A500339F98 /* FaciesImageObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD44BFF71B3322A500339F98 /* FaciesImageObject.swift */; };
 		FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */; };
 		FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A714C1B26415400AD51B4 /* MapViewController.swift */; };
@@ -36,6 +37,8 @@
 		FD4A71591B2B8A6A00AD51B4 /* CustomCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */; };
 		FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD89543A1B33433D006D78B2 /* PopupMenuController.swift */; };
 		FDC9066D1B31E7F700465D43 /* LineOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC9066C1B31E7F700465D43 /* LineOverlay.swift */; };
+		FDEF9C671B448D7800B2B7BE /* export.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDEF9C661B448D7800B2B7BE /* export.swift */; };
+		FDEF9C6C1B44956F00B2B7BE /* ProjectObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDEF9C6B1B44956F00B2B7BE /* ProjectObject.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +78,7 @@
 		FD19C54F1B38AB52008B2D02 /* HistogramSplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramSplitViewController.swift; sourceTree = "<group>"; };
 		FD19C5511B38AB66008B2D02 /* HistogramMasterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramMasterViewController.swift; sourceTree = "<group>"; };
 		FD19C5531B38AB76008B2D02 /* HistogramDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistogramDetailViewController.swift; sourceTree = "<group>"; };
+		FD335FD11B4DA8000075E3B8 /* SavePopoverViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SavePopoverViewController.swift; sourceTree = "<group>"; };
 		FD44BFF71B3322A500339F98 /* FaciesImageObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesImageObject.swift; sourceTree = "<group>"; };
 		FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTableViewCell.swift; sourceTree = "<group>"; };
 		FD4A714C1B26415400AD51B4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
@@ -82,6 +86,8 @@
 		FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomCalloutView.swift; sourceTree = "<group>"; };
 		FD89543A1B33433D006D78B2 /* PopupMenuController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopupMenuController.swift; sourceTree = "<group>"; };
 		FDC9066C1B31E7F700465D43 /* LineOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineOverlay.swift; sourceTree = "<group>"; };
+		FDEF9C661B448D7800B2B7BE /* export.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = export.swift; sourceTree = "<group>"; };
+		FDEF9C6B1B44956F00B2B7BE /* ProjectObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ProjectObject.swift; path = ../ProjectObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,9 +132,11 @@
 				2F1286721B0E3A150095D500 /* AppDelegate.swift */,
 				2F1286771B0E3A150095D500 /* ViewController.swift */,
 				2F1286951B0E3BFF0095D500 /* CameraViewController.swift */,
+				FDEF9C661B448D7800B2B7BE /* export.swift */,
 				2F1286971B0E3DDF0095D500 /* PreviewView.swift */,
 				2F1286991B0E57C50095D500 /* DrawingViewController.swift */,
 				2F12869B1B0E60300095D500 /* DrawingView.swift */,
+				FD335FD11B4DA8000075E3B8 /* SavePopoverViewController.swift */,
 				2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */,
 				FD4A71441B2203B800AD51B4 /* CardTableViewCell.swift */,
 				FD4A714C1B26415400AD51B4 /* MapViewController.swift */,
@@ -145,6 +153,7 @@
 				2F682F6B1B1F616A002C1BA7 /* Line.swift */,
 				2F682F671B1F6169002C1BA7 /* Feature.swift */,
 				2F682F691B1F616A002C1BA7 /* DetailedImage.swift */,
+				FDEF9C6B1B44956F00B2B7BE /* ProjectObject.swift */,
 				2FCDF1251B30E3D6004308D6 /* FaciesVignetteObject.swift */,
 				FD44BFF71B3322A500339F98 /* FaciesImageObject.swift */,
 				2FCDF11D1B3086A4004308D6 /* TextObject.swift */,
@@ -152,7 +161,6 @@
 				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
 				2F12867C1B0E3A150095D500 /* Images.xcassets */,
 				2F1286701B0E3A140095D500 /* Supporting Files */,
-				2FCDF1271B34ADD7004308D6 /* export.swift */,
 			);
 			path = SnapMeasure;
 			sourceTree = "<group>";
@@ -296,15 +304,17 @@
 				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
 				2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
+				FDEF9C671B448D7800B2B7BE /* export.swift in Sources */,
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
 				2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */,
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
-				2FCDF1281B34ADD7004308D6 /* export.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
 				FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */,
+				FD335FD21B4DA8000075E3B8 /* SavePopoverViewController.swift in Sources */,
 				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
 				FD44BFF81B3322A500339F98 /* FaciesImageObject.swift in Sources */,
+				FDEF9C6C1B44956F00B2B7BE /* ProjectObject.swift in Sources */,
 				FD4A71591B2B8A6A00AD51B4 /* CustomCalloutView.swift in Sources */,
 				2F1286731B0E3A150095D500 /* AppDelegate.swift in Sources */,
 				FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */,
