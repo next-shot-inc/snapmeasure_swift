@@ -18,6 +18,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
     
     @IBOutlet weak var projectNameLabel: UILabel!
     @IBOutlet weak var nameTextField: UITextField!
+    @IBOutlet weak var featureTable: UITableView!
     
     override func viewDidLoad() {
         projectNameLabel.text = currentProject.name
@@ -26,6 +27,11 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         for feat in drawingVC!.detailedImage!.features {
             features.append(feat as! FeatureObject)
         }
+        
+        featureTable.dataSource = self
+        featureTable.rowHeight = 51
+        featureTable.tableFooterView = UIView(frame: CGRect.zeroRect)
+        featureTable.reloadData()
     }
     
     @IBAction func newProjectButtonPressed(sender: UIButton) {

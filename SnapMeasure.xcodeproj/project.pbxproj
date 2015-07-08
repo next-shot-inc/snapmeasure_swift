@@ -23,9 +23,6 @@
 		2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F671B1F6169002C1BA7 /* Feature.swift */; };
 		2F682F6A1B1F616A002C1BA7 /* DetailedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F691B1F616A002C1BA7 /* DetailedImage.swift */; };
 		2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F6B1B1F616A002C1BA7 /* Line.swift */; };
-		2FCD8F8D1B444532009F6E07 /* OrientationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCD8F8C1B444532009F6E07 /* OrientationController.swift */; };
-		2FCD8F8F1B44767F009F6E07 /* utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCD8F8E1B44767F009F6E07 /* utils.swift */; };
-		2FCD8F931B473CB4009F6E07 /* export.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCD8F921B473CB4009F6E07 /* export.swift */; };
 		2FCD8F951B4ACFA0009F6E07 /* DipMeterPointObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */; };
 		2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11D1B3086A4004308D6 /* TextObject.swift */; };
 		2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */; };
@@ -40,6 +37,9 @@
 		FD4A714D1B26415400AD51B4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A714C1B26415400AD51B4 /* MapViewController.swift */; };
 		FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */; };
 		FD4A71591B2B8A6A00AD51B4 /* CustomCalloutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */; };
+		FD4C17CE1B4DD31600BC46BA /* export.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4C17CD1B4DD31600BC46BA /* export.swift */; };
+		FD4C17D01B4DD32200BC46BA /* utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4C17CF1B4DD32200BC46BA /* utils.swift */; };
+		FD4C17D21B4DD34000BC46BA /* OrientationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD4C17D11B4DD34000BC46BA /* OrientationController.swift */; };
 		FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD89543A1B33433D006D78B2 /* PopupMenuController.swift */; };
 		FDC9066D1B31E7F700465D43 /* LineOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC9066C1B31E7F700465D43 /* LineOverlay.swift */; };
 /* End PBXBuildFile section */
@@ -75,9 +75,6 @@
 		2F682F671B1F6169002C1BA7 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Feature.swift; path = ../Feature.swift; sourceTree = "<group>"; };
 		2F682F691B1F616A002C1BA7 /* DetailedImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailedImage.swift; path = ../DetailedImage.swift; sourceTree = "<group>"; };
 		2F682F6B1B1F616A002C1BA7 /* Line.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Line.swift; path = ../Line.swift; sourceTree = "<group>"; };
-		2FCD8F8C1B444532009F6E07 /* OrientationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrientationController.swift; sourceTree = "<group>"; };
-		2FCD8F8E1B44767F009F6E07 /* utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utils.swift; sourceTree = "<group>"; };
-		2FCD8F921B473CB4009F6E07 /* export.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = export.swift; sourceTree = "<group>"; };
 		2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DipMeterPointObject.swift; sourceTree = "<group>"; };
 		2FCDF11D1B3086A4004308D6 /* TextObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObject.swift; sourceTree = "<group>"; };
 		2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesPixmapViewController.swift; sourceTree = "<group>"; };
@@ -92,6 +89,9 @@
 		FD4A714C1B26415400AD51B4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		FD4A71521B27527B00AD51B4 /* ImageAnnotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageAnnotation.swift; path = ../ImageAnnotation.swift; sourceTree = "<group>"; };
 		FD4A71581B2B8A6A00AD51B4 /* CustomCalloutView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomCalloutView.swift; sourceTree = "<group>"; };
+		FD4C17CD1B4DD31600BC46BA /* export.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = export.swift; sourceTree = "<group>"; };
+		FD4C17CF1B4DD32200BC46BA /* utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utils.swift; sourceTree = "<group>"; };
+		FD4C17D11B4DD34000BC46BA /* OrientationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrientationController.swift; sourceTree = "<group>"; };
 		FD89543A1B33433D006D78B2 /* PopupMenuController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopupMenuController.swift; sourceTree = "<group>"; };
 		FDC9066C1B31E7F700465D43 /* LineOverlay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LineOverlay.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -135,6 +135,9 @@
 		2F12866F1B0E3A140095D500 /* SnapMeasure */ = {
 			isa = PBXGroup;
 			children = (
+				FD4C17D11B4DD34000BC46BA /* OrientationController.swift */,
+				FD4C17CF1B4DD32200BC46BA /* utils.swift */,
+				FD4C17CD1B4DD31600BC46BA /* export.swift */,
 				2F1286721B0E3A150095D500 /* AppDelegate.swift */,
 				2F1286771B0E3A150095D500 /* ViewController.swift */,
 				2F1286951B0E3BFF0095D500 /* CameraViewController.swift */,
@@ -305,16 +308,16 @@
 				2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */,
 				FD19C5541B38AB76008B2D02 /* HistogramDetailViewController.swift in Sources */,
 				2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */,
-				2FCD8F8D1B444532009F6E07 /* OrientationController.swift in Sources */,
 				2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */,
 				2FCDF1261B30E3D6004308D6 /* FaciesVignetteObject.swift in Sources */,
 				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
-				2FCD8F8F1B44767F009F6E07 /* utils.swift in Sources */,
 				2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */,
-				2FCD8F931B473CB4009F6E07 /* export.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
+				FD4C17D21B4DD34000BC46BA /* OrientationController.swift in Sources */,
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
 				2FCD8F951B4ACFA0009F6E07 /* DipMeterPointObject.swift in Sources */,
+				FD4C17D01B4DD32200BC46BA /* utils.swift in Sources */,
+				FD4C17CE1B4DD31600BC46BA /* export.swift in Sources */,
 				2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */,
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,

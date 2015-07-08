@@ -958,7 +958,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="0aS-Qj-HzO" kind="popoverPresentation" popoverAnchorView="DfX-i5-tQl" id="cKU-Os-q1e">
+                                    <segue destination="0aS-Qj-HzO" kind="popoverPresentation" identifier="showSavePopover" popoverAnchorView="DfX-i5-tQl" id="cKU-Os-q1e">
                                         <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                     </segue>
                                 </connections>
@@ -1184,13 +1184,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FeatureTypeLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D0U-C4-ZTz">
-                                                    <rect key="frame" x="18" y="37" width="136" height="20.5"/>
+                                                    <rect key="frame" x="18" y="40.5" width="136" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FeatureSizeLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1pC-gm-Csp">
-                                                    <rect key="frame" x="18" y="68" width="81" height="12"/>
+                                                    <rect key="frame" x="18" y="65" width="81" height="12"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
@@ -1203,9 +1203,9 @@
                                                 </button>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="centerY" secondItem="D0U-C4-ZTz" secondAttribute="bottom" constant="5" id="2Ju-lA-Ptl"/>
+                                                <constraint firstAttribute="centerY" secondItem="D0U-C4-ZTz" secondAttribute="bottom" constant="2" id="2Ju-lA-Ptl"/>
                                                 <constraint firstItem="1pC-gm-Csp" firstAttribute="leading" secondItem="D0U-C4-ZTz" secondAttribute="leading" id="VS7-FW-G4N"/>
-                                                <constraint firstAttribute="centerY" secondItem="1pC-gm-Csp" secondAttribute="top" constant="-5" id="Wj8-Vd-slN"/>
+                                                <constraint firstAttribute="centerY" secondItem="1pC-gm-Csp" secondAttribute="top" constant="-2" id="Wj8-Vd-slN"/>
                                                 <constraint firstItem="D0U-C4-ZTz" firstAttribute="leading" secondItem="OzC-Nd-LyE" secondAttribute="leadingMargin" constant="10" id="rVA-la-sgT"/>
                                                 <constraint firstAttribute="centerY" secondItem="Z8j-FW-KdP" secondAttribute="centerY" id="t17-cM-lE6"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="Z8j-FW-KdP" secondAttribute="trailing" constant="19" id="zKo-0I-6gi"/>
@@ -1303,6 +1303,7 @@
                         </variation>
                     </view>
                     <connections>
+                        <outlet property="featureTable" destination="t2F-33-ZF1" id="xkE-fX-0g8"/>
                         <outlet property="nameTextField" destination="Zu6-Od-2WU" id="0JH-2y-SDa"/>
                         <outlet property="projectNameLabel" destination="O7V-N1-XkW" id="vm5-Jo-BCg"/>
                     </connections>

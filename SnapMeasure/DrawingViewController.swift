@@ -528,7 +528,6 @@ class DrawingViewController: UIViewController {
         feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
             inManagedObjectContext: managedContext) as? FeatureObject
         feature!.image = detailedImage!
-        //detailedImage!.features.setByAddingObject(feature!)
         
         let drawingView = imageView as! DrawingView
         if (drawingView.lineView.refMeasureValue.isZero || drawingView.lineView.refMeasureValue.isNaN) {

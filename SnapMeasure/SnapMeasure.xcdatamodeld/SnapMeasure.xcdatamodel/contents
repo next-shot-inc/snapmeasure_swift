@@ -46,7 +46,7 @@
         <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="image" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DetailedImageObject" inverseName="lines" inverseEntity="DetailedImageObject" syncable="YES"/>
     </entity>
-    <entity name="ProjectObject" syncable="YES">
+    <entity name="ProjectObject" representedClassName="SnapMeasure.ProjectObject" syncable="YES">
         <attribute name="date" attributeType="Date" syncable="YES"/>
         <attribute name="name" attributeType="String" defaultValueString="New Project" syncable="YES"/>
         <relationship name="detailedImages" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DetailedImageObject" inverseName="project" inverseEntity="DetailedImageObject" syncable="YES"/>
@@ -62,7 +62,7 @@
         <element name="FaciesVignetteObject" positionX="313" positionY="-1" width="128" height="73"/>
         <element name="FeatureObject" positionX="286" positionY="104" width="128" height="103"/>
         <element name="LineObject" positionX="-47" positionY="243" width="128" height="120"/>
+        <element name="ProjectObject" positionX="-389" positionY="74" width="128" height="90"/>
         <element name="TextObject" positionX="135" positionY="243" width="128" height="75"/>
-        <element name="ProjectObject" positionX="-389" positionY="74" width="128" height="88"/>
     </elements>
 </model>
