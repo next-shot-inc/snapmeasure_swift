@@ -542,8 +542,9 @@ class DrawingViewController: UIViewController {
     @IBAction func pushSetHeightButton(sender : AnyObject) {
         let drawingView = imageView as! DrawingView
         var height = 0.0 as NSNumber
-        if drawingView.lineView.label.text != nil {
-            height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)!
+        if( drawingView.lineView.label.text != nil ) {
+            var decode_height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
+            height = decode_height == nil ? 0.0 : decode_height!
         }
         if (height.isEqualToNumber(0.0)) {
             let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .Alert)
@@ -565,7 +566,7 @@ class DrawingViewController: UIViewController {
                 feature!.height = height
             }
             println("height: ", height.floatValue)
-            self.setHeightButton.userInteractionEnabled = false
+            self.setHeightButton.enabled = false
             self.setHeightButton.hidden = true
             self.setWidthButton.enabled = true
             self.setWidthButton.hidden = false
@@ -579,8 +580,9 @@ class DrawingViewController: UIViewController {
     @IBAction func pushSetWdithButton(sender : AnyObject) {
         let drawingView = imageView as! DrawingView
         var width = 0.0 as NSNumber
-        if drawingView.lineView.label.text != nil {
-            width = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)!
+        if( drawingView.lineView.label.text != nil ) {
+            let decode_width = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
+            width = decode_width == nil ? 0.0 : decode_width!
         }
         if (width.isEqualToNumber(0.0)) {
             let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .Alert)
@@ -606,6 +608,7 @@ class DrawingViewController: UIViewController {
             self.setWidthButton.hidden = true
             
             let nf = NSNumberFormatter()
+            nf.numberStyle = NSNumberFormatterStyle.DecimalStyle
             let message = "Select a feature type for this feature of width: " +
                 nf.stringFromNumber(feature!.width)! + " and height " +
                 nf.stringFromNumber(feature!.height)!

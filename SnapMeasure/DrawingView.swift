@@ -323,6 +323,8 @@ class LineView : UIView {
             CGContextMoveToPoint (context, measure[0].x, measure[0].y);
             CGContextAddLineToPoint (context, measure[1].x, measure[1].y);
             CGContextStrokePath(context)
+        } else {
+            label.text = ""
         }
         
         // Draw bounding rectangle
