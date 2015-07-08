@@ -9,17 +9,25 @@
 import UIKit
 import CoreData
 
+//global data types
+var projects : [ProjectObject] = []
+var currentProject : ProjectObject!
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
     let picker = UIImagePickerController()
     var image :  UIImage?
     var imageInfo = ImageInfo()
+    var menuController : PopupMenuController?
+    var managedContext : NSManagedObjectContext?
     
     @IBOutlet weak var selectExistingButton: UIButton!
     @IBOutlet weak var loadPicture: UIButton!
     @IBOutlet weak var newPicture: UIButton!
     @IBOutlet weak var showHistogram: UIButton!
     @IBOutlet weak var showMap: UIButton!
+    @IBOutlet weak var projectNameLabel: UILabel!
+    @IBOutlet weak var newProjectButton: UIButton!
+    @IBOutlet weak var loadProjectButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,13 +36,42 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         // Test if there are existing DetailedImageObject
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let managedContext = appDelegate.managedObjectContext!
+        managedContext = appDelegate.managedObjectContext!
         
-        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
+        var fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
         var error: NSError?
-        let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+        var fetchedResultsCount = managedContext!.countForFetchRequest(fetchRequest,
             error: &error)
         selectExistingButton.enabled = fetchedResultsCount > 0
+        
+        if projects.count == 0 { //just opened app
+            //get the most recent project worked on
+            fetchRequest = NSFetchRequest(entityName: "ProjectObject")
+            //sort so most recent is first
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+            fetchedResultsCount = managedContext!.countForFetchRequest(fetchRequest,
+                error: &error)
+        
+            if fetchedResultsCount > 0 {
+                //println("Project already exists in context")
+                projects = (managedContext!.executeFetchRequest(fetchRequest,
+                    error: &error) as? [ProjectObject])!
+                currentProject = projects[0]
+
+            } else {
+                //println("Creating a new default project")
+                let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
+                    inManagedObjectContext: managedContext!) as! ProjectObject
+                project.name = "Project 1"
+                project.date = NSDate()
+                currentProject = project
+                projects.append(project)
+                managedContext!.save(&error)
+            }
+        }
+        
+        projectNameLabel.text = currentProject.name
+        
         
         // Initialize button look
         let radius : CGFloat = 10.0
@@ -110,53 +147,97 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     @IBAction func selectFromExisting(sender: AnyObject) {
         //self.performSegueWithIdentifier("toSelectExisting", sender: nil)
     }
+    
+    @IBAction func newProjectButtonTapped(sender: UIButton) {
+        menuController = PopupMenuController()
+        menuController!.initCellContents(1, cols: 1)
+        
+        let width : CGFloat = sender.frame.width+20
+        let height : CGFloat = 45
+        
+        let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
+        textFeild.placeholder = "New Project"
+        textFeild.delegate = self
+        textFeild.becomeFirstResponder()
+        
+        menuController!.cellContents[0][0] = textFeild
+        
+        //set up menu Controller
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        menuController!.preferredContentSize.width = width
+        menuController!.tableView.rowHeight = height
+        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        menuController!.popoverPresentationController?.sourceRect = sender.bounds
+        menuController!.popoverPresentationController?.sourceView = sender as UIView
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left //will use a different direction if it can't be to the left
+        
+        self.presentViewController(menuController!, animated: true, completion: nil)
+    }
+    
+    //Mark: - UITextFeildDelegateMethods
+    
+    func textFieldDidEndEditing(textField: UITextField) {
+        let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
+            inManagedObjectContext: managedContext!) as! ProjectObject
+        if textField.text == "" {
+            project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
+        } else {
+            project.name = textField.text
+        }
+        project.date = NSDate()
+        currentProject = project
+        projects.append(project)
+        
+        var error: NSError?
+        managedContext!.save(&error)
+        
+        projectNameLabel.text = currentProject.name
+        menuController!.dismissViewControllerAnimated(true, completion: nil)
+
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    @IBAction func loadProjectButtonTapped(sender: UIButton) {
+        menuController = PopupMenuController()
+        menuController!.initCellContents(projects.count, cols: 1)
+        
+        let width : CGFloat = sender.frame.width+20
+        let height : CGFloat = 45
+        for i in 0..<projects.count {
+            let button = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+            button.setTitle(projects[i].name, forState: UIControlState.Normal)
+            button.tag = i
+            button.frame = CGRect(x: 0, y: 0, width: width, height: height)
+            button.addTarget(self, action: "loadProject:", forControlEvents: UIControlEvents.TouchUpInside)
+            menuController!.cellContents[i][0] = button
+
+        }
+        
+        //set up menu Controller
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        menuController!.preferredContentSize.width = width
+        menuController!.tableView.rowHeight = height
+        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        menuController!.popoverPresentationController?.sourceRect = sender.bounds
+        menuController!.popoverPresentationController?.sourceView = sender as UIView
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left
+        
+        self.presentViewController(menuController!, animated: true, completion: nil)
+
+    }
+    
+    func loadProject(sender: UIButton) {
+        currentProject = projects[sender.tag]
+        projectNameLabel.text = currentProject.name
+        menuController!.dismissViewControllerAnimated(true, completion: nil)
+    }
        
     @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
     
     }
-    
-    /** This is now done in DrawingViewController
-    @IBAction func saveButtonPushed(sender: AnyObject) {
-        // Copy lines and image to DetailedImageObject and LineObjects and save
-
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        
-        let managedContext = appDelegate.managedObjectContext!
-        let detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
-            inManagedObjectContext: managedContext) as? DetailedImageObject
-        
-        detailedImage!.name = outcropName.text!
-        detailedImage!.imageData = UIImageJPEGRepresentation(image, 1.0)
-        
-        let linesSet = NSMutableSet()
-        
-        for line in lines  {
-            let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
-                inManagedObjectContext: managedContext) as? LineObject
-            
-            lineObject!.name = line.name
-            lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                UIColor(CGColor: line.color)!
-            )
-            
-            var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
-            for( var i=0; i < line.points.count; ++i ) {
-                points[i].x = line.points[i].x
-                points[i].y = line.points[i].y
-            }
-            lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
-            lineObject!.image = detailedImage!
-            linesSet.addObject(lineObject!)
-        }
-        
-        detailedImage!.lines = linesSet
-    
-        var error: NSError?
-        if !managedContext.save(&error) {
-           println("Could not save \(error), \(error?.userInfo)")
-        }
-    
-     } **/
-
 }
 

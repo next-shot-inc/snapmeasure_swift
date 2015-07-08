@@ -185,48 +185,50 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         let width = 150
         let height = 45
         menuController = PopupMenuController()
+        menuController!.initCellContents(6, cols: 1)
         
         //Add Filter Options
         let mostRecentButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         mostRecentButton.setTitle("Last Day", forState: UIControlState.Normal)
         mostRecentButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         mostRecentButton.addTarget(self, action: "showAnnotationsForLatestDay:", forControlEvents: UIControlEvents.TouchUpInside)
-        menuController!.cellContents.append(mostRecentButton)
+        menuController!.cellContents[0][0] = mostRecentButton
         
         let lastWeekButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         lastWeekButton.setTitle("Last Week", forState: UIControlState.Normal)
         lastWeekButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastWeekButton.addTarget(self, action: "showAnnotationsForLatestWeek", forControlEvents: UIControlEvents.TouchUpInside)
-        menuController!.cellContents.append(lastWeekButton)
+        menuController!.cellContents[1][0] = lastWeekButton
         
         let lastMonthButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         lastMonthButton.setTitle("Last Month", forState: UIControlState.Normal)
         lastMonthButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastMonthButton.addTarget(self, action: "showAnnotationsForLatestMonth", forControlEvents: UIControlEvents.TouchUpInside)
-        menuController!.cellContents.append(lastMonthButton)
+        menuController!.cellContents[2][0] = lastMonthButton
         
         let lastYearButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         lastYearButton.setTitle("Last Year", forState: UIControlState.Normal)
         lastYearButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastYearButton.addTarget(self, action: "showAnnotationsForLatestYear", forControlEvents: UIControlEvents.TouchUpInside)
-        menuController!.cellContents.append(lastYearButton)
+        menuController!.cellContents[3][0] = lastYearButton
 
         let AllButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
         AllButton.setTitle("All", forState: UIControlState.Normal)
         AllButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         AllButton.addTarget(self, action: "showAll", forControlEvents: UIControlEvents.TouchUpInside)
-        menuController!.cellContents.append(AllButton)
+        menuController!.cellContents[4][0] = AllButton
         
         let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
         textFeild.placeholder = "MM/DD/YYYY"
         textFeild.keyboardType = UIKeyboardType.NumbersAndPunctuation
         textFeild.delegate = self
-        menuController!.cellContents.append(textFeild)
+        menuController!.cellContents[5][0] = textFeild
 
 
         //set up menu Controller
         menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
         menuController!.preferredContentSize.width = 150
+        menuController!.tableView.rowHeight = 45
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.barButtonItem = sender
         menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any

@@ -10,14 +10,22 @@ import Foundation
 import UIKit
 
 class PopupMenuController: UITableViewController {
-    var cellContents : [UIControl] = []
+    var cellContents : [[UIView]] = [[UIView]]()
+    var dividers : Bool = true
+    
+    func initCellContents(rows : Int, cols: Int) {
+        cellContents = Array(count: rows, repeatedValue: [UIView]())
+        for i in 0..<rows {
+            cellContents[i] = Array(count: cols, repeatedValue: UIView())
+        }
+    }
     
     override func viewDidLoad() {
         self.tableView.tableFooterView = UIView()
         self.tableView.setFrameWidth(150)
         self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         self.tableView.separatorStyle = UITableViewCellSeparatorStyle.None
-        self.tableView.rowHeight = 45
+        //self.tableView.rowHeight = 45
         self.tableView.alwaysBounceVertical = false
         self.tableView.reloadData()
     }
@@ -30,9 +38,9 @@ class PopupMenuController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
         
         if (cellContents.count > 0) {
-            cellContents[indexPath.row].center = cell.contentView.center
-            cell.contentView.addSubview(cellContents[indexPath.row])
-          if (indexPath.row < cellContents.count-1) {
+            cellContents[indexPath.row][indexPath.section].center = cell.contentView.center
+            cell.contentView.addSubview(cellContents[indexPath.row][indexPath.section])
+          if (dividers && indexPath.row < cellContents.count-1) {
                 let lineView = UIView(frame: CGRectMake(0, cell.contentView.frame.size.height - 1.0, cell.contentView.frame.size.width, 1))
                 
                 lineView.backgroundColor = UIColor.lightGrayColor()
@@ -44,7 +52,7 @@ class PopupMenuController: UITableViewController {
     }
     
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return cellContents[0].count
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

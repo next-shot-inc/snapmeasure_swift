@@ -26,6 +26,7 @@ class DetailedImageObject: NSManagedObject {
     @NSManaged var faciesVignettes: NSSet
     @NSManaged var texts : NSSet
     @NSManaged var dipMeterPoints: NSSet
+    @NSManaged var project : ProjectObject
 
     
     var coordinate : CLLocationCoordinate2D? {
@@ -40,5 +41,4 @@ class DetailedImageObject: NSManagedObject {
         self.latitude = NSNumber(double: latitude)
         self.longitude = NSNumber(double: longitude)
     }
-    
 }

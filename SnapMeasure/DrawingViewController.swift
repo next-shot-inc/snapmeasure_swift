@@ -13,6 +13,7 @@ import UIKit
 var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
 let horizonTypes = ["Top", "Unconformity", "Fault"]
 
+
 class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     let count = 8
     var colorButton : UIButton?
@@ -125,6 +126,8 @@ class DrawingViewController: UIViewController {
     var detailedImage : DetailedImageObject?
     var newDetailedImage = false
     
+    var saveMenuController : PopupMenuController?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -178,6 +181,8 @@ class DrawingViewController: UIViewController {
             detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
                 inManagedObjectContext: managedContext) as? DetailedImageObject
             newDetailedImage = true
+            detailedImage!.project = currentProject
+            //detailedImage!.features = NSSet()
         }
         
         faciesCatalog.loadImages()
@@ -503,6 +508,15 @@ class DrawingViewController: UIViewController {
             destinationVC!.image = image
             destinationVC!.lines = drawingView.lineView.lines
         } **/
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "showSavePopover" {
+            let savePopover = segue.destinationViewController as! SavePopoverViewController
+            savePopover.drawingVC = self
+            savePopover.popoverPresentationController!.permittedArrowDirections = nil
+        }
     }
     
     @IBAction func pushDefineFeatureButton(sender : AnyObject) {
