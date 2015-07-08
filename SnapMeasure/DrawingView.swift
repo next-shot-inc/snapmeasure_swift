@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import CoreLocation
 
 struct Line {
     enum Role : Int {
@@ -163,6 +164,36 @@ struct Line {
     }
 }
 
+
+class LineViewTool {
+    var lineName = String()
+    var lineType = String()
+    
+    static func role(lineType: String) -> Line.Role {
+        if( lineType == horizonTypes[0] ) {
+            return Line.Role.Horizon
+        } else if( lineType == horizonTypes[1] ) {
+            return Line.Role.Unconformity
+        } else if( lineType == horizonTypes[2] ) {
+            return Line.Role.Fault
+        } else {
+            return Line.Role.Border
+        }
+    }
+    
+    static func typeName(role: Line.Role) -> String {
+        if( role == Line.Role.Horizon ) {
+            return horizonTypes[0]
+        } else if( role == Line.Role.Unconformity ) {
+            return horizonTypes[1]
+        } else if( role == Line.Role.Fault ) {
+            return horizonTypes[2]
+        } else {
+            return horizonTypes[0]
+        }
+    }
+}
+
 class LineView : UIView {
     var lines = [Line]()
     var measure = [CGPoint]()
@@ -171,7 +202,7 @@ class LineView : UIView {
     var label = UILabel()
     var refLabel = UILabel()
     var refMeasureValue : Float = 0.0
-    var currentLineName = String()
+    var tool = LineViewTool()
     var polygons : Polygons?
     
     override init(frame: CGRect) {
@@ -292,6 +323,8 @@ class LineView : UIView {
             CGContextMoveToPoint (context, measure[0].x, measure[0].y);
             CGContextAddLineToPoint (context, measure[1].x, measure[1].y);
             CGContextStrokePath(context)
+        } else {
+            label.text = ""
         }
         
         // Draw bounding rectangle
@@ -312,6 +345,7 @@ class LineView : UIView {
             if( value.name == line.name ) {
                 var newline = value
                 newline.color = line.color // Take latest color
+                newline.role = line.role // Take latest role
                 newline.merge(line)
                 lines.removeAtIndex(index)
                 lines.insert(newline, atIndex: index)
@@ -584,14 +618,127 @@ class TextView : UIView {
     }
 }
 
+struct DipMarkerPoint {
+    var loc: CGPoint
+    var normal : Vector3
+    var realLocation : CLLocation
+    var snappedLine : Line?
+}
+
+class DipMarkerPickTool {
+    var normal : Vector3
+    var previousToolMode : Int
+    var curPoint = CGPoint()
+    var realLocation : CLLocation?
+    
+    init( normal: Vector3, realLocation: CLLocation?, toolMode: Int){
+        self.normal = normal
+        self.previousToolMode = toolMode
+        self.realLocation = realLocation
+    }
+    
+    func move(point: CGPoint) {
+        curPoint = point
+    }
+}
+
+class DipMarkerView : UIView {
+    var points = [DipMarkerPoint]()
+    var normal = Vector3(x: 0, y: 0, z: 0)
+    var pickTool : DipMarkerPickTool?
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func drawRect(rect: CGRect) {
+        let context = UIGraphicsGetCurrentContext()
+        CGContextSetLineWidth(context, 2.0)
+
+        for p in points {
+            if( p.loc.x == 0 && p.loc.y == 0 ) {
+                continue
+            }
+            if( p.snappedLine != nil ) {
+                 CGContextSetStrokeColorWithColor(context, p.snappedLine!.color)
+            } else {
+                 CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            }
+            let hl : CGFloat = 4
+            CGContextMoveToPoint (context, p.loc.x - hl, p.loc.y - hl);
+            CGContextAddLineToPoint(context, p.loc.x - hl, p.loc.y + hl);
+            CGContextAddLineToPoint(context, p.loc.x + hl, p.loc.y + hl)
+            CGContextAddLineToPoint(context, p.loc.x + hl, p.loc.y - hl)
+            CGContextAddLineToPoint(context, p.loc.x - hl, p.loc.y - hl)
+            CGContextStrokePath(context)
+            
+            //Project normal vector onto plane
+            //B = A - (A.dot.N)N
+            let dot = normal.x*p.normal.x + normal.y*p.normal.y + normal.z*p.normal.z
+            let b = Vector3(x: p.normal.x - dot * normal.x, y: p.normal.y - dot * normal.y, z: p.normal.z - dot * normal.z)
+            let adip = asin(sqrt(b.x*b.x+b.y*b.y)/sqrt(b.x*b.x+b.y*b.y+b.z*b.z))
+            let dmhl : Double = 20
+            CGContextMoveToPoint (context, p.loc.x - CGFloat(dmhl * cos(adip)), p.loc.y - CGFloat(dmhl * sin(adip)))
+            CGContextAddLineToPoint(context, p.loc.x + CGFloat(dmhl * cos(adip)), p.loc.y + CGFloat(dmhl * sin(adip)))
+            CGContextStrokePath(context)
+        }
+
+        if( pickTool != nil ) {
+            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            CGContextMoveToPoint (context, pickTool!.curPoint.x - 50, pickTool!.curPoint.y);
+            CGContextAddLineToPoint(context, pickTool!.curPoint.x + 50, pickTool!.curPoint.y)
+            CGContextStrokePath(context)
+            CGContextMoveToPoint (context, pickTool!.curPoint.x, pickTool!.curPoint.y - 50);
+            CGContextAddLineToPoint(context, pickTool!.curPoint.x, pickTool!.curPoint.y + 50)
+            CGContextStrokePath(context)
+        }
+    }
+    
+    func initializeNormal(orientation: Float?) {
+        if( orientation != nil ) {
+            normal.x = Double(cos(orientation!)) // x is along North
+            normal.y = Double(sin(orientation!))
+        }
+    }
+    
+    // Add a point located in the current picture
+    func addPoint(loc: CGPoint, line: Line?) {
+        if( pickTool != nil ) {
+            var dm = DipMarkerPoint(
+                loc: loc, normal: pickTool!.normal,
+                realLocation: pickTool!.realLocation == nil ? CLLocation() : pickTool!.realLocation!,
+                snappedLine: line
+            )
+           points.append(dm)
+        }
+    }
+    
+    // Add a point related to the current picture but not localized in the picture
+    func addPoint(#realLocation: CLLocation, normal: Vector3) {
+        var dm = DipMarkerPoint(
+            loc: CGPoint(), normal: normal,
+            realLocation: realLocation,
+            snappedLine: nil
+        )
+        points.append(dm)
+    }
+    
+}
+
 class DrawingView : UIImageView {
     enum ToolMode : Int {
-        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5
+        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5, DipMarker = 6
     }
     
     var lineView = LineView()
     var faciesView = FaciesView()
     var textView = TextView()
+    var dipMarkerView = DipMarkerView()
+    
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
     var curColor = UIColor.blackColor().CGColor
@@ -615,6 +762,12 @@ class DrawingView : UIImageView {
         textView.opaque = false
         textView.backgroundColor = nil
         self.addSubview(textView)
+        
+        dipMarkerView = DipMarkerView(frame: frame)
+        dipMarkerView.opaque = false
+        dipMarkerView.backgroundColor = nil
+        self.addSubview(dipMarkerView)
+
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -638,6 +791,12 @@ class DrawingView : UIImageView {
         textView.backgroundColor = nil
         textView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
         self.addSubview(textView)
+        
+        dipMarkerView = DipMarkerView(frame: self.bounds)
+        dipMarkerView.opaque = false
+        dipMarkerView.backgroundColor = nil
+        dipMarkerView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        self.addSubview(dipMarkerView)
     }
     
     func initFrame() {
@@ -673,6 +832,7 @@ class DrawingView : UIImageView {
             line.name = lo!.name
             let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
             line.color = color?.CGColor
+            line.role = LineViewTool.role(lo!.type)
             let arrayData = lo!.pointData
             let array = Array(
                 UnsafeBufferPointer(
@@ -728,6 +888,35 @@ class DrawingView : UIImageView {
             textView.addText(to!.string, rect: rect)
             textView.setNeedsDisplay()
         }
+        
+        // Initialize the dip markers
+        for admpo in detailedImage.dipMeterPoints {
+            let dmpo = admpo as? DipMeterPointObject
+            var loc = dmpo!.locationInImage.CGPointValue()
+            if( loc.x != 0 && loc.y != 0 ) {
+                loc = CGPointApplyAffineTransform(loc, affineTransform)
+            }
+            let strike = dmpo!.strike.doubleValue * M_PI/180
+            let dip = dmpo!.dip.doubleValue * M_PI / 180
+            var line : Line?
+            if( dmpo?.feature != "unassigned" ) {
+                for l in lineView.lines {
+                    if( l.name == dmpo?.feature ) {
+                        line = l
+                        break
+                    }
+                }
+            }
+            dipMarkerView.points.append(DipMarkerPoint(
+                loc: loc,
+                normal: Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip)),
+                realLocation: dmpo!.realLocation as! CLLocation,
+                snappedLine: line
+            ))
+            dipMarkerView.setNeedsDisplay()
+        }
+        
+        dipMarkerView.initializeNormal(detailedImage.compassOrientation?.floatValue)
     }
     
     override var bounds : CGRect {
@@ -786,6 +975,11 @@ class DrawingView : UIImageView {
                 var fv = textView.subviews[i] as! UIView
                 fv.frame = rect
             }
+            for( var i=0; i < dipMarkerView.points.count; ++i ) {
+                if( dipMarkerView.points[i].loc.x != 0 && dipMarkerView.points[i].loc.y != 0 ) {
+                    dipMarkerView.points[i].loc = CGPointApplyAffineTransform(dipMarkerView.points[i].loc, caffineTransform)
+                }
+            }
             
             for( var i=0; i < lineView.refMeasurePoints.count; ++i ) {
                 lineView.refMeasurePoints[i] = CGPointApplyAffineTransform(lineView.refMeasurePoints[i], caffineTransform)
@@ -811,7 +1005,9 @@ class DrawingView : UIImageView {
        let touch = touches.first as! UITouch
        let point = touch.locationInView(self)
     
-        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
+            drawMode != ToolMode.DipMarker
+        ) {
             lineView.currentLine = Line()
             lineView.currentLine.points.append(point)
         } else if( drawMode == ToolMode.Facies ){
@@ -830,6 +1026,9 @@ class DrawingView : UIImageView {
             faciesView.drawTool = FaciesDrawTool(curColumn: cc!, point: point)
         } else if( drawMode == ToolMode.Text ) {
             textView.drawTool = TextDrawTool(point: point)
+        } else if( drawMode == ToolMode.DipMarker ) {
+            dipMarkerView.pickTool!.move(point)
+            dipMarkerView.setNeedsDisplay()
         }
         
         if( drawMode == ToolMode.Erase ) {
@@ -869,7 +1068,9 @@ class DrawingView : UIImageView {
         let touch = touches.first as! UITouch
         let point = touch.locationInView(self)
         
-        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text ) {
+        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
+            drawMode != ToolMode.DipMarker
+        ) {
            lineView.currentLine.points.append(point)
            if( drawMode != ToolMode.Erase ) {
                 lineView.setNeedsDisplay()
@@ -880,6 +1081,9 @@ class DrawingView : UIImageView {
         } else if( drawMode == ToolMode.Text ) {
             textView.drawTool!.move(point)
             textView.setNeedsDisplay()
+        } else if( drawMode == ToolMode.DipMarker ) {
+            dipMarkerView.pickTool!.move(point)
+            dipMarkerView.setNeedsDisplay()
         }
         
     }
@@ -897,7 +1101,8 @@ class DrawingView : UIImageView {
             }
         } else if( drawMode == ToolMode.Draw) {
             lineView.currentLine.color = curColor
-            lineView.currentLine.name = lineView.currentLineName
+            lineView.currentLine.name = lineView.tool.lineName
+            lineView.currentLine.role = LineViewTool.role(lineView.tool.lineType)
             lineView.currentLine.cleanOrientation()
             lineView.add(lineView.currentLine)
             lineView.computePolygon()
@@ -924,6 +1129,13 @@ class DrawingView : UIImageView {
                         break
                     }
                 }
+                for( var i=0; i < dipMarkerView.points.count; i++ ) {
+                    if( rect.contains(dipMarkerView.points[i].loc) ) {
+                        dipMarkerView.points.removeAtIndex(i)
+                        dipMarkerView.setNeedsDisplay()
+                        break
+                    }
+                }
             }
         } else if( drawMode == ToolMode.Facies ) {
             if( faciesView.drawTool != nil ) {
@@ -935,6 +1147,18 @@ class DrawingView : UIImageView {
             let label = textView.addText("", rect: textView.drawTool!.curRect)
             textView.drawTool = nil
             controller?.askText(label)
+        } else if( drawMode == ToolMode.DipMarker ) {
+            drawMode = ToolMode(rawValue: dipMarkerView.pickTool!.previousToolMode)!
+            let rect = CGRectMake(point.x-10.0, point.y-10, 20.0, 20.0)
+            var snappedLine : Line?
+            for l in lineView.lines {
+                if( l.intersectBox(rect) ) {
+                    snappedLine = l
+                }
+            }
+            dipMarkerView.addPoint(point, line: snappedLine)
+            dipMarkerView.pickTool = nil
+            dipMarkerView.setNeedsDisplay()
         }
         lineView.currentLine = Line()
         lineView.setNeedsDisplay()
