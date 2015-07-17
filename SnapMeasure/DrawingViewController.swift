@@ -125,6 +125,7 @@ class DrawingViewController: UIViewController {
     var feature : FeatureObject?
     var detailedImage : DetailedImageObject?
     var newDetailedImage = false
+    var center = CGPoint()
     
     var saveMenuController : PopupMenuController?
     
@@ -210,6 +211,7 @@ class DrawingViewController: UIViewController {
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
+        center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
     }
     
     
@@ -241,15 +243,17 @@ class DrawingViewController: UIViewController {
     @IBAction func handlePinch(sender: AnyObject) {
         let recognizer = sender as! UIPinchGestureRecognizer
         let scaleFactor = recognizer.scale
-        recognizer.view!.transform = CGAffineTransformMakeScale(scaleFactor, scaleFactor);
+        self.imageView.transform = CGAffineTransformScale(self.imageView.transform, scaleFactor, scaleFactor)
+        recognizer.scale = 1
     }
     
     @IBAction func handlePan(sender: AnyObject) {
         let recognizer = sender as! UIPanGestureRecognizer
         let translation = recognizer.translationInView(self.view)
-        recognizer.view!.center = CGPointMake(recognizer.view!.center.x + translation.x,
-            recognizer.view!.center.y + translation.y);
+        self.imageView.center = CGPointMake(self.imageView.center.x + translation.x,
+            self.imageView.center.y + translation.y);
         recognizer.setTranslation(CGPoint(x: 0,y: 0), inView: self.view)
+        center = self.imageView.center
     }
     
     @IBAction func handleTap(sender: AnyObject) {
@@ -258,6 +262,7 @@ class DrawingViewController: UIViewController {
         lineNameTextField.resignFirstResponder()
         colorPickerView.hidden = true
         horizonTypePickerView.hidden = true
+        self.imageView.center = center
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
@@ -295,8 +300,9 @@ class DrawingViewController: UIViewController {
             drawingView.lineView.tool.lineType = LineViewTool.typeName(line!.role)
             horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, forState: UIControlState.Normal)
         } else {
-            self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
-            self.imageView.transform = CGAffineTransformIdentity;
+            self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
+            self.imageView.transform = CGAffineTransformIdentity
+            center = self.imageView.center
         }
     }
     
@@ -345,6 +351,7 @@ class DrawingViewController: UIViewController {
         ctrler.typeButton = self.faciesTypeButton
         ctrler.drawingView = drawingView
         ctrler.faciesCatalog = faciesCatalog
+        ctrler.drawingController = self
         
         ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
         ctrler.preferredContentSize.width = 150

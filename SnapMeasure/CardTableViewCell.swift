@@ -15,12 +15,12 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var myImageView: DrawingView!
     @IBOutlet weak var mailButton: UIButton!
-    var detailedImage : DetailedImageObject?
+    var detailedImageProxy : DetailedImageProxy?
     var faciesCatalog: FaciesCatalog?
     var controller: LoadingViewController?
     
-    func useImage(detailedImage : DetailedImageObject) {
-        self.detailedImage = detailedImage
+    func useImage(detailedImage : DetailedImageProxy) {
+        self.detailedImageProxy = detailedImage
         
         // Round those corners
         mainView.layer.cornerRadius = 10;
@@ -28,20 +28,59 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         
         //fill in the data
         nameLabel.text = detailedImage.name
-        myImageView.image = UIImage(data: detailedImage.imageData)
-        myImageView.initFrame()
-        myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
-        
-        if( detailedImage.scale == nil || detailedImage.scale! == 0 || !MFMailComposeViewController.canSendMail()
-        ) {
-            mailButton.enabled = false
+        var detailedImage = detailedImageProxy?.getObject()
+        if( detailedImage != nil ) {
+            var image = UIImage(data: detailedImage!.imageData)
+            if( image != nil ) {
+               myImageView.image = resizeImage(
+                  image!, newSize: CGSize(width: image!.size.width/8, height: image!.size.height/8)
+               )
+            }
+            if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
+               !MFMailComposeViewController.canSendMail()
+            ){
+                mailButton.enabled = false
+            }
         }
+        myImageView.initFrame()
+        //myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
+        
     }
+    
+    func resizeImage(image: UIImage, newSize: CGSize) -> (UIImage) {
+        let newRect = CGRectIntegral(CGRectMake(0,0, newSize.width, newSize.height))
+        let imageRef = image.CGImage
+        
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
+        let context = UIGraphicsGetCurrentContext()
+        
+        // Set the quality level to use when rescaling
+        CGContextSetInterpolationQuality(context, kCGInterpolationHigh)
+        let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, newSize.height)
+        
+        CGContextConcatCTM(context, flipVertical)
+        // Draw into the context; this scales the image
+        CGContextDrawImage(context, newRect, imageRef)
+        
+        let newImageRef = CGBitmapContextCreateImage(context) as CGImage
+        let newImage = UIImage(CGImage: newImageRef)
+        
+        // Get the resized image from the context and a UIImage
+        UIGraphicsEndImageContext()
+        
+        return newImage!
+    }
+
     
     @IBAction func sendMail(sender: AnyObject) {
         //var format = 1
         var filename: NSURL
         var formatUserName : String
+        var detailedImage = detailedImageProxy?.getObject()
+        if( detailedImage == nil ) {
+            return
+        }
+        
         /*if( format == 0 ) {
             var exporter = ExportAsShapeFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
             filename = exporter.export()

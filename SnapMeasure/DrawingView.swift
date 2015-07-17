@@ -232,7 +232,7 @@ class LineView : UIView {
         // Fill color
         if( polygons != nil ) {
             for p in polygons!.polygons  {
-                CGContextSetAlpha(context, 0.3)
+                CGContextSetAlpha(context, 0.2)
                 CGContextSetFillColorWithColor(context, p.color)
                 var first = true
                 for l in p.lines  {
@@ -988,6 +988,11 @@ class DrawingView : UIImageView {
         didSet(bounds) {
             lineView.computePolygon()
             lineView.setNeedsDisplay()
+        }
+    }
+    
+    override var center : CGPoint {
+        willSet(newCenter) {
         }
     }
     
