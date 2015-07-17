@@ -68,7 +68,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down //will use a different direction if it can't be to the left
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up //will use a different direction if it can't be to the left
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
@@ -124,7 +124,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }

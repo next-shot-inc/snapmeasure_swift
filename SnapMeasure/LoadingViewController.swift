@@ -77,18 +77,27 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             return controller
         })()
         
-        scopeSelected = true
-    
         loadImages()
         
         updateSearchResultsForSearchController(searchController)
-    
+        
         self.tableView.reloadData()
-
+        
+        scopeSelected = true
     }
     
+    
     override func viewDidDisappear(animated: Bool) {
-        println("Loading Controller disappearing")
+        super.viewDidDisappear(animated)
+        detailedImages.removeAll(keepCapacity: false)
+        filteredDetailedImages.removeAll(keepCapacity: false)
+        faciesCatalog = FaciesCatalog()
+        self.tableView.reloadData()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
     }
     
     func loadImages() {
@@ -99,7 +108,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
         fetchRequest.includesSubentities = false
         fetchRequest.propertiesToFetch = [ "name", "project.name" ]
-        fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType     // TODO: Add Predicate to speed-up the request.
+        fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType
         
         var error: NSError?
         var objects = managedContext.executeFetchRequest(fetchRequest,
@@ -158,7 +167,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         if segue.identifier == "loadingToDrawing" {
             let drawingVC = segue.destinationViewController as! DrawingViewController
             var destinationDetailedImageProxy : DetailedImageProxy
-            if self.searchController.active {
+            if (self.searchController.active || scopeSelected ) {
                 let indexPath = self.tableView.indexPathForSelectedRow()
                 destinationDetailedImageProxy = filteredDetailedImages[indexPath!.row]
             } else {
