@@ -257,7 +257,7 @@
                                                     <rect key="frame" x="0.0" y="200" width="287" height="50"/>
                                                     <subviews>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ImageName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="urp-OZ-iI3" userLabel="nameLabel">
-                                                            <rect key="frame" x="97" y="14" width="93" height="22"/>
+                                                            <rect key="frame" x="97" y="14" width="93" height="21.5"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                             <color key="highlightedColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -291,7 +291,7 @@
                                             </constraints>
                                         </view>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUq-92-gMW">
-                                            <rect key="frame" x="17" y="119" width="42" height="42"/>
+                                            <rect key="frame" x="17" y="118" width="42" height="42"/>
                                             <state key="normal" image="message">
                                                 <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                             </state>
@@ -304,10 +304,16 @@
                                     <constraints>
                                         <constraint firstAttribute="centerY" secondItem="PUq-92-gMW" secondAttribute="centerY" id="Jpe-e2-u8i"/>
                                         <constraint firstAttribute="centerX" secondItem="vwZ-BT-aWo" secondAttribute="centerX" id="Ngz-TT-Khr"/>
+                                        <constraint firstItem="vwZ-BT-aWo" firstAttribute="centerY" secondItem="PUq-92-gMW" secondAttribute="centerY" id="RPT-WM-UZr"/>
                                         <constraint firstItem="PUq-92-gMW" firstAttribute="leading" secondItem="4ph-hl-cNB" secondAttribute="leadingMargin" constant="9" id="dHS-Qn-ama"/>
                                         <constraint firstAttribute="bottom" secondItem="vwZ-BT-aWo" secondAttribute="bottom" constant="15" id="jDg-Bw-do8"/>
                                         <constraint firstItem="vwZ-BT-aWo" firstAttribute="top" secondItem="4ph-hl-cNB" secondAttribute="top" constant="14" id="slf-0s-MQV"/>
                                     </constraints>
+                                    <variation key="default">
+                                        <mask key="constraints">
+                                            <exclude reference="Jpe-e2-u8i"/>
+                                        </mask>
+                                    </variation>
                                 </tableViewCellContentView>
                                 <connections>
                                     <outlet property="mailButton" destination="PUq-92-gMW" id="YVH-P7-kle"/>
@@ -1017,9 +1023,11 @@
                         <outlet property="setWidthButton" destination="5Va-oC-eeB" id="6Yf-Uf-iQF"/>
                         <outlet property="toolbarSegmentedControl" destination="SBq-9U-Dsq" id="7tJ-b0-LiP"/>
                         <outlet property="twoTapsGestureRecognizer" destination="jtK-wk-2vq" id="EDv-Ih-97r"/>
+                        <segue destination="zPe-FQ-2Yj" kind="unwind" identifier="unwindFromDrawingToMain" unwindAction="unwindToMainMenu:" id="k1T-gg-vQx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Iwq-Su-1Dn" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="zPe-FQ-2Yj" userLabel="Exit" sceneMemberID="exit"/>
                 <pinchGestureRecognizer id="2Tn-0n-EfQ">
                     <connections>
                         <action selector="handlePinch:" destination="KD6-M1-rG7" id="1Un-t8-ZRK"/>

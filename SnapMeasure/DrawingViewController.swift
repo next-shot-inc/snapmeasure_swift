@@ -375,7 +375,8 @@ class DrawingViewController: UIViewController {
             } **/
             let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
                 self.managedContext.rollback()
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.performSegueWithIdentifier("unwindFromDrawingToMain", sender: self)
+                //self.dismissViewControllerAnimated(true, completion: nil)
             }
             alert.addAction(noAction)
         
@@ -386,7 +387,7 @@ class DrawingViewController: UIViewController {
         
             self.presentViewController(alert, animated: true, completion: nil)
         } else {
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.performSegueWithIdentifier("unwindFromDrawingToMain", sender: self)
         }
     }
     

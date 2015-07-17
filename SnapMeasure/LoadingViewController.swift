@@ -47,12 +47,23 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             return controller
         })()
         
+    }
     
-        
+    override func viewDidDisappear(animated: Bool) {
+        super.viewDidDisappear(animated)
+        detailedImages.removeAll(keepCapacity: false)
+        filteredDetailedImages.removeAll(keepCapacity: false)
+        faciesCatalog = FaciesCatalog()
+        self.tableView.reloadData()
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         loadImages()
         faciesCatalog.loadImages()
         
         self.tableView.reloadData()
+
     }
     
     func loadImages() {
