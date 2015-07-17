@@ -84,6 +84,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         updateSearchResultsForSearchController(searchController)
     
         self.tableView.reloadData()
+
     }
     
     override func viewDidDisappear(animated: Bool) {

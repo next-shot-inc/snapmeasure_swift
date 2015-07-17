@@ -22,6 +22,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
     @IBOutlet weak var warningLabel: UILabel!
     
     override func viewDidLoad() {
+        currentProject = drawingVC!.detailedImage!.project
         projectNameLabel.text = currentProject.name
         nameTextField.text = drawingVC!.detailedImage!.name
         
@@ -67,7 +68,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left //will use a different direction if it can't be to the left
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down //will use a different direction if it can't be to the left
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
@@ -123,7 +124,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
@@ -275,6 +276,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
+        currentImage.project = currentProject
         currentImage.imageData = UIImageJPEGRepresentation(drawingVC!.image, 1.0)
         currentImage.longitude = drawingVC!.imageInfo.longitude
         currentImage.latitude = drawingVC!.imageInfo.latitude
