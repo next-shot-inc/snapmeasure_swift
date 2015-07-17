@@ -105,7 +105,14 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController = PopupMenuController()
         menuController!.initCellContents(projects.count, cols: 1)
         
-        let width : CGFloat = sender.frame.width+20
+        var labelWidth : CGFloat = 0
+        for i in 0..<projects.count {
+           let t = projects[0].name as NSString
+           let size = t.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(UIFont.buttonFontSize())])
+           labelWidth = max(labelWidth, size.width)
+        }
+        
+        let width : CGFloat = max(sender.frame.width+40, labelWidth+40)
         let height : CGFloat = 45
         for i in 0..<projects.count {
             let button = UIButton.buttonWithType(UIButtonType.System) as! UIButton

@@ -284,7 +284,7 @@
                                                         <constraint firstAttribute="centerY" secondItem="urp-OZ-iI3" secondAttribute="centerY" id="bcS-EI-XXn"/>
                                                     </constraints>
                                                 </view>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
                                                     <rect key="frame" x="0.0" y="0.0" width="287" height="200"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="200" id="qdn-k9-A8K"/>
@@ -1371,6 +1371,6 @@
         <image name="type" width="42" height="42"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LFb-Hb-Otc"/>
+        <segue reference="klv-3J-VMp"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -13,7 +13,7 @@ import MessageUI
 class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
     @IBOutlet var mainView: UIView!
     @IBOutlet var nameLabel: UILabel!
-    @IBOutlet var myImageView: DrawingView!
+    @IBOutlet var myImageView: UIImageView!
     @IBOutlet weak var mailButton: UIButton!
     var detailedImageProxy : DetailedImageProxy?
     var faciesCatalog: FaciesCatalog?
@@ -42,7 +42,7 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
                 mailButton.enabled = false
             }
         }
-        myImageView.initFrame()
+        //myImageView.initFrame()
         //myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
         
     }
