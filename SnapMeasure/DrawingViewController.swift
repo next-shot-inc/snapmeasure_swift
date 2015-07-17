@@ -368,153 +368,33 @@ class DrawingViewController: UIViewController {
     }
     
     @IBAction func closeWindow(sender: AnyObject) {
-        var inputTextField : UITextField?
-        let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
-        if( newDetailedImage ) {
-            alert.addTextFieldWithConfigurationHandler { (textField) in
-                textField.placeholder = "Name"
-                inputTextField = textField
-            }
-        }
-        let drawingView = self.imageView as! DrawingView
-        //get scale for the image
-        let scale = drawingView.getScale()
-        if(scale.defined) {
-            self.detailedImage!.scale = scale.scale
-        } else {
-            alert.title = "Save before closing?"
-            alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
-        }
-        let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
-            self.managedContext.rollback()
-            self.dismissViewControllerAnimated(true, completion: nil)
-        }
-        alert.addAction(noAction)
-        
-        let cancelAction : UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
-            alert.dismissViewControllerAnimated(true, completion: nil)
-        }
-        alert.addAction(cancelAction)
-        
-        let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
-            
-            //update detailedImage and lines
-            //detailedImage!.name = outcropName.text!
-            self.detailedImage!.imageData = UIImageJPEGRepresentation(self.image, 1.0)
-            self.detailedImage!.longitude = self.imageInfo.longitude
-            self.detailedImage!.latitude = self.imageInfo.latitude
-            self.detailedImage!.compassOrientation = self.imageInfo.compassOrienation
-            self.detailedImage!.altitude = self.imageInfo.altitude
-            self.detailedImage!.date = self.imageInfo.date
-            if (inputTextField != nil) {
-                self.detailedImage?.name = inputTextField!.text
-            }
-            let linesSet = NSMutableSet()
-            
+        if managedContext.hasChanges {
+            let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
             let drawingView = self.imageView as! DrawingView
-            // Always store the coordinates in image coordinates (reverse any viewing transform due to scaling)
-            let affineTransform = CGAffineTransformInvert(drawingView.affineTransform)
-            for line in drawingView.lineView.lines  {
-                let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
-                    inManagedObjectContext: self.managedContext) as? LineObject
-                
-                lineObject!.name = line.name
-                lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                    UIColor(CGColor: line.color)!
-                )
-                lineObject!.type = LineViewTool.typeName(line.role)
-                
-                var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
-                for( var i=0; i < line.points.count; ++i ) {
-                    points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
-                }
-                lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
-                lineObject!.image = self.detailedImage!
-                linesSet.addObject(lineObject!)
-                println("Added a line")
+            //get scale for the image
+            /**
+            let scale = drawingView.getScale()
+            if(scale.defined) {
+                self.detailedImage!.scale = scale.scale
+            } else {
+                alert.title = "Save before closing?"
+                alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
+            } **/
+            let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
+                self.managedContext.rollback()
+                self.dismissViewControllerAnimated(true, completion: nil)
             }
-            self.detailedImage!.lines = linesSet
-
-            
-            let faciesVignetteSet = NSMutableSet()
-            
-            for fc in drawingView.faciesView.faciesColumns {
-                for fv in fc.faciesVignettes {
-                    let faciesVignetteObject = NSEntityDescription.insertNewObjectForEntityForName(
-                        "FaciesVignetteObject", inManagedObjectContext: self.managedContext) as? FaciesVignetteObject
-                    
-                    faciesVignetteObject!.imageName = fv.imageName
-                    let scaledRect = CGRectApplyAffineTransform(fv.rect, affineTransform)
-                    faciesVignetteObject!.rect = NSValue(CGRect: scaledRect)
-                    faciesVignetteSet.addObject(faciesVignetteObject!)
-                }
-            }
-            self.detailedImage!.faciesVignettes = faciesVignetteSet
-            
-            let textSet = NSMutableSet()
-            for tv in drawingView.textView.subviews {
-                let label = tv as? UILabel
-                if( label != nil ) {
-                    let textObject = NSEntityDescription.insertNewObjectForEntityForName(
-                        "TextObject", inManagedObjectContext: self.managedContext) as? TextObject
-                    
-                    let scaledRect = CGRectApplyAffineTransform(tv.frame, affineTransform)
-                    textObject!.rect = NSValue(CGRect: scaledRect)
-                    
-                    textObject!.string = label!.text!
-                    
-                    textSet.addObject(textObject!)
-                }
-            }
-            self.detailedImage!.texts = textSet
-            
-            let dipMeterPoints = NSMutableSet()
-            for dmp in drawingView.dipMarkerView.points {
-                let dmpo = NSEntityDescription.insertNewObjectForEntityForName(
-                        "DipMeterPointObject", inManagedObjectContext: self.managedContext) as? DipMeterPointObject
-                var tpoint = dmp.loc
-                if( dmp.loc.x != 0 && dmp.loc.y != 0 ) {
-                   tpoint = CGPointApplyAffineTransform(dmp.loc, affineTransform)
-                }
-                dmpo!.locationInImage = NSValue(CGPoint: tpoint)
-                dmpo!.realLocation = dmp.realLocation
-                let sad = dmp.normal.strikeAndDip()
-                dmpo!.strike = sad.strike
-                dmpo!.dip = sad.dip
-                if( dmp.snappedLine != nil ) {
-                    dmpo!.feature = dmp.snappedLine!.name
-                } else {
-                    dmpo!.feature = "unassigned"
-                }
-                dipMeterPoints.addObject(dmpo!)
-            }
-            self.detailedImage!.dipMeterPoints = dipMeterPoints
-            
-            //save the managedObjectContext
-            var error: NSError?
-            if !self.managedContext.save(&error) {
-                println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
-            }
-            println("Saved the ManagedObjectContext")
-            self.dismissViewControllerAnimated(true, completion: nil)
-
-            
-        }
-        alert.addAction(yesAction)
+            alert.addAction(noAction)
         
-        self.presentViewController(alert, animated: true, completion: nil)
-
-        //self.dismissViewControllerAnimated(true, completion: nil)
-        /**
-        let drawingView = imageView as! DrawingView
-        var destinationVC = self.presentingViewController as? ViewController
-        if( destinationVC == nil ) {
-            destinationVC = self.presentingViewController?.presentingViewController as? ViewController
+            let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
+                self.performSegueWithIdentifier("showSavePopover", sender: self)
+            }
+            alert.addAction(yesAction)
+        
+            self.presentViewController(alert, animated: true, completion: nil)
+        } else {
+            self.dismissViewControllerAnimated(true, completion: nil)
         }
-        if( destinationVC != nil ) {
-            destinationVC!.image = image
-            destinationVC!.lines = drawingView.lineView.lines
-        } **/
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
