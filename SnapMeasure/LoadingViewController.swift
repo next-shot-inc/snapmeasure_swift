@@ -116,7 +116,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.performSegueWithIdentifier("loadingToDrawing", sender: tableView)
+        self.performSegueWithIdentifier("loadingToDrawing", sender: self)
         //let detailedImage = detailedImages[indexPath]
     }
     
