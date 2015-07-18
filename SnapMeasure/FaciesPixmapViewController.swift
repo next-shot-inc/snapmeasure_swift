@@ -148,6 +148,7 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
     var typeButton : UIButton?
     var drawingView: DrawingView?
     var faciesCatalog: FaciesCatalog?
+    var drawingController : DrawingViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -159,6 +160,12 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         tableController.faciesCatalog = faciesCatalog
         
         picker.delegate = self
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        if( drawingController != nil ) {
+            drawingController!.imageView.center = drawingController!.center
+        }
     }
     
     @IBAction func AddPixmap(sender: AnyObject) {

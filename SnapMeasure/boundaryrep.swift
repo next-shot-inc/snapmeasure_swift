@@ -113,17 +113,19 @@ func ==(left: OrientedLine, right: OrientedLine) -> Bool {
 
 class OrientedPolygon {
     var lines = [OrientedLine]()
-    var color = UIColor.blackColor().CGColor
+    var color = UIColor.grayColor().CGColor
     
-    func computerColor() {
+    func computeColor() {
         var ymin : CGFloat = 1e+30
         var lmin : Line?
         for l in lines {
-            for(var i=0; i < l.line.points.count-1; i++ ) {
-                let y = (l.line.points[i].y + l.line.points[i+1].y)*0.5
-                if( y < ymin && l.line.role == Line.Role.Horizon ) {
-                    ymin = y
-                    lmin = l.line
+            if( l.line.role == Line.Role.Horizon || l.line.role == Line.Role.Border ) {
+                for(var i=0; i < l.line.points.count-1; i++ ) {
+                    let y = (l.line.points[i].y + l.line.points[i+1].y)*0.5
+                    if( y < ymin  ) {
+                        ymin = y
+                        lmin = l.line
+                    }
                 }
             }
         }
@@ -298,7 +300,7 @@ class Polygons {
                 // As the next line starting from this radial node
                 nline = mate.rn?.next(mate)
             }
-            oPolygon.computerColor()
+            oPolygon.computeColor()
             polygons.append(oPolygon)
         }
         

@@ -10,9 +10,34 @@ import Foundation
 import UIKit
 import CoreData
 
+class DetailedImageProxy {
+    var name: String
+    var project: String
+    init(name: String, project: String) {
+        self.name = name
+        self.project = project
+    }
+    
+    func getObject() -> DetailedImageObject? {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        var managedContext = appDelegate.managedObjectContext!
+        
+        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
+        fetchRequest.predicate = NSPredicate(format: "name LIKE %@", name)
+        var error: NSError?
+        var objects = managedContext.executeFetchRequest(fetchRequest,
+            error: &error)!
+        if( objects.count == 1 ) {
+            return objects[0] as? DetailedImageObject
+        } else {
+            return nil
+        }
+    }
+}
+
 class LoadingViewController: UITableViewController, UISearchResultsUpdating, UISearchBarDelegate {
-    var detailedImages: [DetailedImageObject] = []
-    var filteredDetailedImages: [DetailedImageObject] = []
+    var detailedImages: [DetailedImageProxy] = []
+    var filteredDetailedImages: [DetailedImageProxy] = []
     var searchController = UISearchController()
     var managedContext : NSManagedObjectContext!
     var faciesCatalog = FaciesCatalog()
@@ -36,18 +61,31 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             controller.dimsBackgroundDuringPresentation = false
             controller.searchBar.showsScopeBar = true
             controller.searchBar.scopeButtonTitles = ["All"]
-            for project in projects {
+            var selectedScopeButton = 0
+            for (index,project) in enumerate(projects) {
                 controller.searchBar.scopeButtonTitles!.append(project.name)
+                if( project == currentProject ) {
+                    selectedScopeButton = index+1
+                }
             }
             controller.searchBar.delegate = self
             controller.hidesNavigationBarDuringPresentation = false
             controller.searchBar.sizeToFit()
+            controller.searchBar.selectedScopeButtonIndex = selectedScopeButton
 
             self.tableView.tableHeaderView = controller.searchBar
             return controller
         })()
         
+        loadImages()
+        
+        updateSearchResultsForSearchController(searchController)
+        
+        self.tableView.reloadData()
+        
+        scopeSelected = true
     }
+    
     
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
@@ -59,11 +97,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        loadImages()
-        faciesCatalog.loadImages()
         
-        self.tableView.reloadData()
-
     }
     
     func loadImages() {
@@ -72,11 +106,20 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         managedContext = appDelegate.managedObjectContext!
         
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        // TODO: Add Predicate to speed-up the request.
+        fetchRequest.includesSubentities = false
+        fetchRequest.propertiesToFetch = [ "name", "project.name" ]
+        fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType
         
         var error: NSError?
-        detailedImages = (managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [DetailedImageObject])!
+        var objects = managedContext.executeFetchRequest(fetchRequest,
+            error: &error)!
+        for obj in objects {
+            var name = obj.valueForKey("name") as? NSString
+            var project = obj.valueForKey("project.name") as? NSString
+            if( name != nil && project != nil ) {
+                 detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String))
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -104,7 +147,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         cell.controller = self
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
-        var detailedImage: DetailedImageObject
+        var detailedImage: DetailedImageProxy
         if (searchController.active || scopeSelected) {
             detailedImage = filteredDetailedImages[indexPath.row]
         } else {
@@ -123,30 +166,32 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "loadingToDrawing" {
             let drawingVC = segue.destinationViewController as! DrawingViewController
-            var destinationDetailedImage : DetailedImageObject
-            if self.searchController.active {
+            var destinationDetailedImageProxy : DetailedImageProxy
+            if (self.searchController.active || scopeSelected ) {
                 let indexPath = self.tableView.indexPathForSelectedRow()
-                destinationDetailedImage = filteredDetailedImages[indexPath!.row]
+                destinationDetailedImageProxy = filteredDetailedImages[indexPath!.row]
             } else {
                 let indexPath = self.tableView.indexPathForSelectedRow()
-                destinationDetailedImage = detailedImages[indexPath!.row]
+                destinationDetailedImageProxy = detailedImages[indexPath!.row]
             }
             
-            drawingVC.detailedImage = destinationDetailedImage
-            drawingVC.image = UIImage(data: destinationDetailedImage.imageData)
-            
-            //get ImageInfo
-            var imageInfo = ImageInfo()
-            imageInfo.xDimension = Int(drawingVC.image!.size.width)
-            imageInfo.yDimension = Int(drawingVC.image!.size.height)
-            imageInfo.latitude = destinationDetailedImage.latitude?.doubleValue
-            imageInfo.longitude = destinationDetailedImage.longitude?.doubleValue
-            imageInfo.compassOrienation = destinationDetailedImage.compassOrientation?.doubleValue
-            imageInfo.date = destinationDetailedImage.date
-            imageInfo.scale = destinationDetailedImage.scale?.doubleValue
-            
-            
-            drawingVC.imageInfo = imageInfo
+            var destinationDetailedImage = destinationDetailedImageProxy.getObject()
+            if( destinationDetailedImage != nil ) {
+                drawingVC.detailedImage = destinationDetailedImage!
+                drawingVC.image = UIImage(data: destinationDetailedImage!.imageData)
+                
+                //get ImageInfo
+                var imageInfo = ImageInfo()
+                imageInfo.xDimension = Int(drawingVC.image!.size.width)
+                imageInfo.yDimension = Int(drawingVC.image!.size.height)
+                imageInfo.latitude = destinationDetailedImage!.latitude?.doubleValue
+                imageInfo.longitude = destinationDetailedImage!.longitude?.doubleValue
+                imageInfo.compassOrienation = destinationDetailedImage!.compassOrientation?.doubleValue
+                imageInfo.date = destinationDetailedImage!.date
+                imageInfo.scale = destinationDetailedImage!.scale?.doubleValue
+                
+                drawingVC.imageInfo = imageInfo
+            }
         }
         
         if( edited ) {
@@ -171,8 +216,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
                 
             } else {
                 
-                let deletedImage = detailedImages[indexPath.row]
-                managedContext.deleteObject(deletedImage)
+                let deletedImage = detailedImages[indexPath.row].getObject()
+                if( deletedImage != nil ) {
+                   managedContext.deleteObject(deletedImage!)
+                }
                 
                 detailedImages.removeAtIndex(indexPath.row)
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
@@ -193,17 +240,17 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     func filterContentForSearchText(searchText: String, scope: String = "All") {
         // Filter the array using the filter method
-        self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageObject) -> Bool in
-            let categoryMatch = (scope == "All") || (detailedImage.project.name == scope)
+        self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageProxy) -> Bool in
+            let categoryMatch = (scope == "All") || (detailedImage.project == scope)
             let stringMatch = detailedImage.name.rangeOfString(searchText)
-            return categoryMatch && (stringMatch != nil)
+            return categoryMatch && (searchText.isEmpty || stringMatch != nil)
             //return (stringMatch != nil)
         })
     }
     
     func filterContentForScope(scope: String = "All") {
-        self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageObject) -> Bool in
-            let categoryMatch = (scope == "All") || (detailedImage.project.name == scope)
+        self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageProxy) -> Bool in
+            let categoryMatch = (scope == "All") || (detailedImage.project == scope)
             return categoryMatch
         })
     }

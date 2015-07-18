@@ -68,7 +68,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down //will use a different direction if it can't be to the left
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up //will use a different direction if it can't be to the left
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
@@ -105,7 +105,14 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController = PopupMenuController()
         menuController!.initCellContents(projects.count, cols: 1)
         
-        let width : CGFloat = sender.frame.width+20
+        var labelWidth : CGFloat = 0
+        for i in 0..<projects.count {
+           let t = projects[0].name as NSString
+           let size = t.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(UIFont.buttonFontSize())])
+           labelWidth = max(labelWidth, size.width)
+        }
+        
+        let width : CGFloat = max(sender.frame.width+40, labelWidth+40)
         let height : CGFloat = 45
         for i in 0..<projects.count {
             let button = UIButton.buttonWithType(UIButtonType.System) as! UIButton
@@ -124,7 +131,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Down
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up
         
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
