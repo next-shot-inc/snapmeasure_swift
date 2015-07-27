@@ -161,9 +161,11 @@ class DrawingViewController: UIViewController {
         horizonTypePickerCtrler.typeButton = horizonTypeButton
         horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
         
+        faciesTypeButton.setTitle("sandstone", forState: UIControlState.Normal)
+
         referenceSizeContainerView.hidden = true
         faciesTypeContainerView.hidden = true
-
+        
         //make sure all buttons are in the right state
         self.colButton.enabled = true
         self.newLineButton.enabled = true
@@ -208,6 +210,7 @@ class DrawingViewController: UIViewController {
         drawingView.lineView.tool.lineName = lineNameTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
         drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
+        drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
@@ -359,6 +362,8 @@ class DrawingViewController: UIViewController {
         ctrler.popoverPresentationController?.sourceView = sender as! UIView
         ctrler.popoverPresentationController?.sourceRect = sender.bounds
         ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+        ctrler.preferredContentSize = size
         
         self.presentViewController(ctrler, animated: true, completion: nil)
     }

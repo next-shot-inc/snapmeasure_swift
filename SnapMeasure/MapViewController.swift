@@ -113,7 +113,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
         
         // only get the detailedImages that have a location
-        fetchRequest.predicate = NSPredicate(format: "latitude!=nil AND longitude!=nil")
+        fetchRequest.predicate = NSPredicate(format: "latitude!=nil AND longitude!=nil AND project.name==%@", currentProject.name)
         
         var error: NSError?
         detailedImages = (managedContext.executeFetchRequest(fetchRequest,

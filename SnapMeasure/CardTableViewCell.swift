@@ -63,7 +63,7 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         CGContextDrawImage(context, newRect, imageRef)
         
         let newImageRef = CGBitmapContextCreateImage(context) as CGImage
-        let newImage = UIImage(CGImage: newImageRef)
+        let newImage = UIImage(CGImage: newImageRef, scale: 1.0, orientation: UIImageOrientation.Right)
         
         // Get the resized image from the context and a UIImage
         UIGraphicsEndImageContext()
