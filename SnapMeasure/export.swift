@@ -89,9 +89,16 @@ class Exporter {
                     let dy = centerMapPoint.y-minPoint.y
                     let d = sqrt(dx*dx + dy*dy)
                     // Move the center by the distance perpendicular to the orientation
-                    centerMapPoint.x += d*cos(orientation)
-                    centerMapPoint.y += d*sin(orientation)
+                    centerMapPoint.x += d*sin(orientation)
+                    centerMapPoint.y -= d*cos(orientation)
                 }
+            } else {
+                // distance to the object
+                // object (mm) = focal length (mm) * real height of the object (mm) * image height (pixels) / (
+                // object height (pixels) * sensor height (mm))
+                var distanceToObject = 3.3 * detailedImage.scale!.doubleValue * 1000
+                centerMapPoint.x += distanceToObject*sin(orientation)/scale
+                centerMapPoint.y -= distanceToObject*cos(orientation)/scale
             }
             
             let mapLength = length/scale

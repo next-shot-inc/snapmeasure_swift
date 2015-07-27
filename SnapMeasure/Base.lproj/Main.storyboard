@@ -57,7 +57,7 @@
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <segue destination="wi2-b7-hAm" kind="presentation" id="dP0-Kl-K5D"/>
+                                    <segue destination="wi2-b7-hAm" kind="presentation" identifier="toMapView" id="dP0-Kl-K5D"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Outcrop:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
@@ -1381,6 +1381,6 @@
         <image name="type" width="42" height="42"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LFb-Hb-Otc"/>
+        <segue reference="0z3-db-DKN"/>
     </inferredMetricsTieBreakers>
 </document>

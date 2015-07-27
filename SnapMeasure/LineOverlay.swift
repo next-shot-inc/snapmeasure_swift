@@ -14,9 +14,11 @@ class MapLineOverlay: NSObject, MKOverlay {
     var boundingMapRect: MKMapRect
     var mapLength : Double
     var angle : Double
+    var distanceToObject : Double
+    var objectCoordinate : MKMapPoint
     
     //length represents the length of the line in meters
-    init(length: Double, compassOrientation: CLLocationDirection, coordinate: CLLocationCoordinate2D) {
+    init(length: Double, compassOrientation: CLLocationDirection, coordinate: CLLocationCoordinate2D, object_scale: Double) {
         let orientation : Double
         if (compassOrientation < 0) {
             orientation = 2*M_PI+compassOrientation * M_PI/180;
@@ -35,7 +37,15 @@ class MapLineOverlay: NSObject, MKOverlay {
         self.coordinate = coordinate
         self.mapLength = length/scale
         self.angle = orientation
-    }
+        
+        // distance to the object 
+        // object (mm) = focal length (mm) * real height of the object (mm) * image height (pixels) / (
+        // object height (pixels) * sensor height (mm))
+        distanceToObject = 3.3 * object_scale * 1000
+        objectCoordinate = MKMapPointForCoordinate(coordinate)
+        objectCoordinate.x += distanceToObject*sin(orientation)/scale
+        objectCoordinate.y -= distanceToObject*cos(orientation)/scale
+     }
 }
 
 class MapLineOverlayView: MKOverlayRenderer {
@@ -48,35 +58,42 @@ class MapLineOverlayView: MKOverlayRenderer {
         
             let cgmapRect = rectForMapRect(mapRect)
             
-            let coordinateMapPoint = MKMapPointForCoordinate(overlay.coordinate)
-            let coordinatePoint = pointForMapPoint(coordinateMapPoint)
-        
+            
+            let objectMapPoint = lineOverlay.objectCoordinate
+
             CGContextSetLineWidth(context, 50.0)
         
-            //draw line representing length
+            //draw line representing length (in Blue)
             //first get map points
-            var startMapPoint = MKMapPoint(x: coordinateMapPoint.x+lineOverlay.mapLength*cos(lineOverlay.angle)/2, y: coordinateMapPoint.y+lineOverlay.mapLength*sin(lineOverlay.angle)/2)
-            var endMapPoint = MKMapPoint(x: coordinateMapPoint.x-lineOverlay.mapLength*cos(lineOverlay.angle)/2, y: coordinateMapPoint.y-lineOverlay.mapLength*sin(lineOverlay.angle)/2)
+            var startMapPoint = MKMapPoint(
+                x: objectMapPoint.x+lineOverlay.mapLength*cos(lineOverlay.angle)/2,
+                y: objectMapPoint.y+lineOverlay.mapLength*sin(lineOverlay.angle)/2
+            )
+            var endMapPoint = MKMapPoint(
+                x: objectMapPoint.x-lineOverlay.mapLength*cos(lineOverlay.angle)/2,
+                y: objectMapPoint.y-lineOverlay.mapLength*sin(lineOverlay.angle)/2
+            )
             let deltaY = lineOverlay.mapLength*sin(lineOverlay.angle)/2
             //get CGpoints for MapPoints
             var startPoint = pointForMapPoint(startMapPoint)
             var endPoint = pointForMapPoint(endMapPoint)
 
-            
             CGContextSetStrokeColorWithColor(context, UIColor.blueColor().CGColor)
 
             CGContextMoveToPoint (context, startPoint.x, startPoint.y)
             CGContextAddLineToPoint (context, endPoint.x, endPoint.y)
             CGContextStrokePath(context)
             
-            //draw T line
+            //draw T line (position of the camera)
             //first get map point
-            endMapPoint = MKMapPoint(x: coordinateMapPoint.x+lineOverlay.mapLength/4*sin(lineOverlay.angle), y: coordinateMapPoint.y - lineOverlay.mapLength*cos(lineOverlay.angle)/4)
+            let coordinateMapPoint = MKMapPointForCoordinate(overlay.coordinate)
             
             //get CGpoints for MapPoints
-            endPoint = pointForMapPoint(endMapPoint)
+            let coordinatePoint = pointForMapPoint(coordinateMapPoint)
+            endPoint = pointForMapPoint(objectMapPoint)
             
             CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
+            CGContextSetLineWidth(context, 2.0)
             
             CGContextMoveToPoint (context, coordinatePoint.x, coordinatePoint.y)
             CGContextAddLineToPoint (context, endPoint.x, endPoint.y)

@@ -137,7 +137,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 destinationVC!.image = image
                 destinationVC!.imageInfo = imageInfo
             }
-        } else if( segue.identifier == "toLoadingView" ) {
+        } else if( segue.identifier == "toLoadingView" || segue.identifier == "toMapView" ) {
             activityView = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
             activityView!.color = UIColor.blueColor()
             activityView!.center = self.view.center
