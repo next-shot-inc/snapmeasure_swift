@@ -13,9 +13,11 @@ import CoreData
 class DetailedImageProxy {
     var name: String
     var project: String
-    init(name: String, project: String) {
+    var date: NSDate
+    init(name: String, project: String, date: NSDate) {
         self.name = name
         self.project = project
+        self.date = date
     }
     
     func getObject() -> DetailedImageObject? {
@@ -23,10 +25,11 @@ class DetailedImageProxy {
         var managedContext = appDelegate.managedObjectContext!
         
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        fetchRequest.predicate = NSPredicate(format: "name LIKE %@", name)
+        fetchRequest.predicate = NSPredicate(format: "date == %@", date)
         var error: NSError?
         var objects = managedContext.executeFetchRequest(fetchRequest,
             error: &error)!
+        
         if( objects.count == 1 ) {
             return objects[0] as? DetailedImageObject
         } else {
@@ -107,7 +110,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
         fetchRequest.includesSubentities = false
-        fetchRequest.propertiesToFetch = [ "name", "project.name" ]
+        fetchRequest.propertiesToFetch = [ "name", "project.name", "date"]
         fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType
         
         var error: NSError?
@@ -116,8 +119,9 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         for obj in objects {
             var name = obj.valueForKey("name") as? NSString
             var project = obj.valueForKey("project.name") as? NSString
+            var date = obj.valueForKey("date") as? NSDate
             if( name != nil && project != nil ) {
-                 detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String))
+                detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String, date: date!))
             }
         }
     }
@@ -159,8 +163,12 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.performSegueWithIdentifier("loadingToDrawing", sender: tableView)
-        //let detailedImage = detailedImages[indexPath]
+        if (!self.searchController.active) {
+            self.performSegueWithIdentifier("loadingToDrawing", sender: self)
+        } else {
+            // do something that deals with the fact that search controller is active
+        }
+
     }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -271,6 +279,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         scopeSelected = false
+        //self.tableView.reloadData()
     }
 
     

@@ -168,7 +168,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         newImage.latitude = drawingVC!.imageInfo.latitude
         newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
         newImage.altitude = drawingVC!.imageInfo.altitude
-        newImage.date = drawingVC!.imageInfo.date
+        newImage.date = NSDate()
         newImage.project = currentProject
         newImage.features = drawingVC!.detailedImage!.features.copy() as! NSSet
         if (nameTextField.text != "") {
