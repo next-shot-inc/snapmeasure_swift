@@ -113,7 +113,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
         
         // only get the detailedImages that have a location
-        fetchRequest.predicate = NSPredicate(format: "latitude!=nil AND longitude!=nil")
+        fetchRequest.predicate = NSPredicate(format: "latitude!=nil AND longitude!=nil AND project.name==%@", currentProject.name)
         
         var error: NSError?
         detailedImages = (managedContext.executeFetchRequest(fetchRequest,
@@ -360,7 +360,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             self.calloutView.presentCalloutFromRect(view.bounds, inView:view, constrainedToView:self.view, animated:true)
             
             if (ann.length != nil && ann.compassOrientation != nil) {
-                self.overlay = MapLineOverlay(length: ann.length!, compassOrientation: ann.compassOrientation!, coordinate: ann.coordinate)
+                self.overlay = MapLineOverlay(
+                    length: ann.length!, compassOrientation: ann.compassOrientation!,
+                    coordinate: ann.coordinate, object_scale: ann.detailedImage.scale != nil ? ann.detailedImage.scale!.doubleValue : 1.0
+                )
                 mapView.addOverlay(overlay)
             }
         }
@@ -391,7 +394,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
     func calloutImageTapped() {
         var goToDrawing = false
         let alert = UIAlertController(
-            title: "Edit this Image?", message: nil, preferredStyle: .Alert
+            title: "Interpret this Outcrop?", message: nil, preferredStyle: .Alert
         )
         let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
             //do stuff

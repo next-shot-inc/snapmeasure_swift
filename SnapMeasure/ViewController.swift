@@ -19,6 +19,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     var imageInfo = ImageInfo()
     var menuController : PopupMenuController?
     var managedContext : NSManagedObjectContext?
+    var activityView : UIActivityIndicatorView?
     
     @IBOutlet weak var selectExistingButton: UIButton!
     @IBOutlet weak var loadPicture: UIButton!
@@ -89,6 +90,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         showHistogram.backgroundColor = bgColor
         showMap.layer.cornerRadius = radius
         showMap.backgroundColor = bgColor
+        newProjectButton.layer.cornerRadius = radius
+        newProjectButton.backgroundColor = bgColor
+        newProjectButton.layer.cornerRadius = radius
+        newProjectButton.backgroundColor = bgColor
+        loadProjectButton.layer.cornerRadius = radius
+        loadProjectButton.backgroundColor = bgColor
 
     }
 
@@ -130,6 +137,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 destinationVC!.image = image
                 destinationVC!.imageInfo = imageInfo
             }
+        } else if( segue.identifier == "toLoadingView" || segue.identifier == "toMapView" ) {
+            activityView = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
+            activityView!.color = UIColor.blueColor()
+            activityView!.center = self.view.center
+            activityView!.startAnimating()
+            self.view.addSubview(activityView!)
         }
     }
     
@@ -142,6 +155,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
             error: &error)
         selectExistingButton.enabled = fetchedResultsCount > 0
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        if( activityView != nil ) {
+            activityView!.stopAnimating()
+            activityView!.removeFromSuperview()
+            activityView = nil
+        }
     }
     
     @IBAction func selectFromExisting(sender: AnyObject) {

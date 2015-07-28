@@ -163,6 +163,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         horizonTypePickerCtrler.typeButton = horizonTypeButton
         horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
         
+        faciesTypeButton.setTitle("sandstone", forState: UIControlState.Normal)
+
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
 
@@ -210,6 +212,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         drawingView.lineView.tool.lineName = lineNameTextField.text
         drawingView.curColor = colButton.backgroundColor?.CGColor
         drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
+        drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
@@ -496,6 +499,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         ctrler.popoverPresentationController?.sourceView = sender as! UIView
         ctrler.popoverPresentationController?.sourceRect = sender.bounds
         ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+        ctrler.preferredContentSize = size
         
         self.presentViewController(ctrler, animated: true, completion: nil)
     } **/

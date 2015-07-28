@@ -608,9 +608,23 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         }
     
         // Use the true heading if it is valid.
-        let theHeading = ((newHeading.trueHeading > 0) ?
-            newHeading.trueHeading : newHeading.magneticHeading);
-    
+        var theHeading = ((newHeading.trueHeading > 0) ?
+            newHeading.trueHeading : newHeading.magneticHeading)
+        
+        // the location manager assumes that the top of the device in portrait mode represents due north (0 degrees) by default
+        switch UIApplication.sharedApplication().statusBarOrientation {
+           case UIInterfaceOrientation.Portrait: break // Nothing to do
+           case UIInterfaceOrientation.LandscapeRight: theHeading += 90
+           case UIInterfaceOrientation.PortraitUpsideDown: theHeading += 180
+           case UIInterfaceOrientation.LandscapeLeft: theHeading += 270
+           case UIInterfaceOrientation.Unknown: break // Nothing intelligent to do
+        }
+        if( theHeading < 0 ) {
+            theHeading += 360
+        } else if( theHeading > 360 ) {
+            theHeading -= 360
+        }
+        
         self.currentHeading = theHeading;
         self.locationLabel.attributedText = Utility.formatAngle(theHeading, orient: true)
     }
