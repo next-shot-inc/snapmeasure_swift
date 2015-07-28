@@ -50,7 +50,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         menuController = PopupMenuController()
         menuController!.initCellContents(1, cols: 1)
         
-        let width : CGFloat = sender.frame.width+20
+        let width : CGFloat = 100
         let height : CGFloat = 45
         
         let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))

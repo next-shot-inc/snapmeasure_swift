@@ -87,18 +87,18 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class DrawingViewController: UIViewController {
+class DrawingViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
     
     @IBOutlet weak var colButton: UIButton!
-    @IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
+    //@IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var referenceSizeTextField: UITextField!
     @IBOutlet weak var lineNameTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
-    @IBOutlet weak var faciesTypeButton: UIButton!
+    //@IBOutlet weak var faciesTypeButton: UIButton!
     @IBOutlet weak var horizonTypePickerView: UIPickerView!
     @IBOutlet weak var newLineButton: UIButton!
     @IBOutlet weak var horizonTypeButton: UIButton!
@@ -139,11 +139,13 @@ class DrawingViewController: UIViewController {
         // Initialize widgets at the top
         // 1. Text field
         lineNameTextField.keyboardType = UIKeyboardType.Default
-        lineNameTextField.placeholder = "Name"
+        //lineNameTextField.placeholder = "Name"
         lineNameTextField.text = "H1"
+        lineNameTextField.delegate = self
         
         referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
         referenceSizeTextField.placeholder = "Size"
+        referenceSizeTextField.delegate = self
         
         // 2. Color picker
         colorPickerView.delegate = colorPickerCtrler
@@ -164,12 +166,12 @@ class DrawingViewController: UIViewController {
         faciesTypeButton.setTitle("sandstone", forState: UIControlState.Normal)
 
         referenceSizeContainerView.hidden = true
-        faciesTypeContainerView.hidden = true
-        
+        //faciesTypeContainerView.hidden = true
+
         //make sure all buttons are in the right state
         self.colButton.enabled = true
         self.newLineButton.enabled = true
-        self.toolbarSegmentedControl.enabled = true
+        //self.toolbarSegmentedControl.enabled = true
 
         self.defineFeatureButton.enabled = true
         self.defineFeatureButton.hidden = false
@@ -217,14 +219,14 @@ class DrawingViewController: UIViewController {
         center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
     }
     
-    
+    /**
     @IBAction func toolChanged(sender: AnyObject) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode =
             DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
         
         referenceSizeContainerView.hidden = true
-        faciesTypeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
@@ -239,9 +241,143 @@ class DrawingViewController: UIViewController {
             lineContainerView.hidden = false
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
-            faciesTypeContainerView.hidden = false
+            //faciesTypeContainerView.hidden = false
+        }
+    } **/
+    
+    // Mark: Bottom Toolbar methods
+    @IBAction func newLineButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Draw
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        
+        //from storyboard height = 49 and width = 235
+        let centerX = sender.frame.origin.x + sender.frame.size.width/2
+        let originY = self.view.frameBottom - 100
+        let originX = centerX-235/2
+        if originX < 0 {
+            lineContainerView.frame = CGRect(x: 0, y: originY, width: 235, height: 49)
+        } else {
+            lineContainerView.frame = CGRect(x: originX, y: originY, width: 235, height: 49)
+        }
+        
+        lineContainerView.hidden = false
+    }
+    
+    @IBAction func eraseButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Erase
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func measureButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Measure
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func drawReferenceButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Reference
+        
+        let nf = NSNumberFormatter()
+        referenceSizeTextField.text =
+            nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+        
+        //from storyboard height = 49 and width = 186
+        let centerX = sender.frame.origin.x + sender.frame.size.width/2
+        let originY = self.view.frameBottom - 100
+        let originX = centerX-186/2
+        if originX < 0 {
+            referenceSizeContainerView.frame = CGRect(x: 0, y: originY, width: 186, height: 49)
+        } else if originX+186 > self.view.frameRight  {
+            referenceSizeContainerView.frame = CGRect(x: self.view.frameRight-186, y: originY, width: 186, height: 49)
+        } else{
+            referenceSizeContainerView.frame = CGRect(x: originX, y: originY, width: 186, height: 49)
+        }
+        
+        referenceSizeContainerView.hidden = false
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func faciesButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Facies
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = false
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func textboxButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Text
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func dipMeterButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.DipMarker
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    //Mark: UITextFeildDelegateMethods 
+    //This doesn't work ... ????????
+    func textFieldDidBeginEditing(textField: UITextField) {
+        
+        if textField.tag == 1 { //lineNameTextField
+            var newFrame = lineContainerView.frame
+            newFrame.origin.y -= self.view.frameHeight*2/3
+            
+            UIView.beginAnimations(nil, context: nil)
+            UIView.setAnimationBeginsFromCurrentState(true)
+            
+            UIView.setAnimationDuration(NSTimeInterval(0.25))
+            
+            lineContainerView.frame = newFrame
+            
+            UIView.commitAnimations()
+
+        } else { //referenceSizeTextFeild tag = 2
+            referenceSizeContainerView.frame.origin = CGPoint(x: referenceSizeContainerView.frame.origin.x, y: referenceSizeContainerView.frame.origin.y-self.view.frameHeight*2/3)
         }
     }
+    
+    func textFieldDidEndEditing(textField: UITextField) {
+        
+        if textField.tag == 1 { //lineNameTextField
+            var newFrame = lineContainerView.frame
+            newFrame.origin.y += self.view.frameHeight*2/3
+            
+            UIView.beginAnimations(nil, context: nil)
+            UIView.setAnimationBeginsFromCurrentState(true)
+            
+            UIView.setAnimationDuration(NSTimeInterval(0.25))
+            
+            lineContainerView.frame = newFrame
+            
+            UIView.commitAnimations()
+        } else { //referenceSizeTextFeild tag = 2
+            referenceSizeContainerView.frame.origin = CGPoint(x: referenceSizeContainerView.frame.origin.x, y: self.view.frameHeight-100)
+        }
+        
+    }
+    
     
     @IBAction func handlePinch(sender: AnyObject) {
         let recognizer = sender as! UIPinchGestureRecognizer
@@ -280,7 +416,7 @@ class DrawingViewController: UIViewController {
             drawingView.lineView.tool.lineName = lineNameTextField.text
                     
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
-            drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
+            //drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
         }
     }
     
@@ -348,10 +484,11 @@ class DrawingViewController: UIViewController {
         drawingView.curColor = color.CGColor
     }
     
+    /**
     @IBAction func pushTypeButton(sender: AnyObject) {
         let drawingView = imageView as! DrawingView
         let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("FaciesPixmapController") as! FaciesPixmapViewController
-        ctrler.typeButton = self.faciesTypeButton
+        //ctrler.typeButton = self.faciesTypeButton
         ctrler.drawingView = drawingView
         ctrler.faciesCatalog = faciesCatalog
         ctrler.drawingController = self
@@ -366,7 +503,7 @@ class DrawingViewController: UIViewController {
         ctrler.preferredContentSize = size
         
         self.presentViewController(ctrler, animated: true, completion: nil)
-    }
+    } **/
 
     @IBAction func pushLineTypeButton(sender: AnyObject) {
         horizonTypePickerView.hidden = !horizonTypePickerView.hidden
@@ -408,13 +545,23 @@ class DrawingViewController: UIViewController {
         if segue.identifier == "showSavePopover" {
             let savePopover = segue.destinationViewController as! SavePopoverViewController
             savePopover.drawingVC = self
-            savePopover.popoverPresentationController!.permittedArrowDirections = nil
+            savePopover.preferredContentSize.height = CGFloat(295 + (51*self.detailedImage!.features.count))
+            print(self.detailedImage!.features.count)
+            savePopover.preferredContentSize.width = 500
+            
+        } else if segue.identifier == "showFaciesPixmap" {
+            let faciesPopover = segue.destinationViewController as! FaciesPixmapViewController
+            faciesPopover.drawingView = (imageView as! DrawingView)
+            faciesPopover.faciesCatalog = faciesCatalog
+            faciesPopover.drawingController = self
+            let size = faciesPopover.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+            faciesPopover.preferredContentSize = size
         }
     }
     
     @IBAction func pushDefineFeatureButton(sender : AnyObject) {
         //disable all other buttons until Feature definition is complete
-        self.toolbarSegmentedControl.enabled = false
+        //self.toolbarSegmentedControl.enabled = false
         self.addDipMeterPointButton.enabled = false
         
         //create a new Feature
@@ -431,13 +578,13 @@ class DrawingViewController: UIViewController {
             alert.addAction(cancelAction)
             self.presentViewController(alert, animated: true, completion: nil)
             
-            self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
+            //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Reference
             let nf = NSNumberFormatter()
             referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
             
         } else {
-            self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+            //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Measure
             self.defineFeatureButton.hidden = true
             self.setHeightButton.enabled = true
@@ -462,7 +609,7 @@ class DrawingViewController: UIViewController {
             self.presentViewController(alert, animated: true, completion: nil)
             //just in case
             if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
-                self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+                //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
                 drawingView.drawMode = DrawingView.ToolMode.Measure
             }
         } else {
@@ -500,7 +647,7 @@ class DrawingViewController: UIViewController {
             self.presentViewController(alert, animated: true, completion: nil)
             //just in case
             if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
-                self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
+                //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
                 drawingView.drawMode = DrawingView.ToolMode.Measure
             }
         } else {
@@ -553,7 +700,7 @@ class DrawingViewController: UIViewController {
             self.defineFeatureButton.hidden = false
             
             //Re-enable all other buttons until Feature definition is complete
-            self.toolbarSegmentedControl.enabled = true
+            //self.toolbarSegmentedControl.enabled = true
             self.addDipMeterPointButton.enabled = true
             
             // Remove measurement line
