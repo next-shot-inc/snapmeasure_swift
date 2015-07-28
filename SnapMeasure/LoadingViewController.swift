@@ -173,7 +173,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "loadingToDrawing" {
-            let drawingVC = segue.destinationViewController as! DrawingViewController
+            let drawingNC = segue.destinationViewController as! UINavigationController
+            let drawingVC = drawingNC.topViewController as! DrawingViewController
             var destinationDetailedImageProxy : DetailedImageProxy
             if (self.searchController.active || scopeSelected ) {
                 let indexPath = self.tableView.indexPathForSelectedRow()
