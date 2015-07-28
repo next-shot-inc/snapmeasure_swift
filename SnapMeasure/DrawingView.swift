@@ -1032,7 +1032,7 @@ class DrawingView : UIImageView {
             faciesView.drawTool = FaciesDrawTool(curColumn: cc!, point: point)
         } else if( drawMode == ToolMode.Text ) {
             textView.drawTool = TextDrawTool(point: point)
-        } else if( drawMode == ToolMode.DipMarker ) {
+        } else if( drawMode == ToolMode.DipMarker && dipMarkerView.pickTool != nil ) {
             dipMarkerView.pickTool!.move(point)
             dipMarkerView.setNeedsDisplay()
         }
@@ -1081,13 +1081,13 @@ class DrawingView : UIImageView {
            if( drawMode != ToolMode.Erase ) {
                 lineView.setNeedsDisplay()
            }
-        } else if( drawMode == ToolMode.Facies ) {
+        } else if( drawMode == ToolMode.Facies && faciesView.drawTool != nil ) {
            faciesView.drawTool!.move(point)
            faciesView.setNeedsDisplay()
-        } else if( drawMode == ToolMode.Text ) {
+        } else if( drawMode == ToolMode.Text && textView.drawTool != nil ) {
             textView.drawTool!.move(point)
             textView.setNeedsDisplay()
-        } else if( drawMode == ToolMode.DipMarker ) {
+        } else if( drawMode == ToolMode.DipMarker && dipMarkerView.pickTool != nil ) {
             dipMarkerView.pickTool!.move(point)
             dipMarkerView.setNeedsDisplay()
         }
@@ -1149,11 +1149,11 @@ class DrawingView : UIImageView {
             }
             faciesView.drawTool = nil
             faciesView.setNeedsDisplay()
-        } else if( drawMode == ToolMode.Text ) {
+        } else if( drawMode == ToolMode.Text && textView.drawTool != nil ) {
             let label = textView.addText("", rect: textView.drawTool!.curRect)
             textView.drawTool = nil
             controller?.askText(label)
-        } else if( drawMode == ToolMode.DipMarker ) {
+        } else if( drawMode == ToolMode.DipMarker && dipMarkerView.pickTool != nil ) {
             drawMode = ToolMode(rawValue: dipMarkerView.pickTool!.previousToolMode)!
             let rect = CGRectMake(point.x-10.0, point.y-10, 20.0, 20.0)
             var snappedLine : Line?

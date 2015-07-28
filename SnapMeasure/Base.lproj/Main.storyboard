@@ -37,7 +37,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cw7-zZ-foI">
-                                <rect key="frame" x="116" y="324" width="108" height="31"/>
+                                <rect key="frame" x="36" y="362" width="188" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Features Histogram">
@@ -49,7 +49,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oea-fH-bxA">
-                                <rect key="frame" x="116" y="375" width="56" height="31"/>
+                                <rect key="frame" x="36" y="423" width="56" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Map">
@@ -61,19 +61,19 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Outcrop" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zoN-5C-vHP">
-                                <rect key="frame" x="116" y="247" width="102" height="20.5"/>
+                                <rect key="frame" x="36" y="260" width="102" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Existing Oucrop:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UIN-ZE-bqi">
-                                <rect key="frame" x="116" y="197" width="127.5" height="20.5"/>
+                                <rect key="frame" x="36" y="210" width="128" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="h0v-JU-ng0">
-                                <rect key="frame" x="253" y="192" width="174" height="31"/>
+                                <rect key="frame" x="174" y="204" width="174" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Select &amp; Interpret">
@@ -86,7 +86,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KPO-lU-ARU">
-                                <rect key="frame" x="253" y="283" width="126" height="31"/>
+                                <rect key="frame" x="174" y="301" width="126" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="Load Picture">
@@ -98,19 +98,19 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Current Project:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fQL-Iv-HYz">
-                                <rect key="frame" x="116" y="138" width="121" height="20.5"/>
+                                <rect key="frame" x="179" y="159" width="121" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ProjectName" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3rs-dy-tcG">
-                                <rect key="frame" x="253" y="138" width="99.5" height="20.5"/>
+                                <rect key="frame" x="310" y="159" width="100" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y3C-uL-xoU">
-                                <rect key="frame" x="253" y="49" width="103" height="33"/>
+                                <rect key="frame" x="174" y="63" width="115" height="33"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <state key="normal" title=" New Project ">
                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -121,7 +121,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="vLB-b8-djg">
-                                <rect key="frame" x="253" y="90" width="118" height="33"/>
+                                <rect key="frame" x="174" y="111" width="130" height="33"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <state key="normal" title=" Select Project ">
                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -132,13 +132,13 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Manage Project:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J4j-Kw-cAS">
-                                <rect key="frame" x="116" y="56" width="125.5" height="20.5"/>
+                                <rect key="frame" x="36" y="70" width="126" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iGn-33-JlB">
-                                <rect key="frame" x="253" y="242" width="122" height="31"/>
+                                <rect key="frame" x="174" y="255" width="122" height="31"/>
                                 <fontDescription key="fontDescription" name="Verdana" family="Verdana" pointSize="17"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="5" maxX="10" maxY="5"/>
                                 <state key="normal" title="New picture">
@@ -792,8 +792,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
-                                <rect key="frame" x="21" y="72" width="558" height="0.0"/>
+                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="EaD-SD-Xzk" customClass="DrawingView" customModule="SnapMeasure" customModuleProvider="target">
+                                <rect key="frame" x="21" y="72" width="571" height="477"/>
                                 <gestureRecognizers/>
                             </imageView>
                             <pickerView hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wev-s6-Qso">
@@ -1053,15 +1053,15 @@
                                 </variation>
                             </view>
                             <view tag="2" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PDP-Da-byb" userLabel="ReferencePopupView">
-                                <rect key="frame" x="315" y="499" width="186.5" height="49.5"/>
+                                <rect key="frame" x="315" y="500" width="187" height="49"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Size" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="6l9-no-owf">
-                                        <rect key="frame" x="133" y="5" width="48.5" height="39.5"/>
+                                        <rect key="frame" x="133" y="5" width="49" height="39"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <textInputTraits key="textInputTraits"/>
                                     </textField>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Reference Size:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eZa-eo-8f8">
-                                        <rect key="frame" x="5" y="14" width="120" height="20.5"/>
+                                        <rect key="frame" x="5" y="15" width="120" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
@@ -1090,7 +1090,7 @@
                             <constraint firstItem="4QH-PT-ktZ" firstAttribute="top" secondItem="vx2-ax-Iw8" secondAttribute="bottom" constant="20" id="76Q-MG-ac5"/>
                             <constraint firstItem="4QH-PT-ktZ" firstAttribute="centerX" secondItem="vx2-ax-Iw8" secondAttribute="centerX" id="7up-21-5DY"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="leading" secondItem="4QH-PT-ktZ" secondAttribute="trailing" constant="10" id="ApN-qX-QkP"/>
-                            <constraint firstItem="0nk-b2-KQ8" firstAttribute="top" relation="greaterThanOrEqual" secondItem="EaD-SD-Xzk" secondAttribute="bottom" id="Ejv-Tm-9qf"/>
+                            <constraint firstItem="0nk-b2-KQ8" firstAttribute="top" secondItem="EaD-SD-Xzk" secondAttribute="bottom" id="Ejv-Tm-9qf"/>
                             <constraint firstItem="0nk-b2-KQ8" firstAttribute="top" secondItem="PDP-Da-byb" secondAttribute="bottom" constant="1" id="FRC-9T-b8b"/>
                             <constraint firstItem="rxP-Dv-Dey" firstAttribute="top" secondItem="0nk-b2-KQ8" secondAttribute="bottom" id="Hyk-ce-5JM"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="centerX" secondItem="4QH-PT-ktZ" secondAttribute="centerX" id="KGT-JU-LDI"/>
@@ -1098,6 +1098,7 @@
                             <constraint firstItem="7Ua-vU-sig" firstAttribute="top" secondItem="wev-s6-Qso" secondAttribute="bottom" constant="10" id="Ncw-P1-G9r"/>
                             <constraint firstItem="wev-s6-Qso" firstAttribute="centerX" secondItem="7Ua-vU-sig" secondAttribute="centerX" id="PGy-AJ-Pva"/>
                             <constraint firstItem="7Ln-g8-wlv" firstAttribute="top" secondItem="vx2-ax-Iw8" secondAttribute="bottom" constant="10" id="PQR-KJ-rkv"/>
+                            <constraint firstItem="EaD-SD-Xzk" firstAttribute="top" secondItem="k29-4t-8uI" secondAttribute="bottom" id="TKK-hp-5Ie"/>
                             <constraint firstItem="0nk-b2-KQ8" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leading" id="TXi-sH-uiY"/>
                             <constraint firstItem="vx2-ax-Iw8" firstAttribute="top" secondItem="4QH-PT-ktZ" secondAttribute="bottom" id="ZHd-AH-F76"/>
                             <constraint firstItem="7Ln-g8-wlv" firstAttribute="leading" secondItem="NHE-DP-mGt" secondAttribute="leading" constant="5" id="a6H-CG-lcj"/>
@@ -1108,10 +1109,10 @@
                         </constraints>
                         <variation key="default">
                             <mask key="constraints">
-                                <exclude reference="4av-sZ-UIc"/>
                                 <exclude reference="ApN-qX-QkP"/>
                                 <exclude reference="KGT-JU-LDI"/>
                                 <exclude reference="ZHd-AH-F76"/>
+                                <exclude reference="4av-sZ-UIc"/>
                                 <exclude reference="1iJ-av-taZ"/>
                                 <exclude reference="76Q-MG-ac5"/>
                                 <exclude reference="6RK-B9-ksh"/>
@@ -1286,13 +1287,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ProjectLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O7V-N1-XkW">
-                                <rect key="frame" x="262" y="50" width="96" height="20.5"/>
+                                <rect key="frame" x="262" y="50" width="96" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HPC-Wc-It6">
-                                <rect key="frame" x="187" y="92" width="55" height="20.5"/>
+                                <rect key="frame" x="187" y="92" width="55" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="55" id="U2k-is-hZU"/>
                                 </constraints>
@@ -1319,7 +1320,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="FeatureTypeLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D0U-C4-ZTz">
-                                                    <rect key="frame" x="18" y="40" width="136" height="20.5"/>
+                                                    <rect key="frame" x="18" y="40" width="136" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
@@ -1357,7 +1358,7 @@
                                 </prototypes>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wGf-D2-DVG">
-                                <rect key="frame" x="16" y="570" width="189.5" height="30"/>
+                                <rect key="frame" x="16" y="570" width="190" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <state key="normal" title="Cancel">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
@@ -1367,7 +1368,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dzb-ex-Cf8">
-                                <rect key="frame" x="394" y="570" width="189.5" height="30"/>
+                                <rect key="frame" x="394" y="570" width="190" height="30"/>
                                 <state key="normal" title="Save">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -1403,13 +1404,13 @@
                                 </connections>
                             </button>
                             <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="WarningLabel" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LsB-C5-Uzn">
-                                <rect key="frame" x="60" y="127" width="480" height="20.5"/>
+                                <rect key="frame" x="60" y="127" width="480" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Project:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fjB-0z-iAX">
-                                <rect key="frame" x="187" y="50" width="59" height="20.5"/>
+                                <rect key="frame" x="187" y="50" width="59" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>

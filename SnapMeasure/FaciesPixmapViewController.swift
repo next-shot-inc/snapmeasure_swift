@@ -173,6 +173,17 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         }
     }
     
+    override func viewWillAppear(animated: Bool) {
+        if( drawingView != nil && faciesCatalog != nil ) {
+            tableView.selectRowAtIndexPath(
+                NSIndexPath(
+                    forRow: faciesCatalog!.imageIndex(drawingView!.faciesView.curImageName), inSection: 0
+                ),
+                animated: true, scrollPosition: UITableViewScrollPosition.Middle
+            )
+        }
+    }
+    
     @IBAction func AddPixmap(sender: AnyObject) {
         picker.allowsEditing = false
         picker.sourceType = .PhotoLibrary
