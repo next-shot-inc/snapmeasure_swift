@@ -139,7 +139,7 @@ class DrawingViewController: UIViewController {
         // Initialize widgets at the top
         // 1. Text field
         lineNameTextField.keyboardType = UIKeyboardType.Default
-        lineNameTextField.placeholder = "Name"
+        //lineNameTextField.placeholder = "Name"
         lineNameTextField.text = "H1"
         
         referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
@@ -221,7 +221,7 @@ class DrawingViewController: UIViewController {
             DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
         
         referenceSizeContainerView.hidden = true
-        faciesTypeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
@@ -236,9 +236,101 @@ class DrawingViewController: UIViewController {
             lineContainerView.hidden = false
             
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
-            faciesTypeContainerView.hidden = false
+            //faciesTypeContainerView.hidden = false
         }
     }
+    
+    // Mark: Bottom Toolbar methods
+    @IBAction func newLineButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Draw
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        
+        //from storyboard height = 49 and width = 235
+        let centerX = sender.frame.origin.x + sender.frame.size.width/2
+        let originY = self.view.frameBottom - 100
+        let originX = centerX-235/2
+        if originX < 0 {
+            lineContainerView.frame = CGRect(x: 0, y: originY, width: 235, height: 49)
+        } else {
+            lineContainerView.frame = CGRect(x: originX, y: originY, width: 235, height: 49)
+        }
+        
+        lineContainerView.hidden = false
+    }
+    
+    @IBAction func eraseButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Erase
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func measureButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Measure
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func drawReferenceButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Reference
+        
+        let nf = NSNumberFormatter()
+        referenceSizeTextField.text =
+            nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+        
+        //from storyboard height = 49 and width = 186
+        let centerX = sender.frame.origin.x + sender.frame.size.width/2
+        let originY = self.view.frameBottom - 100
+        let originX = centerX-186/2
+        if originX < 0 {
+            referenceSizeContainerView.frame = CGRect(x: 0, y: originY, width: 186, height: 49)
+        } else if originX+186 > self.view.frameRight  {
+            referenceSizeContainerView.frame = CGRect(x: self.view.frameRight-186, y: originY, width: 186, height: 49)
+        } else{
+            referenceSizeContainerView.frame = CGRect(x: originX, y: originY, width: 186, height: 49)
+        }
+        
+        referenceSizeContainerView.hidden = false
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func faciesButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Facies
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = false
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func textboxButtonPressed(sender: UIButton) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.Text
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
+    @IBAction func dipMeterButtonPressed(sender: AnyObject) {
+        let drawingView = imageView as! DrawingView
+        drawingView.drawMode = DrawingView.ToolMode.DipMarker
+        
+        referenceSizeContainerView.hidden = true
+        //faciesTypeContainerView.hidden = true
+        lineContainerView.hidden = true
+    }
+    
     
     @IBAction func handlePinch(sender: AnyObject) {
         let recognizer = sender as! UIPinchGestureRecognizer
@@ -403,7 +495,17 @@ class DrawingViewController: UIViewController {
         if segue.identifier == "showSavePopover" {
             let savePopover = segue.destinationViewController as! SavePopoverViewController
             savePopover.drawingVC = self
-            savePopover.popoverPresentationController!.permittedArrowDirections = nil
+            savePopover.preferredContentSize.height = CGFloat(245 + (51*self.detailedImage!.features.count))
+            print(self.detailedImage!.features.count)
+            savePopover.preferredContentSize.width = 500
+            
+        } else if segue.identifier == "showFaciesPixmap" {
+            let faciesPopover = segue.destinationViewController as! FaciesPixmapViewController
+            faciesPopover.drawingView = (imageView as! DrawingView)
+            faciesPopover.faciesCatalog = faciesCatalog
+            faciesPopover.drawingController = self
+            let size = faciesPopover.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+            faciesPopover.preferredContentSize = size
         }
     }
     

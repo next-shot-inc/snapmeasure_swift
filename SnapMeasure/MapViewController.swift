@@ -366,12 +366,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         }
     }
     
+    
     func mapView(mapView: MKMapView!, didDeselectAnnotationView view: MKAnnotationView!) {
         self.calloutView.dismissCalloutAnimated(true)
-        self.calloutView = CustomCalloutView()
-        self.calloutView.delegate = self
-        self.mapView.calloutView = self.calloutView
-        self.selectedImage = nil
+        //self.calloutView = CustomCalloutView()
+        //self.calloutView.delegate = self
+        //self.mapView.calloutView = self.calloutView
+        //self.selectedImage = nil
         
         if (overlay != nil) {
             mapView.removeOverlay(overlay!)
