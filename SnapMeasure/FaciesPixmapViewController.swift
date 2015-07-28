@@ -13,7 +13,12 @@ import CoreData
 
 class FaciesCatalog {
     let faciesTypes = [
-        "sandstone", "shale", "conglomerate", "limestone", "dolomite", "granites"
+        "sandstone", "shale", "conglomerate", "limestone", "dolomite", "granites",
+        "planar-bedding", "cross-lamination", "ripple-marked-bedding", "gradded-bedding", "cut-and-fill-bedding"
+    ]
+    let predefinedTiling = [
+        true, true, true, true, true, true,
+        false,false,false,false,false
     ]
     var faciesImages = [FaciesImageObject]()
     
@@ -42,9 +47,9 @@ class FaciesCatalog {
     }
     
     func image(name: String) -> (image: UIImage?, tile: Bool) {
-        for n in faciesTypes {
+        for (i,n) in enumerate(faciesTypes) {
             if( n == name ) {
-                return (UIImage(named: name), true)
+                return (UIImage(named: name), predefinedTiling[i])
             }
         }
         for fio in faciesImages {
