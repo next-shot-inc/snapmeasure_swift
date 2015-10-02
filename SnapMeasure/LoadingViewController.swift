@@ -22,17 +22,18 @@ class DetailedImageProxy {
     
     func getObject() -> DetailedImageObject? {
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        var managedContext = appDelegate.managedObjectContext!
+        let managedContext = appDelegate.managedObjectContext!
         
         let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
         fetchRequest.predicate = NSPredicate(format: "date == %@", date)
-        var error: NSError?
-        var objects = managedContext.executeFetchRequest(fetchRequest,
-            error: &error)!
-        
-        if( objects.count == 1 ) {
-            return objects[0] as? DetailedImageObject
-        } else {
+        do {
+            let objects = try managedContext.executeFetchRequest(fetchRequest)
+            if( objects.count == 1 ) {
+                return objects[0] as? DetailedImageObject
+            } else {
+                return nil
+            }
+        } catch {
             return nil
         }
     }
@@ -65,7 +66,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             controller.searchBar.showsScopeBar = true
             controller.searchBar.scopeButtonTitles = ["All"]
             var selectedScopeButton = 0
-            for (index,project) in enumerate(projects) {
+            for (index,project) in projects.enumerate() {
                 controller.searchBar.scopeButtonTitles!.append(project.name)
                 if( project == currentProject ) {
                     selectedScopeButton = index+1
@@ -113,17 +114,20 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         fetchRequest.propertiesToFetch = [ "name", "project.name", "date"]
         fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType
         
-        var error: NSError?
-        var objects = managedContext.executeFetchRequest(fetchRequest,
-            error: &error)!
-        for obj in objects {
-            var name = obj.valueForKey("name") as? NSString
-            var project = obj.valueForKey("project.name") as? NSString
-            var date = obj.valueForKey("date") as? NSDate
-            if( name != nil && project != nil ) {
-                detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String, date: date!))
+        do {
+            let objects = try managedContext.executeFetchRequest(fetchRequest)
+            for obj in objects {
+                let name = obj.valueForKey("name") as? NSString
+                let project = obj.valueForKey("project.name") as? NSString
+                let date = obj.valueForKey("date") as? NSDate
+                if( name != nil && project != nil ) {
+                    detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String, date: date!))
+                }
             }
+        } catch {
+            
         }
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -177,14 +181,14 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             let drawingVC = drawingNC.topViewController as! DrawingViewController
             var destinationDetailedImageProxy : DetailedImageProxy
             if (self.searchController.active || scopeSelected ) {
-                let indexPath = self.tableView.indexPathForSelectedRow()
-                destinationDetailedImageProxy = filteredDetailedImages[indexPath!.row]
+                let indexPath = self.tableView.indexPathForSelectedRow!
+                destinationDetailedImageProxy = filteredDetailedImages[indexPath.row]
             } else {
-                let indexPath = self.tableView.indexPathForSelectedRow()
-                destinationDetailedImageProxy = detailedImages[indexPath!.row]
+                let indexPath = self.tableView.indexPathForSelectedRow!
+                destinationDetailedImageProxy = detailedImages[indexPath.row]
             }
             
-            var destinationDetailedImage = destinationDetailedImageProxy.getObject()
+            let destinationDetailedImage = destinationDetailedImageProxy.getObject()
             if( destinationDetailedImage != nil ) {
                 drawingVC.detailedImage = destinationDetailedImage!
                 drawingVC.image = UIImage(data: destinationDetailedImage!.imageData)
@@ -204,11 +208,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         }
         
         if( edited ) {
-            var error: NSError?
-            if !self.managedContext.save(&error) {
-                println("Could not save in LoadingingViewController \(error), \(error?.userInfo)")
-            } else {
-                println("LoadingViewController saved the ManagedObjectContext")
+            do {
+              try self.managedContext.save()
+            } catch let error as NSError {
+                print("Could not save in LoadingingViewController \(error), \(error.userInfo)")
             }
         }
     }
@@ -241,9 +244,9 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     // Mark: - Filtering
     func updateSearchResultsForSearchController(searchController: UISearchController) {
         filteredDetailedImages.removeAll(keepCapacity: false)
-        let scopes = self.searchController.searchBar.scopeButtonTitles as! [String]
+        let scopes = self.searchController.searchBar.scopeButtonTitles!
         let selectedScope = scopes[self.searchController.searchBar.selectedScopeButtonIndex]
-        self.filterContentForSearchText(searchController.searchBar.text, scope: selectedScope)
+        self.filterContentForSearchText(searchController.searchBar.text!, scope: selectedScope)
         self.tableView.reloadData();
     }
     
@@ -270,10 +273,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         if self.searchController.active {
             self.updateSearchResultsForSearchController(self.searchController)
         } else {
-            let scopes = self.searchController.searchBar.scopeButtonTitles as! [String]
+            let scopes = self.searchController.searchBar.scopeButtonTitles!
             let scope = scopes[selectedScope]
             scopeSelected = true
-            self.filterContentForScope(scope: scope)
+            self.filterContentForScope(scope)
             self.tableView.reloadData()
         }
     }

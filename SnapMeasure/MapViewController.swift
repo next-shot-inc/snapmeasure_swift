@@ -40,7 +40,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         
             self.showAll()
         } else {
-            println("No DetailedImageObjects with a location")
+            print("No DetailedImageObjects with a location")
         }
         
         //self.seeAllAnnotations(mapView.annotations as! [MKAnnotation])
@@ -50,6 +50,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         
         self.mapView.calloutView = self.calloutView
 
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        if( menuController == nil ) {
+           super.viewDidDisappear(animated)
+           mapView.removeFromSuperview()
+        }
     }
     
     func initTestImages() {
@@ -65,7 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t1.setCoordinate(30.0, longitude: -100.0)
         t1.date = dateFormater.dateFromString("6/19/2015 09:00 AM")!
-        t1.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t1.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t1.scale = 0.005
         t1.compassOrientation = 0
         t1.name = "Day"
@@ -75,7 +82,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t2.setCoordinate(35.0, longitude: -120.0)
         t2.date = dateFormater.dateFromString("6/13/2015 09:00 AM")!
-        t2.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t2.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t2.scale = 0.005
         t2.compassOrientation = 0
         t2.name = "Week"
@@ -85,7 +92,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t3.setCoordinate(45.0, longitude: -70.0)
         t3.date = dateFormater.dateFromString("5/25/2015 09:00 AM")!
-        t3.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t3.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t3.scale = 0.005
         t3.compassOrientation = 0
         t3.name = "Month"
@@ -95,7 +102,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t4.setCoordinate(40.0, longitude: -100.0)
         t4.date = dateFormater.dateFromString("9/8/2014 09:00 AM")!
-        t4.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)
+        t4.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t4.scale = 0.005
         t4.compassOrientation = 0
         t4.name = "Year"
@@ -115,9 +122,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         // only get the detailedImages that have a location
         fetchRequest.predicate = NSPredicate(format: "latitude!=nil AND longitude!=nil AND project.name==%@", currentProject.name)
         
-        var error: NSError?
-        detailedImages = (managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [DetailedImageObject])!
+        do {
+            try detailedImages = (managedContext.executeFetchRequest(fetchRequest) as? [DetailedImageObject])!
+        } catch {
+            
+        }
+        
     }
     
     func centerMapOnLocation(coordinate: CLLocationCoordinate2D, withRadius radius: CLLocationDistance) {
@@ -177,6 +187,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         }
         
         menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
         self.filterByDateButton.title = "Filter by Date:"
     }
     
@@ -188,31 +199,31 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         menuController!.initCellContents(6, cols: 1)
         
         //Add Filter Options
-        let mostRecentButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        let mostRecentButton = UIButton(type: UIButtonType.System)
         mostRecentButton.setTitle("Last Day", forState: UIControlState.Normal)
         mostRecentButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         mostRecentButton.addTarget(self, action: "showAnnotationsForLatestDay:", forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[0][0] = mostRecentButton
         
-        let lastWeekButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        let lastWeekButton = UIButton(type: UIButtonType.System)
         lastWeekButton.setTitle("Last Week", forState: UIControlState.Normal)
         lastWeekButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastWeekButton.addTarget(self, action: "showAnnotationsForLatestWeek", forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[1][0] = lastWeekButton
         
-        let lastMonthButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        let lastMonthButton = UIButton(type: UIButtonType.System)
         lastMonthButton.setTitle("Last Month", forState: UIControlState.Normal)
         lastMonthButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastMonthButton.addTarget(self, action: "showAnnotationsForLatestMonth", forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[2][0] = lastMonthButton
         
-        let lastYearButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        let lastYearButton = UIButton(type: UIButtonType.System)
         lastYearButton.setTitle("Last Year", forState: UIControlState.Normal)
         lastYearButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         lastYearButton.addTarget(self, action: "showAnnotationsForLatestYear", forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[3][0] = lastYearButton
 
-        let AllButton = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+        let AllButton = UIButton(type: UIButtonType.System)
         AllButton.setTitle("All", forState: UIControlState.Normal)
         AllButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
         AllButton.addTarget(self, action: "showAll", forControlEvents: UIControlEvents.TouchUpInside)
@@ -247,52 +258,108 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             }
         }
         menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
     }
     
     func showAnnotationsForLatestDay(sender: UIButton) {
         //24hours/day * 60min/hour * 60sec/min
         let dayInterval : NSTimeInterval = 86400 //secs
-        self.showAnnotationsForTimeIntervalFromCurrentDate(dayInterval)
-        self.filterByDateButton.title = "Filter by Date: Latest Day"
+        showAnnotationsForTimeIntervalFromCurrentDate(dayInterval)
+        filterByDateButton.title = "Filter by Date: Latest Day"
     }
     
     func showAnnotationsForLatestWeek() {
         //7days/week * 24hours/day * 60min/hour * 60sec/min
         let weekInterval : NSTimeInterval = 604800 //secs
-        self.showAnnotationsForTimeIntervalFromCurrentDate(weekInterval)
-        self.filterByDateButton.title = "Filter by Date: Latest Week"
+        showAnnotationsForTimeIntervalFromCurrentDate(weekInterval)
+        filterByDateButton.title = "Filter by Date: Latest Week"
     }
     
     func showAnnotationsForLatestMonth() {
         //30.5 days/month * 24hours/day * 60min/hour * 60sec/min
         let monthInterval : NSTimeInterval = 2635200 //secs
-        self.showAnnotationsForTimeIntervalFromCurrentDate(monthInterval)
-        self.filterByDateButton.title = "Filter by Date: Latest Month"
+        showAnnotationsForTimeIntervalFromCurrentDate(monthInterval)
+        filterByDateButton.title = "Filter by Date: Latest Month"
     }
     
     func showAnnotationsForLatestYear() {
         //24hours/day * 60min/hour * 60sec/min
         let yearInterval : NSTimeInterval = 31536000 //secs
-        self.showAnnotationsForTimeIntervalFromCurrentDate(yearInterval)
-        self.filterByDateButton.title = "Filter by Date: Latest Year"
+        showAnnotationsForTimeIntervalFromCurrentDate(yearInterval)
+        filterByDateButton.title = "Filter by Date: Latest Year"
     }
     
     func showAnnotationsForTimeSpan (interval: NSTimeInterval, fromDate: NSDate) {
         self.removeAll()
         for detailedImage in detailedImages {
             //if the date is later in time than the earliestAllowedDate
-            println(detailedImage.date)
+            print(detailedImage.date)
             let intervalSinceDate = detailedImage.date.timeIntervalSinceDate(fromDate)
-            println(intervalSinceDate)
+            print(intervalSinceDate)
             if intervalSinceDate < interval && intervalSinceDate >= 0 {
                 let annotation = ImageAnnotation(detailedImage: detailedImage)
                 mapView.addAnnotation(annotation)
             }
         }
         menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
     }
     
-    //Mark: - UITextFeildDelegateMethods
+    //Mark: - Actions: Filtering by Date
+    @IBAction func tappedSettings(sender: UIBarButtonItem) {
+        let width = 150
+        let height = 45
+        menuController = PopupMenuController()
+        menuController!.initCellContents(3, cols: 1)
+        
+        //Add Map display Options
+        let standardButton = UIButton(type: UIButtonType.System)
+        standardButton.setTitle("Standard", forState: UIControlState.Normal)
+        standardButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        standardButton.addTarget(self, action: "showStandardMap", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents[0][0] = standardButton
+        
+        let satelliteButton = UIButton(type: UIButtonType.System)
+        satelliteButton.setTitle("Satellite", forState: UIControlState.Normal)
+        satelliteButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        satelliteButton.addTarget(self, action: "showSatelliteMap", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents[1][0] = satelliteButton
+        
+        let hybridButton = UIButton(type: UIButtonType.System)
+        hybridButton.setTitle("Hybrid", forState: UIControlState.Normal)
+        hybridButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        hybridButton.addTarget(self, action: "showHybridMap", forControlEvents: UIControlEvents.TouchUpInside)
+        menuController!.cellContents[2][0] = hybridButton
+
+        //set up menu Controller
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        //menuController!.preferredContentSize.width = width
+        menuController!.tableView.rowHeight = 45
+        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        menuController!.popoverPresentationController?.barButtonItem = sender
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
+        
+        self.presentViewController(menuController!, animated: true, completion: nil)
+    }
+    
+    func showStandardMap() {
+        self.mapView.mapType = MKMapType.Standard
+        menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
+    }
+    func showSatelliteMap() {
+        self.mapView.mapType = MKMapType.Satellite
+        menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
+    }
+    func showHybridMap() {
+        self.mapView.mapType = MKMapType.Hybrid
+        menuController?.dismissViewControllerAnimated(true, completion: nil)
+        menuController = nil
+    }
+
+    
+    //Mark: - UITextFieldDelegateMethods
     
     func textFieldDidEndEditing(textField: UITextField) {
         let dateFormatter = NSDateFormatter()
@@ -300,9 +367,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         dateFormatter.timeStyle = NSDateFormatterStyle.NoStyle
         dateFormatter.locale = NSLocale.currentLocale()
 
-        if let date = dateFormatter.dateFromString(textField.text) { //date is in GMT
+        if let date = dateFormatter.dateFromString(textField.text!) { //date is in GMT
             self.showAnnotationsForTimeSpan(86400, fromDate: date)
-            self.filterByDateButton.title = "Filter by Date: " + textField.text
+            self.filterByDateButton.title = "Filter by Date: " + textField.text!
         }
     }
     
@@ -315,7 +382,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
     //Mark: - MKMapViewDelegate methods
     
     //gets called for each annotation added to the map
-    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         if let annotation = annotation as? ImageAnnotation {
             let identifier = "ImageAnnotationView"
             var view: MKPinAnnotationView
@@ -333,7 +400,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         return nil
     }
 
-    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         if let ann = view.annotation as? ImageAnnotation {
             //annView.setMapLineViewOrientation(self.mapView.camera.heading)
             
@@ -364,13 +431,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
                     length: ann.length!, compassOrientation: ann.compassOrientation!,
                     coordinate: ann.coordinate, object_scale: ann.detailedImage.scale != nil ? ann.detailedImage.scale!.doubleValue : 1.0
                 )
-                mapView.addOverlay(overlay)
+                mapView.addOverlay(overlay!)
             }
         }
     }
     
     
-    func mapView(mapView: MKMapView!, didDeselectAnnotationView view: MKAnnotationView!) {
+    func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView) {
         self.calloutView.dismissCalloutAnimated(true)
         //self.calloutView = CustomCalloutView()
         //self.calloutView.delegate = self
@@ -382,17 +449,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         }
     }
     
-    func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
-        if overlay is MapLineOverlay {
-            let overlayView = MapLineOverlayView(overlay: overlay)
-            return overlayView
-        } else {
-            return nil
-        }
+    func mapView(mapView: MKMapView,rendererForOverlay overlay: MKOverlay)-> MKOverlayRenderer {
+        let overlayView = MapLineOverlayView(overlay: overlay)
+        return overlayView
     }
     
     func calloutImageTapped() {
-        var goToDrawing = false
         let alert = UIAlertController(
             title: "Interpret this Outcrop?", message: nil, preferredStyle: .Alert
         )
@@ -411,23 +473,35 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "mapToDrawing" {
-            let drawingVC = segue.destinationViewController as! DrawingViewController
-            
-            drawingVC.detailedImage = self.selectedImage!
-            drawingVC.image = UIImage(data: self.selectedImage!.imageData)
-            
-            //get ImageInfo
-            var imageInfo = ImageInfo()
-            imageInfo.xDimension = Int(drawingVC.image!.size.width)
-            imageInfo.yDimension = Int(drawingVC.image!.size.height)
-            imageInfo.latitude = self.selectedImage!.latitude?.doubleValue
-            imageInfo.longitude = self.selectedImage!.longitude?.doubleValue
-            imageInfo.compassOrienation = self.selectedImage!.compassOrientation?.doubleValue
-            imageInfo.date = self.selectedImage!.date
-            imageInfo.scale = self.selectedImage!.scale?.doubleValue
-            
-            
-            drawingVC.imageInfo = imageInfo
+            var drawingVC = segue.destinationViewController as? DrawingViewController
+            if( drawingVC == nil ) {
+                let navigationVC = segue.destinationViewController as? UINavigationController
+                if( navigationVC != nil ) {
+                    for vc in navigationVC!.viewControllers {
+                        drawingVC = vc as? DrawingViewController
+                        if( drawingVC != nil ) {
+                            break
+                        }
+                    }
+                }
+            }
+
+            if( drawingVC != nil ) {
+                drawingVC!.detailedImage = self.selectedImage!
+                drawingVC!.image = UIImage(data: self.selectedImage!.imageData)
+                
+                //get ImageInfo
+                var imageInfo = ImageInfo()
+                imageInfo.xDimension = Int(drawingVC!.image!.size.width)
+                imageInfo.yDimension = Int(drawingVC!.image!.size.height)
+                imageInfo.latitude = self.selectedImage!.latitude?.doubleValue
+                imageInfo.longitude = self.selectedImage!.longitude?.doubleValue
+                imageInfo.compassOrienation = self.selectedImage!.compassOrientation?.doubleValue
+                imageInfo.date = self.selectedImage!.date
+                imageInfo.scale = self.selectedImage!.scale?.doubleValue
+                
+                drawingVC!.imageInfo = imageInfo
+            }
         }
     }
     
@@ -462,7 +536,7 @@ class CustomMapView: MKMapView , UIGestureRecognizerDelegate{
 
     func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldReceiveTouch touch: UITouch) -> Bool {
         
-        if (touch.view.isKindOfClass(UIControl)) {
+        if (touch.view!.isKindOfClass(UIControl)) {
             return false
         } else {
             return super.gestureRecognizerShouldBegin(gestureRecognizer)

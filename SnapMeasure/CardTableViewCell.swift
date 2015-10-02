@@ -14,7 +14,7 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
     @IBOutlet var mainView: UIView!
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var myImageView: UIImageView!
-    @IBOutlet weak var mailButton: UIButton!
+
     var detailedImageProxy : DetailedImageProxy?
     var faciesCatalog: FaciesCatalog?
     var controller: LoadingViewController?
@@ -28,19 +28,15 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         
         //fill in the data
         nameLabel.text = detailedImage.name
-        var detailedImage = detailedImageProxy?.getObject()
+        let detailedImage = detailedImageProxy?.getObject()
         if( detailedImage != nil ) {
-            var image = UIImage(data: detailedImage!.imageData)
+            let image = UIImage(data: detailedImage!.imageData)
             if( image != nil ) {
                myImageView.image = resizeImage(
                   image!, newSize: CGSize(width: image!.size.width/8, height: image!.size.height/8)
                )
             }
-            if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
-               !MFMailComposeViewController.canSendMail()
-            ){
-                mailButton.enabled = false
-            }
+            
         }
         //myImageView.initFrame()
         //myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
@@ -55,20 +51,20 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         let context = UIGraphicsGetCurrentContext()
         
         // Set the quality level to use when rescaling
-        CGContextSetInterpolationQuality(context, kCGInterpolationHigh)
+        CGContextSetInterpolationQuality(context, CGInterpolationQuality.High)
         let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, newSize.height)
         
         CGContextConcatCTM(context, flipVertical)
         // Draw into the context; this scales the image
         CGContextDrawImage(context, newRect, imageRef)
         
-        let newImageRef = CGBitmapContextCreateImage(context) as CGImage
-        let newImage = UIImage(CGImage: newImageRef, scale: 1.0, orientation: UIImageOrientation.Right)
+        let newImageRef = CGBitmapContextCreateImage(context)
+        let newImage = UIImage(CGImage: newImageRef!, scale: 1.0, orientation: UIImageOrientation.Right)
         
         // Get the resized image from the context and a UIImage
         UIGraphicsEndImageContext()
         
-        return newImage!
+        return newImage
     }
 
     
@@ -76,7 +72,7 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         //var format = 1
         var filename: NSURL
         var formatUserName : String
-        var detailedImage = detailedImageProxy?.getObject()
+        let detailedImage = detailedImageProxy?.getObject()
         if( detailedImage == nil ) {
             return
         }
@@ -86,16 +82,16 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
             filename = exporter.export()
             formatUserName = "Shape"
         } else {*/
-            var exporter = ExportAsGocadFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
+            let exporter = ExportAsGocadFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
             filename = exporter.export()
             formatUserName = "Gocad"
         //}
         
-        
-        var error : NSError?
-        let fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions(0), error: &error)
-        if( fileData == nil ) {
-            println("Could not read data to send")
+        var fileData = NSData()
+        do {
+            try fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions.DataReadingMappedIfSafe)
+        } catch {
+            print("Could not read data to send")
             return
         }
 
@@ -121,8 +117,8 @@ class CardTableViewCell: UITableViewCell,  MFMailComposeViewControllerDelegate {
         controller!.presentViewController(mailComposer, animated: true, completion: nil)
     }
     
-    func mailComposeController(controller: MFMailComposeViewController!, didFinishWithResult result: MFMailComposeResult, error: NSError!) {
-        println(result)
-        controller!.dismissViewControllerAnimated(true, completion: nil)
+    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
+        print(result)
+        controller.dismissViewControllerAnimated(true, completion: nil)
     }
 }

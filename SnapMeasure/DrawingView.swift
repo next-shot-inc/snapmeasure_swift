@@ -52,7 +52,7 @@ struct Line {
         
         let globalLeftToRight = points.last!.x > points.first!.x
         var filtered = false
-        do {
+        repeat {
             filtered = false
             let leftToRight = points[1].x > points[0].x
             if( globalLeftToRight != leftToRight ) {
@@ -98,7 +98,7 @@ struct Line {
         // Find corresponding min and max Y for minX and maxX we found before
         var minY = p1.y;
         var maxY = p2.y;
-        var dx = p2.x - p1.x;
+        let dx = p2.x - p1.x;
         
         if( abs(dx) > 0.0000001 ) {
             let a = (p2.y - p1.y) / dx;
@@ -126,18 +126,20 @@ struct Line {
     }
     
     static func segmentsIntersect(a: CGPoint, b: CGPoint, c: CGPoint, d: CGPoint) -> (exist: Bool, loc: CGPoint) {
-        let denom = Double(a.x) * Double( d.y - c.y ) + Double(b.x) * Double( c.y - d.y ) +
-                    Double(d.x) * Double( b.y - a.y ) + Double(c.x) * Double( a.y - b.y );
+        var denom = Double(a.x) * Double( d.y - c.y ) + Double(b.x) * Double( c.y - d.y ) ;
+        denom += Double(d.x) * Double( b.y - a.y ) + Double(c.x) * Double( a.y - b.y );
             
         /* If denom is zero, then segments are parallel: no intersection */
         if( abs(denom) < 1e-6 ) {
             return (false, CGPoint())
         }
             
-        let nums = Double(a.x) * Double( d.y - c.y ) + Double(c.x) * Double( a.y - d.y ) + Double(d.x) * Double( c.y - a.y )
+        var nums = Double(a.x) * Double( d.y - c.y ) + Double(c.x) * Double( a.y - d.y ) ;
+        nums += Double(d.x) * Double( c.y - a.y )
         var s = nums / denom
         
-        let numt = Double(a.x) * Double( c.y - b.y ) + Double(b.x) * Double( a.y - c.y ) + Double(c.x) * Double( b.y - a.y )
+        var numt = Double(a.x) * Double( c.y - b.y ) + Double(b.x) * Double( a.y - c.y )
+        numt += Double(c.x) * Double( b.y - a.y )
         let t = -numt / denom
         
         let eps = 1e-8
@@ -204,6 +206,7 @@ class LineView : UIView {
     var refMeasureValue : Float = 0.0
     var tool = LineViewTool()
     var polygons : Polygons?
+    var drawPolygon = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -339,7 +342,7 @@ class LineView : UIView {
     // The merge is done when the name of the new line is the same as the name of an existing line
     func add(line: Line) {
         // Find if it needs to be merged with an existing line
-        for (index,value) in enumerate(lines) {
+        for (index,value) in lines.enumerate() {
             if( value.name == line.name ) {
                 var newline = value
                 newline.color = line.color // Take latest color
@@ -366,17 +369,21 @@ class LineView : UIView {
     }
     
     func computePolygon() {
-        var nlines = lines;
-        var border = Line()
-        border.role = Line.Role.Border
-        border.points.append(CGPoint(x: 10, y: 10))
-        border.points.append(CGPoint(x: bounds.width - 10.0, y: 10))
-        border.points.append(CGPoint(x: bounds.width - 10.0, y: bounds.height - 10.0))
-        border.points.append(CGPoint(x: 10, y: bounds.height - 10.0))
-        border.points.append(CGPoint(x: 10, y: 10))
-        
-        nlines.append(border)
-        polygons = Polygons(lines: nlines)
+        if( drawPolygon == false ) {
+            polygons = nil
+        } else {
+            var nlines = lines;
+            var border = Line()
+            border.role = Line.Role.Border
+            border.points.append(CGPoint(x: 10, y: 10))
+            border.points.append(CGPoint(x: bounds.width - 10.0, y: 10))
+            border.points.append(CGPoint(x: bounds.width - 10.0, y: bounds.height - 10.0))
+            border.points.append(CGPoint(x: 10, y: bounds.height - 10.0))
+            border.points.append(CGPoint(x: 10, y: 10))
+            
+            nlines.append(border)
+            polygons = Polygons(lines: nlines)
+        }
     }
 }
 
@@ -429,10 +436,10 @@ class FaciesColumn {
     
     func snap(origin: CGPoint, point: CGPoint) -> CGRect {
         if( faciesVignettes.count == 0 ) {
-            var xmin = min(origin.x, point.x)
-            var xmax = max(origin.x, point.x)
-            var ymin = min(origin.y, point.y)
-            var ymax = max(origin.y, point.y)
+            let xmin = min(origin.x, point.x)
+            let xmax = max(origin.x, point.x)
+            let ymin = min(origin.y, point.y)
+            let ymax = max(origin.y, point.y)
             return CGRectMake(xmin, ymin, xmax-xmin, ymax-ymin)
         } else {
             var snapped = CGPoint()
@@ -441,8 +448,8 @@ class FaciesColumn {
             } else {
                 snapped.x = faciesVignettes[0].rect.minX
             }
-            var xmin = min(origin.x, snapped.x)
-            var xmax = max(origin.x, snapped.x)
+            let xmin = min(origin.x, snapped.x)
+            let xmax = max(origin.x, snapped.x)
             if( origin.y == faciesVignettes[0].rect.minY ) {
                 // Drawing rectangle above the first one
                 if( point.y < origin.y ) {
@@ -491,7 +498,7 @@ class FaciesDrawTool {
         curRect = curColumn!.snap(origin, point: point)
     }
     
-    func end(#imageName: String) {
+    func end(imageName imageName: String) {
         if( append ) {
             curColumn!.faciesVignettes.append(
                 FaciesVignette(rect: curRect, image: imageName)
@@ -577,10 +584,10 @@ class TextDrawTool {
     }
     
     func move(point: CGPoint) {
-        var xmin = min(origin.x, point.x)
-        var xmax = max(origin.x, point.x)
-        var ymin = min(origin.y, point.y)
-        var ymax = max(origin.y, point.y)
+        let xmin = min(origin.x, point.x)
+        let xmax = max(origin.x, point.x)
+        let ymin = min(origin.y, point.y)
+        let ymax = max(origin.y, point.y)
         curRect = CGRectMake(xmin, ymin, xmax-xmin, ymax-ymin)
     }
 
@@ -598,7 +605,7 @@ class TextView : UIView {
     }
     
     func addText(label: String, rect: CGRect) -> UILabel {
-        var uilabel = UILabel(frame: rect)
+        let uilabel = UILabel(frame: rect)
         uilabel.adjustsFontSizeToFitWidth = true
         uilabel.numberOfLines = 0
         uilabel.text = label
@@ -706,7 +713,7 @@ class DipMarkerView : UIView {
     // Add a point located in the current picture
     func addPoint(loc: CGPoint, line: Line?) {
         if( pickTool != nil ) {
-            var dm = DipMarkerPoint(
+            let dm = DipMarkerPoint(
                 loc: loc, normal: pickTool!.normal,
                 realLocation: pickTool!.realLocation == nil ? CLLocation() : pickTool!.realLocation!,
                 snappedLine: line
@@ -716,8 +723,8 @@ class DipMarkerView : UIView {
     }
     
     // Add a point related to the current picture but not localized in the picture
-    func addPoint(#realLocation: CLLocation, normal: Vector3) {
-        var dm = DipMarkerPoint(
+    func addPoint(realLocation realLocation: CLLocation, normal: Vector3) {
+        let dm = DipMarkerPoint(
             loc: CGPoint(), normal: normal,
             realLocation: realLocation,
             snappedLine: nil
@@ -769,36 +776,36 @@ class DrawingView : UIImageView {
     }
 
     required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        super.init(coder: aDecoder)!
         
         lineView = LineView(frame: self.bounds)
         lineView.opaque = false
         lineView.backgroundColor = nil
-        lineView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        lineView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(lineView)
 
         
         faciesView = FaciesView(frame: self.bounds)
         faciesView.opaque = false
         faciesView.backgroundColor = nil
-        faciesView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        faciesView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(faciesView)
         
         textView = TextView(frame: self.bounds)
         textView.opaque = false
         textView.backgroundColor = nil
-        textView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        textView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(textView)
         
         dipMarkerView = DipMarkerView(frame: self.bounds)
         dipMarkerView.opaque = false
         dipMarkerView.backgroundColor = nil
-        dipMarkerView.autoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
+        dipMarkerView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(dipMarkerView)
     }
     
     func initFrame() {
-        self.sizeToFit()
+        // self.sizeToFit()
         //lineView.frame = CGRect(origin: CGPoint(x: 0,y: 0), size: self.bounds.size)
     }
     
@@ -829,7 +836,7 @@ class DrawingView : UIImageView {
             var line = Line()
             line.name = lo!.name
             let color = NSKeyedUnarchiver.unarchiveObjectWithData(lo!.colorData) as? UIColor
-            line.color = color?.CGColor
+            line.color = (color?.CGColor)!
             line.role = LineViewTool.role(lo!.type)
             let arrayData = lo!.pointData
             let array = Array(
@@ -848,7 +855,7 @@ class DrawingView : UIImageView {
         // Get the facies vignettes
         for afvo in detailedImage.faciesVignettes {
             let fvo = afvo as? FaciesVignetteObject
-            let orect = fvo!.rect.CGRectValue()
+            let orect = fvo!.rect.CGRectValue!
             let rect = CGRectApplyAffineTransform(orect, affineTransform)
             let fv = FaciesVignette(rect: rect, image: fvo!.imageName)
             let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
@@ -856,7 +863,7 @@ class DrawingView : UIImageView {
             var inserted_in_column = false
             for fvc in faciesView.faciesColumns {
                 if( fvc.inside(center) ) {
-                    for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                    for (index,cfv) in fvc.faciesVignettes.enumerate() {
                         if( center.y < cfv.rect.minY ) {
                             fvc.faciesVignettes.insert(fv, atIndex: index)
                             inserted_in_column = true
@@ -881,7 +888,7 @@ class DrawingView : UIImageView {
         // Get the annotations
         for ato in detailedImage.texts {
             let to = ato as? TextObject
-            let orect = to!.rect.CGRectValue()
+            let orect = to!.rect.CGRectValue!
             let rect = CGRectApplyAffineTransform(orect, affineTransform)
             textView.addText(to!.string, rect: rect)
             textView.setNeedsDisplay()
@@ -890,7 +897,7 @@ class DrawingView : UIImageView {
         // Initialize the dip markers
         for admpo in detailedImage.dipMeterPoints {
             let dmpo = admpo as? DipMeterPointObject
-            var loc = dmpo!.locationInImage.CGPointValue()
+            var loc = dmpo!.locationInImage.CGPointValue!
             if( loc.x != 0 && loc.y != 0 ) {
                 loc = CGPointApplyAffineTransform(loc, affineTransform)
             }
@@ -926,7 +933,6 @@ class DrawingView : UIImageView {
             if( self.image == nil ) {
                 return
             }
-            
             
             // Compute scaling factors
             let scalex = newBounds.width/self.image!.size.width
@@ -964,13 +970,13 @@ class DrawingView : UIImageView {
                 }
             }
             for fvc in faciesView.faciesColumns {
-                for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                for (index,cfv) in fvc.faciesVignettes.enumerate() {
                     fvc.faciesVignettes[index].rect = CGRectApplyAffineTransform(cfv.rect, caffineTransform)
                 }
             }
             for( var i=0; i < textView.subviews.count; ++i ) {
                 let rect = CGRectApplyAffineTransform(textView.subviews[i].frame, caffineTransform)
-                var fv = textView.subviews[i] as! UIView
+                let fv = textView.subviews[i] 
                 fv.frame = rect
             }
             for( var i=0; i < dipMarkerView.points.count; ++i ) {
@@ -1007,9 +1013,9 @@ class DrawingView : UIImageView {
         return nil
     }
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
-       let touch = touches.first as! UITouch
-       let point = touch.locationInView(self)
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+       let touch = touches.first
+       let point = touch!.locationInView(self)
     
         if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
             drawMode != ToolMode.DipMarker
@@ -1040,7 +1046,7 @@ class DrawingView : UIImageView {
         if( drawMode == ToolMode.Erase ) {
             let rect = CGRectMake(point.x-10.0, point.y-10.0, 20.0, 20.0)
             // Find if there is a line below
-            for (index,value) in enumerate(lineView.lines) {
+            for (index,value) in lineView.lines.enumerate() {
                 if( value.intersectBox(rect) ) {
                     lineView.lines.removeAtIndex(index)
                     lineView.setNeedsDisplay()
@@ -1048,8 +1054,8 @@ class DrawingView : UIImageView {
                 }
             }
             // Find if there is a facies vignette
-            for (fcindex, fc) in enumerate(faciesView.faciesColumns) {
-                for (index,value) in enumerate(fc.faciesVignettes) {
+            for (fcindex, fc) in faciesView.faciesColumns.enumerate() {
+                for (index,value) in fc.faciesVignettes.enumerate() {
                     if( value.rect.intersects(rect) ) {
                         fc.remove(index)
                         if( fc.faciesVignettes.count == 0 ) {
@@ -1070,8 +1076,8 @@ class DrawingView : UIImageView {
         }
     }
     
-    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
-        let touch = touches.first as! UITouch
+    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        let touch = touches.first!
         let point = touch.locationInView(self)
         
         if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
@@ -1094,8 +1100,8 @@ class DrawingView : UIImageView {
         
     }
     
-    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
-        let touch = touches.first as! UITouch
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        let touch = touches.first!
         let point = touch.locationInView(self)
         lineView.currentLine.points.append(point)
         
@@ -1128,7 +1134,7 @@ class DrawingView : UIImageView {
                 let maxY = max(p1.y, p0.y)
                 
                 let rect = CGRectMake(minX, minY, maxX-minX, maxY-minY)
-                for (index,value) in enumerate(lineView.lines) {
+                for (index,value) in lineView.lines.enumerate() {
                     if( value.intersectBox(rect) ) {
                         lineView.lines.removeAtIndex(index)
                         lineView.computePolygon()

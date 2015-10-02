@@ -51,13 +51,11 @@ class MapLineOverlay: NSObject, MKOverlay {
 class MapLineOverlayView: MKOverlayRenderer {
     
     
-    override func drawMapRect(mapRect: MKMapRect, zoomScale: MKZoomScale, inContext context: CGContext!) {
+    override func drawMapRect(mapRect: MKMapRect, zoomScale: MKZoomScale, inContext context: CGContext) {
         if let lineOverlay = overlay as? MapLineOverlay {
-            let overlayMapRect = overlay.boundingMapRect
-            let cgRect = rectForMapRect(overlayMapRect)
-        
-            let cgmapRect = rectForMapRect(mapRect)
-            
+            //let overlayMapRect = overlay.boundingMapRect
+            //let cgRect = rectForMapRect(overlayMapRect)
+            //let cgmapRect = rectForMapRect(mapRect)
             
             let objectMapPoint = lineOverlay.objectCoordinate
 
@@ -65,17 +63,17 @@ class MapLineOverlayView: MKOverlayRenderer {
         
             //draw line representing length (in Blue)
             //first get map points
-            var startMapPoint = MKMapPoint(
+            let startMapPoint = MKMapPoint(
                 x: objectMapPoint.x+lineOverlay.mapLength*cos(lineOverlay.angle)/2,
                 y: objectMapPoint.y+lineOverlay.mapLength*sin(lineOverlay.angle)/2
             )
-            var endMapPoint = MKMapPoint(
+            let endMapPoint = MKMapPoint(
                 x: objectMapPoint.x-lineOverlay.mapLength*cos(lineOverlay.angle)/2,
                 y: objectMapPoint.y-lineOverlay.mapLength*sin(lineOverlay.angle)/2
             )
-            let deltaY = lineOverlay.mapLength*sin(lineOverlay.angle)/2
+            //let deltaY = lineOverlay.mapLength*sin(lineOverlay.angle)/2
             //get CGpoints for MapPoints
-            var startPoint = pointForMapPoint(startMapPoint)
+            let startPoint = pointForMapPoint(startMapPoint)
             var endPoint = pointForMapPoint(endMapPoint)
 
             CGContextSetStrokeColorWithColor(context, UIColor.blueColor().CGColor)

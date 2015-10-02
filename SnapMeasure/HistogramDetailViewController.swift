@@ -26,7 +26,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
         navigationItem.leftItemsSupplementBackButton = true
         
-        var doubleTap = UITapGestureRecognizer(target: self, action: "doubleTappedLabel:")
+        let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTappedLabel:")
         doubleTap.numberOfTapsRequired = 2
         titleLabel.addGestureRecognizer(doubleTap)
     }
@@ -130,7 +130,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         //global var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
         var barHeights = [Int](count: possibleFeatureTypes.count, repeatedValue: 0)
         for feature in features {
-            let index = find(possibleFeatureTypes,feature.type)! //feature.type should always be found in possibleFeatureTypes
+            let index = possibleFeatureTypes.indexOf(feature.type)! //feature.type should always be found in possibleFeatureTypes
             barHeights[index] = barHeights[index] + 1
         }
         return barHeights
@@ -138,17 +138,26 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
     
     func getBarHeightsForSortingByWidth(numBins: Int, features: [FeatureObject]) -> (barHeights: [Int], scale: [Double]) {
         var barHeights = [Int](count: numBins, repeatedValue: 0)
-        var scale = [0.0]
-        let maxValue = features.last?.width
-        if maxValue != nil {
-            let binSize = maxValue!.doubleValue/Double(numBins)
-            for var i = 0; i < features.count; i++  {
-                let bin = Int(ceil(features[i].width.doubleValue/binSize)) //feature belongs in bin if binLeast < f.w <= binMost
-                barHeights[bin-1] = barHeights[bin-1] + 1
-            }
-            for var k = 1; k <= numBins; k++ {
-                scale.append(binSize*Double(k))
-            }
+        if( features.count == 0 ) {
+            return (barHeights, [0.0])
+        }
+        var maxValue = features[0].width.floatValue
+        var minValue = features[0].width.floatValue
+        for var i=1 ; i < features.count; i++  {
+            minValue = min(minValue, features[i].width.floatValue)
+            maxValue = max(maxValue, features[i].width.floatValue)
+        }
+        let delta = maxValue - minValue
+        let binSize = delta/Float(numBins)
+        for var i = 0; i < features.count; i++  {
+            var bin = Int(floor((features[i].width.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost
+            bin = max(bin,0)
+            bin = min(bin, numBins-1)
+            barHeights[bin] = barHeights[bin] + 1
+        }
+        var scale = [Double]()
+        for var k = 0; k <= numBins; k++ {
+            scale.append(Double(binSize*Float(k)+minValue))
         }
         
         return (barHeights, scale)
@@ -156,17 +165,26 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
     
     func getBarHeightsForSortingByHeight(numBins: Int, features: [FeatureObject]) -> (barHeights: [Int], scale: [Double]) {
         var barHeights = [Int](count: numBins, repeatedValue: 0)
-        var scale = [0.0]
-        let maxValue = features.last?.height
-        if maxValue != nil {
-            let binSize = maxValue!.doubleValue/Double(numBins)
-            for var i = 0; i < features.count; i++  {
-                let bin = Int(ceil(features[i].height.doubleValue/binSize)) //feature belongs in bin if binLeast < f.h <= binMost
-                barHeights[bin-1] = barHeights[bin-1] + 1
-            }
-            for var k = 1; k <= numBins; k++ {
-                scale.append(binSize*Double(k))
-            }
+        if( features.count == 0 ) {
+            return (barHeights, [0.0])
+        }
+        var maxValue = features[0].height.floatValue
+        var minValue = features[0].height.floatValue
+        for var i=1 ; i < features.count; i++  {
+            minValue = min(minValue, features[i].height.floatValue)
+            maxValue = max(maxValue, features[i].height.floatValue)
+        }
+        let delta = maxValue - minValue
+        let binSize = delta/Float(numBins)
+        for var i = 0; i < features.count; i++  {
+            var bin = Int(floor((features[i].height.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost
+            bin = max(bin,0)
+            bin = min(bin, numBins-1)
+            barHeights[bin] = barHeights[bin] + 1
+        }
+        var scale = [Double]()
+        for var k = 0; k <= numBins; k++ {
+            scale.append(Double(binSize*Float(k)+minValue))
         }
         
         return (barHeights, scale)
@@ -190,7 +208,7 @@ class HistogramView : UIView {
     func initAttributes(barHeights: [Int], xAxisScale: [AnyObject]) {
         self.barHeights = barHeights
         self.xScaleLables = xAxisScale
-        self.maxBarHeight = CGFloat(maxElement(barHeights))
+        self.maxBarHeight = CGFloat(barHeights.maxElement()!)
         self.xScalePoints = []
         self.yScalePoints = []
         
@@ -199,7 +217,7 @@ class HistogramView : UIView {
     
     override func drawRect(rect: CGRect) {
         if (initialized) {
-            let context = UIGraphicsGetCurrentContext()
+            let context = UIGraphicsGetCurrentContext()!
             CGContextSetStrokeColorWithColor(context, UIColor.darkGrayColor().CGColor)
 
             let adjust = font.pointSize/2
@@ -379,22 +397,24 @@ class HistogramView : UIView {
             xScalePoints!.append(xPos)
             
             //draw ticklabel
-            if StringsNotNumbers && i < attributedLabels.count {
-                let attributedLabel = attributedLabels[i]
-                let range = NSRange(location: 0,length: attributedLabel.length)
-                attributedLabel.removeAttribute(NSFontAttributeName, range: range)
-                attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
-                
-                let labelSize = attributedLabel.size()
-                let textRect = CGRect(origin: CGPoint(x: xPos+dx/2-labelSize.width/2, y: y+tickLength+5), size: labelSize)
-                attributedLabel.drawInRect(textRect)
-            } else if !StringsNotNumbers {
-                let attributedLabel = attributedLabels[i]
-                
-                let labelSize = attributedLabel.size()
-                let textRect = CGRect(origin: CGPoint(x: xPos-labelSize.width/2, y: y+tickLength+5), size: labelSize)
-                attributedLabel.drawInRect(textRect)
-
+            if( i < attributedLabels.count ) {
+                if StringsNotNumbers  {
+                    let attributedLabel = attributedLabels[i]
+                    let range = NSRange(location: 0,length: attributedLabel.length)
+                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
+                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    
+                    let labelSize = attributedLabel.size()
+                    let textRect = CGRect(origin: CGPoint(x: xPos+dx/2-labelSize.width/2, y: y+tickLength+5), size: labelSize)
+                    attributedLabel.drawInRect(textRect)
+                } else  {
+                    let attributedLabel = attributedLabels[i]
+                    
+                    let labelSize = attributedLabel.size()
+                    let textRect = CGRect(origin: CGPoint(x: xPos-labelSize.width/2, y: y+tickLength+5), size: labelSize)
+                    attributedLabel.drawInRect(textRect)
+                    
+                }
             }
             i++
         }

@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 import UIKit
+import MessageUI
 
 var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
 let horizonTypes = ["Top", "Unconformity", "Fault"]
@@ -26,7 +27,7 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         let hue = CGFloat(row)/CGFloat(count)
         colorButton!.backgroundColor =
             UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
-        drawingView?.curColor = colorButton!.backgroundColor?.CGColor
+        drawingView?.curColor = (colorButton!.backgroundColor?.CGColor)!
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -40,7 +41,7 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         return 36
     }
     
-    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView!) -> UIView {
+    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView?) -> UIView {
         var pickerLabel = view as? UILabel
         if pickerLabel == nil {  //if no label there yet
             pickerLabel = UILabel()
@@ -82,12 +83,12 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
         return horizonTypes.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return horizonTypes[row]
     }
 }
 
-class DrawingViewController: UIViewController, UITextFieldDelegate {
+class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailComposeViewControllerDelegate {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
@@ -111,12 +112,20 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var defineFeatureButton : UIButton!
     @IBOutlet weak var setWidthButton : UIButton!
     @IBOutlet weak var setHeightButton : UIButton!
+    @IBOutlet weak var eraseButton: UIButton!
+    @IBOutlet weak var drawButton: UIButton!
+    @IBOutlet weak var measureButton: UIButton!
+    @IBOutlet weak var measureReferenceButton: UIButton!
+    @IBOutlet weak var faciesButton: UIButton!
+    @IBOutlet weak var textButton: UIButton!
+    @IBOutlet weak var solidFillButton: UIButton!
     
     var image : UIImage?
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
     var horizonTypePickerCtrler = HorizonTypePickerController()
     static var lineCount = 1
+    var curButton : UIButton?
 
     var faciesCatalog = FaciesCatalog()
     
@@ -125,6 +134,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
     var feature : FeatureObject?
     var detailedImage : DetailedImageObject?
     var newDetailedImage = false
+    var loadedFromDetailedImage = false
     var center = CGPoint()
     
     var saveMenuController : PopupMenuController?
@@ -163,6 +173,13 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         horizonTypePickerCtrler.typeButton = horizonTypeButton
         horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
         
+        let drawingView = imageView as! DrawingView
+        drawingView.faciesView.curImageName = "sandstone"
+        drawingView.image = image
+        drawingView.imageInfo = imageInfo
+        drawingView.controller = self
+
+
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
 
@@ -177,6 +194,24 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         self.setWidthButton.hidden = true
         self.setHeightButton.enabled = false
         self.setHeightButton.hidden = true
+        
+        initButton(drawButton)
+        initButton(eraseButton)
+        initButton(defineFeatureButton)
+        initButton(measureButton)
+        initButton(measureReferenceButton)
+        initButton(faciesButton)
+        initButton(textButton)
+        initButton(addDipMeterPointButton)
+        initButton(setWidthButton)
+        initButton(setHeightButton)
+        
+        solidFillButton.setBackgroundImage(
+            UIImage(named: "solidfill"), forState: UIControlState.Selected
+        )
+        
+        drawButton.selected = true
+        curButton = drawButton
 
         managedContext = appDelegate.managedObjectContext!
         
@@ -186,6 +221,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             newDetailedImage = true
             detailedImage!.project = currentProject
             //detailedImage!.features = NSSet()
+            loadedFromDetailedImage = true
+        } else {
+            loadedFromDetailedImage = false
         }
         
         faciesCatalog.loadImages()
@@ -201,20 +239,38 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         imageView.setNeedsDisplay()
         
         let drawingView = imageView as! DrawingView
-        drawingView.image = image
-        drawingView.imageInfo = imageInfo
-        drawingView.controller = self
-        drawingView.initFrame()
-        drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
         
-        drawingView.lineView.tool.lineName = lineNameTextField.text
-        drawingView.curColor = colButton.backgroundColor?.CGColor
+        if( !loadedFromDetailedImage ) {
+            drawingView.initFrame()
+            drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
+            loadedFromDetailedImage = true
+        }
+        
+        drawingView.lineView.tool.lineName = lineNameTextField.text!
+        drawingView.curColor = (colButton.backgroundColor?.CGColor)!
         drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
-        drawingView.faciesView.curImageName = "sandstone"
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
         center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
+    }
+    
+    func initButton(button: UIButton) {
+        let buttonImage = button.imageForState(UIControlState.Normal)
+        if( buttonImage != nil ) {
+           let buttonCGIImage = CIImage(image:buttonImage!)
+           let filter = CIFilter(name:  "CIColorInvert", withInputParameters: [kCIInputImageKey: buttonCGIImage!])
+           let invertedButtonImage = UIImage(CIImage: filter!.outputImage!)
+           button.setImage(invertedButtonImage, forState: UIControlState.Selected)
+        }
+    }
+    
+    func highlightButton(sender: UIButton) {
+        if( curButton != sender ) {
+            sender.selected = true
+            curButton?.selected = false
+            curButton = sender
+        }
     }
     
     /**
@@ -262,6 +318,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         }
         
         lineContainerView.hidden = false
+        
+        highlightButton(sender)
     }
     
     @IBAction func eraseButtonPressed(sender: UIButton) {
@@ -271,6 +329,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
+        
+        highlightButton(sender)
     }
     
     @IBAction func measureButtonPressed(sender: UIButton) {
@@ -280,9 +340,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
+        
+        highlightButton(sender)
     }
     
-    @IBAction func drawReferenceButtonPressed(sender: AnyObject) {
+    @IBAction func drawReferenceButtonPressed(sender: UIButton) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.Reference
         
@@ -305,15 +367,18 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         referenceSizeContainerView.hidden = false
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
+        highlightButton(sender)
     }
     
-    @IBAction func faciesButtonPressed(sender: AnyObject) {
+    @IBAction func faciesButtonPressed(sender: UIButton) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.Facies
         
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = false
         lineContainerView.hidden = true
+        
+        highlightButton(sender)
     }
     
     @IBAction func textboxButtonPressed(sender: UIButton) {
@@ -323,15 +388,19 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
+        
+        highlightButton(sender)
     }
     
-    @IBAction func dipMeterButtonPressed(sender: AnyObject) {
+    @IBAction func dipMeterButtonPressed(sender: UIButton) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.DipMarker
         
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
+        
+        highlightButton(sender)
     }
     
     //Mark: UITextFeildDelegateMethods 
@@ -405,13 +474,13 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         let drawingView = imageView as! DrawingView
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
-            var nf = NSNumberFormatter()
-            var ns = nf.numberFromString(referenceSizeTextField.text)
+            let nf = NSNumberFormatter()
+            let ns = nf.numberFromString(referenceSizeTextField.text!)
             if( ns != nil ) {
                 drawingView.lineView.refMeasureValue = ns!.floatValue
             }
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            drawingView.lineView.tool.lineName = lineNameTextField.text
+            drawingView.lineView.tool.lineName = lineNameTextField.text!
                     
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
             //drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
@@ -466,7 +535,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
     @IBAction func pushColButton(sender: AnyObject) {
         colorPickerView.hidden = !colorPickerView.hidden
         let drawingView = imageView as! DrawingView
-        drawingView.curColor = colButton.backgroundColor?.CGColor
+        drawingView.curColor = (colButton.backgroundColor?.CGColor)!
     }
     
     @IBAction func pushNewLine(sender: AnyObject) {
@@ -477,7 +546,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
         colButton.backgroundColor = color
-        drawingView.lineView.tool.lineName = lineNameTextField.text
+        drawingView.lineView.tool.lineName = lineNameTextField.text!
         drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
         drawingView.curColor = color.CGColor
     }
@@ -510,7 +579,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
     @IBAction func closeWindow(sender: AnyObject) {
         if managedContext.hasChanges {
             let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
-            let drawingView = self.imageView as! DrawingView
+            //let drawingView = self.imageView as! DrawingView
             //get scale for the image
             /**
             let scale = drawingView.getScale()
@@ -552,12 +621,12 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             faciesPopover.drawingView = (imageView as! DrawingView)
             faciesPopover.faciesCatalog = faciesCatalog
             faciesPopover.drawingController = self
-            let size = faciesPopover.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
-            faciesPopover.preferredContentSize = size
+            //let size = faciesPopover.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+            //faciesPopover.preferredContentSize = size
         }
     }
     
-    @IBAction func pushDefineFeatureButton(sender : AnyObject) {
+    @IBAction func pushDefineFeatureButton(sender : UIButton) {
         //disable all other buttons until Feature definition is complete
         //self.toolbarSegmentedControl.enabled = false
         self.addDipMeterPointButton.enabled = false
@@ -588,14 +657,16 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             self.setHeightButton.enabled = true
             self.setHeightButton.hidden = false
         }
+        
+        highlightButton(sender)
     }
     
     
-    @IBAction func pushSetHeightButton(sender : AnyObject) {
+    @IBAction func pushSetHeightButton(sender : UIButton) {
         let drawingView = imageView as! DrawingView
         var height = 0.0 as NSNumber
         if( drawingView.lineView.label.text != nil ) {
-            var decode_height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
+            let decode_height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
             height = decode_height == nil ? 0.0 : decode_height!
         }
         if (height.isEqualToNumber(0.0)) {
@@ -613,11 +684,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         } else {
             //set Feature.height = height
             if feature == nil {
-                println("Feature is nil when attempting to set height")
+                print("Feature is nil when attempting to set height")
             } else {
                 feature!.height = height
             }
-            println("height: ", height.floatValue)
+            print("height: ", height.floatValue)
             self.setHeightButton.enabled = false
             self.setHeightButton.hidden = true
             self.setWidthButton.enabled = true
@@ -627,9 +698,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             drawingView.lineView.measure.removeAll(keepCapacity: true)
             drawingView.lineView.setNeedsDisplay()
         }
+        
+        highlightButton(sender)
     }
     
-    @IBAction func pushSetWdithButton(sender : AnyObject) {
+    @IBAction func pushSetWdithButton(sender : UIButton) {
         let drawingView = imageView as! DrawingView
         var width = 0.0 as NSNumber
         if( drawingView.lineView.label.text != nil ) {
@@ -651,11 +724,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
         } else {
             //set Feature.width = width
             if feature == nil {
-                println("Feature is nil when attempting to set type")
+                print("Feature is nil when attempting to set type")
             } else {
                 feature!.width = width
             }
-            println("width: ",width.floatValue)
+            print("width: ",width.floatValue)
             self.setWidthButton.enabled = false
             self.setWidthButton.hidden = true
             
@@ -681,10 +754,10 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             
             // Add buttons the alert action
             for type in possibleFeatureTypes {
-                var nextAction: UIAlertAction = UIAlertAction(title: type, style: .Default) { action -> Void in
+                let nextAction: UIAlertAction = UIAlertAction(title: type, style: .Default) { action -> Void in
                     //save Feature.type as type
                     if self.feature == nil {
-                        println("Feature is nil when attempting to set type")
+                        print("Feature is nil when attempting to set type")
                     } else {
                         self.feature!.type = type
                     }
@@ -705,25 +778,102 @@ class DrawingViewController: UIViewController, UITextFieldDelegate {
             drawingView.lineView.measure.removeAll(keepCapacity: true)
             drawingView.lineView.setNeedsDisplay()
         }
+        highlightButton(sender)
     }
     
     @IBAction func unwindToDrawing (segue: UIStoryboardSegue) {
         
     }
     
-    @IBAction func doMeasureDipAndStrike(sender: AnyObject) {
+    @IBAction func doMeasureDipAndStrike(sender: UIButton) {
         let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("OrientationController") as! OrientationController
         
         ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
-        ctrler.popoverPresentationController?.sourceView = sender as! UIView
+        ctrler.popoverPresentationController?.sourceView = sender.viewForBaselineLayout()
         ctrler.popoverPresentationController?.sourceRect = sender.bounds
         ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
         let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
         ctrler.preferredContentSize = size
         
         self.presentViewController(ctrler, animated: true, completion: nil)
+        
+        highlightButton(sender)
     }
     
+    @IBAction func doSendMail(sender: AnyObject) {
+        var filename: NSURL
+        var formatUserName : String
+        
+        let drawingView = imageView as! DrawingView
+        let scale = drawingView.getScale()
+        if(scale.defined) {
+            detailedImage!.scale = scale.scale
+        }
+        
+        if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
+            !MFMailComposeViewController.canSendMail()
+        ){
+            let alert = UIAlertController(title: "", message: "Need to establish a reference before sending it in 3D", preferredStyle: .Alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .Cancel) { action -> Void in
+                //Do some stuff
+            }
+            alert.addAction(cancelAction)
+            self.presentViewController(alert, animated: true, completion: nil)
+        } else {
+        
+            /*if( format == 0 ) {
+            var exporter = ExportAsShapeFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
+            filename = exporter.export()
+            formatUserName = "Shape"
+            } else {*/
+            let exporter = ExportAsGocadFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
+            filename = exporter.export()
+            formatUserName = "Gocad"
+            //}
+            
+            var fileData = NSData()
+            do {
+                try fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions.DataReadingMappedIfSafe)
+            } catch {
+                print("Could not read data to send")
+                return
+            }
+            
+            let mailComposer = MFMailComposeViewController()
+            mailComposer.setSubject("Sending " + formatUserName + " file for Outcrop " + detailedImage!.name)
+            
+            /*if( format == 0 ) {
+            mailComposer.addAttachmentData(
+            fileData, mimeType: "application/shp", fileName: detailedImage!.name + ".shp"
+            )
+            } else {*/
+            mailComposer.addAttachmentData(
+                fileData, mimeType: "text/plain", fileName: detailedImage!.name + "_gocad.txt"
+            )
+            //}
+            mailComposer.addAttachmentData(
+                detailedImage!.imageData, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
+            )
+            
+            mailComposer.setToRecipients([String]())
+            mailComposer.mailComposeDelegate = self
+            
+            presentViewController(mailComposer, animated: true, completion: nil)
+        }
+    }
+    
+    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
+        print(result)
+        controller.dismissViewControllerAnimated(true, completion: nil)
+    }
+
+    @IBAction func solidFillButtonPressed(sender: UIButton) {
+        sender.selected = !sender.selected
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.drawPolygon = sender.selected
+        drawingView.lineView.computePolygon()
+        drawingView.lineView.setNeedsDisplay()
+    }
 }
 
 

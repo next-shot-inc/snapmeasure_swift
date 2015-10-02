@@ -42,11 +42,11 @@ class ImageAnnotation: NSObject, MKAnnotation {
         }
     }
     
-    var title: String {
+    var title: String? {
         return name
     }
     
-    var subtitle: String {
+    var subtitle: String? {
         return NSDateFormatter.localizedStringFromDate(date, dateStyle: NSDateFormatterStyle.MediumStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
     }
 }

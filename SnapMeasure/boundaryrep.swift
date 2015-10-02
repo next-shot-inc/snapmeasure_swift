@@ -20,8 +20,7 @@ class RadialNode {
     }
     
     func add(line: OrientedLine) {
-        var inserted = false
-        var c = line.endSegment()
+        let c = line.endSegment()
         
         if( lines.count < 2 ) {
             // The first line is always first (angle = 0)
@@ -46,7 +45,7 @@ class RadialNode {
     
     func next(line: OrientedLine) -> OrientedLine? {
         // Return the next line in the array of lines
-        for (index, iline) in enumerate(lines) {
+        for (index, iline) in lines.enumerate() {
             if( iline == line ) {
                 if( index == lines.count-1 ) {
                     // Circular list
@@ -250,11 +249,11 @@ class Polygons {
         var olines = Set<OrientedLine>()
         var extremities = [Extremity]()
         for line in splitLines.values {
-            var splitted = line.split()
+            let splitted = line.split()
             for nline in splitted {
                 // For every piece of geomtric line,create two oppositely oriented lines
-                var o1 = OrientedLine(line: nline, reverse: false)
-                var o2 = OrientedLine(line: nline, reverse: true)
+                let o1 = OrientedLine(line: nline, reverse: false)
+                let o2 = OrientedLine(line: nline, reverse: true)
                 o1.mate = o2
                 o2.mate = o1
                 extremities.append(Extremity(line: o1, loc: nline.points[0]))
@@ -264,7 +263,7 @@ class Polygons {
             }
         }
         
-        sort(&extremities)
+        extremities.sortInPlace()
         
         // Construct the radial nodes 
         // after the sorting the extremities at the same location are next to each others

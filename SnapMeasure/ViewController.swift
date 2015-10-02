@@ -50,36 +50,45 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             fetchRequest = NSFetchRequest(entityName: "ProjectObject")
             //sort so most recent is first
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+            
             fetchedResultsCount = managedContext!.countForFetchRequest(fetchRequest,
                 error: &error)
         
             if fetchedResultsCount > 0 {
                 //println("Project already exists in context")
-                projects = (managedContext!.executeFetchRequest(fetchRequest,
-                    error: &error) as? [ProjectObject])!
-                currentProject = projects[0]
+                let fprojects = try? managedContext!.executeFetchRequest(fetchRequest)
+                if( fprojects != nil ) {
+                   projects = fprojects as! [ProjectObject]
+                   currentProject = projects[0] as ProjectObject
+                }
 
             } else {
                 //println("Creating a new default project")
-                let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
-                    inManagedObjectContext: managedContext!) as! ProjectObject
+                let project = NSEntityDescription.insertNewObjectForEntityForName(
+                    "ProjectObject",
+                    inManagedObjectContext: managedContext!
+                ) as! ProjectObject
                 project.name = "Project 1"
                 project.date = NSDate()
                 currentProject = project
                 projects.append(project)
-                managedContext!.save(&error)
+                do {
+                    try managedContext!.save()
+                } catch {
+                    
+                }
             }
         }
         
         projectNameLabel.text = currentProject.name
         
-        
         // Initialize button look
+        /*
         let radius : CGFloat = 10.0
         let bgColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
         //UIButton.appearance().layer.cornerRadius = radius
         //UIButton.appearance().backgroundColor = bgColor
-        
+       
         selectExistingButton.layer.cornerRadius = radius
         selectExistingButton.backgroundColor = bgColor
         loadPicture.layer.cornerRadius = radius
@@ -96,6 +105,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         newProjectButton.backgroundColor = bgColor
         loadProjectButton.layer.cornerRadius = radius
         loadProjectButton.backgroundColor = bgColor
+        */
 
     }
 
@@ -105,15 +115,15 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     func imagePickerController(
-        picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [NSObject : AnyObject]
+        picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]
     ) {
-        var chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+        let chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         image = chosenImage
         imageInfo.xDimension = Int(image!.size.width)
         imageInfo.yDimension = Int(image!.size.height)
         let cimage = image!.CIImage
         if( cimage != nil ) {
-            cimage?.properties()
+            cimage?.properties
         }
         dismissViewControllerAnimated(true, completion: nil)
         
@@ -136,6 +146,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             if( destinationVC != nil ) {
                 destinationVC!.image = image
                 destinationVC!.imageInfo = imageInfo
+            } else {
+                let navigationVC = segue.destinationViewController as? UINavigationController
+                if( navigationVC != nil ) {
+                    for vc in navigationVC!.viewControllers {
+                        let dvc = vc as? DrawingViewController
+                        if( dvc != nil) {
+                            dvc!.image = image
+                            dvc!.imageInfo = imageInfo
+                        }
+                    }
+                }
             }
         } else if( segue.identifier == "toLoadingView" || segue.identifier == "toMapView" ) {
             activityView = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
@@ -154,7 +175,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         var error: NSError?
         let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
             error: &error)
+        
         selectExistingButton.enabled = fetchedResultsCount > 0
+        showHistogram.enabled = fetchedResultsCount > 0
     }
     
     override func viewDidDisappear(animated: Bool) {
@@ -203,14 +226,17 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         if textField.text == "" {
             project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
         } else {
-            project.name = textField.text
+            project.name = textField.text!
         }
         project.date = NSDate()
         currentProject = project
         projects.append(project)
         
-        var error: NSError?
-        managedContext!.save(&error)
+        do {
+           try managedContext!.save()
+        } catch {
+            
+        }
         
         projectNameLabel.text = currentProject.name
         menuController!.dismissViewControllerAnimated(true, completion: nil)
@@ -229,7 +255,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let width : CGFloat = sender.frame.width+20
         let height : CGFloat = 45
         for i in 0..<projects.count {
-            let button = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+            let button = UIButton(type: UIButtonType.System)
             button.setTitle(projects[i].name, forState: UIControlState.Normal)
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)

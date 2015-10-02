@@ -21,7 +21,7 @@ class PopupMenuController: UITableViewController {
     }
     
     override func viewDidLoad() {
-        self.tableView.tableFooterView = UIView()
+        //self.tableView.tableFooterView = UIView()
         self.tableView.setFrameWidth(150)
         self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         self.tableView.separatorStyle = UITableViewCellSeparatorStyle.None
@@ -35,14 +35,24 @@ class PopupMenuController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell", forIndexPath: indexPath)
+        if( indexPath.row == 0 ) {
+            // Empty cell at the top. Draw thick line below.
+            if( dividers ) {
+               let lineView = UIView(frame: CGRectMake(0, cell.contentView.frame.size.height - 1.0, cell.contentView.frame.size.width, 2))
+               lineView.backgroundColor = UIColor.lightGrayColor()
+               cell.contentView.addSubview(lineView)
+            }
+            return cell
+        }
         
         if (cellContents.count > 0) {
-            cellContents[indexPath.row][indexPath.section].center = cell.contentView.center
-            cell.contentView.addSubview(cellContents[indexPath.row][indexPath.section])
-          if (dividers && indexPath.row < cellContents.count-1) {
-                let lineView = UIView(frame: CGRectMake(0, cell.contentView.frame.size.height - 1.0, cell.contentView.frame.size.width, 1))
-                
+            cellContents[indexPath.row-1][indexPath.section].center = cell.contentView.center
+            cell.contentView.addSubview(cellContents[indexPath.row-1][indexPath.section])
+            if ( dividers ) {
+                // Draw thick line below last.
+                let lineWidth = indexPath.row < cellContents.count ? CGFloat(1) : CGFloat(2)
+                let lineView = UIView(frame: CGRectMake(0, cell.contentView.frame.size.height - 1.0, cell.contentView.frame.size.width, lineWidth))
                 lineView.backgroundColor = UIColor.lightGrayColor()
                 cell.contentView.addSubview(lineView)
             }
@@ -56,7 +66,8 @@ class PopupMenuController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cellContents.count
+        // Add an empty cell at the top to give some room
+        return cellContents.count + 1
     }
     
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {

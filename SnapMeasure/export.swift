@@ -59,9 +59,9 @@ class Exporter {
             var maxPoint = MKMapPoint()
             for adpo in object.dipMeterPoints  {
                 let dpo = adpo as! DipMeterPointObject
-                var loc = dpo.locationInImage.CGPointValue()
+                let loc = dpo.locationInImage.CGPointValue
                 if( loc.x != 0 && loc.y != 0 ) {
-                    var rloc = dpo.realLocation as! CLLocation
+                    let rloc = dpo.realLocation as! CLLocation
                     if( rloc.horizontalAccuracy > 0 ) {
                        let mapPoint = MKMapPointForCoordinate(rloc.coordinate)
                         if( loc.x < minLoc ) {
@@ -96,7 +96,7 @@ class Exporter {
                 // distance to the object
                 // object (mm) = focal length (mm) * real height of the object (mm) * image height (pixels) / (
                 // object height (pixels) * sensor height (mm))
-                var distanceToObject = 3.3 * detailedImage.scale!.doubleValue * 1000
+                let distanceToObject = 3.3 * detailedImage.scale!.doubleValue * 1000
                 centerMapPoint.x += distanceToObject*sin(orientation)/scale
                 centerMapPoint.y -= distanceToObject*cos(orientation)/scale
             }
@@ -142,28 +142,34 @@ class ExportAsShapeFile : Exporter {
     func export(url_shp: NSURL, url_shx: NSURL) {
         let df = NSFileManager.defaultManager()
         if( df.fileExistsAtPath(url_shp.path!) ) {
-            var error : NSError?
-            df.removeItemAtPath(url_shp.path!, error: &error)
+            do {
+               try df.removeItemAtPath(url_shp.path!)
+            } catch {
+                
+            }
         }
         df.createFileAtPath(url_shp.path!, contents: nil, attributes: nil)
         
         if( df.fileExistsAtPath(url_shx.path!) ) {
-            var error : NSError?
-            df.removeItemAtPath(url_shx.path!, error: &error)
+            do {
+               try df.removeItemAtPath(url_shx.path!)
+            } catch {
+                
+            }
         }
         df.createFileAtPath(url_shx.path!, contents: nil, attributes: nil)
 
-        var filePath = url_shp.path?.fileSystemRepresentation()
-        var fd = open(filePath!, O_WRONLY)
+        let filePath = url_shp.fileSystemRepresentation
+        let fd = open(filePath, O_WRONLY)
         if( fd < 0 ) {
-            var err = errno
+            _ = errno
             return
         }
         
-        var filePathx = url_shx.path?.fileSystemRepresentation()
-        var fdx = open(filePathx!, O_WRONLY)
+        let filePathx = url_shx.fileSystemRepresentation
+        let fdx = open(filePathx, O_WRONLY)
         if( fdx < 0 ) {
-            var err = errno
+            _ = errno
             return
         }
         
@@ -187,7 +193,7 @@ class ExportAsShapeFile : Exporter {
         write(fdx, &zero, sizeof(CInt))
         
         // Byte 24 File Length File Length Integer Big
-        var file_length = computeFileLength()
+        let file_length = computeFileLength()
         var file_length_s = CFSwapInt32HostToBig(file_length)
         write(fd, &file_length_s, sizeof(CInt))
         write(fdx, &file_length_s, sizeof(CInt))
@@ -237,7 +243,7 @@ class ExportAsShapeFile : Exporter {
             
             var recordNumber_s = CFSwapInt32HostToBig(recordNumber)
             write(fd, &recordNumber_s, sizeof(CInt))
-            var content_length = computeContentLength(lo!)
+            let content_length = computeContentLength(lo!)
             var content_length_s = CFSwapInt32HostToBig(file_length)
             write(fd, &content_length_s, sizeof(CInt))
             
@@ -257,7 +263,7 @@ class ExportAsShapeFile : Exporter {
     
     func writeDouble(fd: CInt, d: Double) {
         let byteOrder = CFByteOrderGetCurrent()
-        if( UInt32(byteOrder) == CFByteOrderLittleEndian.value ) {
+        if( UInt32(byteOrder) == CFByteOrderLittleEndian.rawValue ) {
             var dd = d
             write(fd, &dd, sizeof(Double))
         } else {
@@ -336,7 +342,7 @@ class ExportAsShapeFile : Exporter {
     func computeBBox() -> CGRect {
         var rect = CGRect()
         for alo in object.lines {
-            rect = rect.rectByUnion(computeBBox(alo as! LineObject))
+            rect = rect.union(computeBBox(alo as! LineObject))
         }
         return rect
     }
@@ -387,7 +393,7 @@ class ExportAsShapeFile : Exporter {
         
         // Array of x,y
         for( var i=0; i < array.count; i++ ) {
-            var p = zpoint(array[i])
+            let p = zpoint(array[i])
             writeDouble(fd, d: p.x)
             writeDouble(fd, d: p.y)
         }
@@ -399,7 +405,7 @@ class ExportAsShapeFile : Exporter {
 
         // Array of z.
         for( var i=0; i < array.count; i++ ) {
-            var p = zpoint(array[i])
+            let p = zpoint(array[i])
             writeDouble(fd, d: p.z)
         }
     }
@@ -407,15 +413,18 @@ class ExportAsShapeFile : Exporter {
     func export_dbf(url: NSURL) {
         let df = NSFileManager.defaultManager()
         if( df.fileExistsAtPath(url.path!) ) {
-            var error : NSError?
-            df.removeItemAtPath(url.path!, error: &error)
+            do {
+                try df.removeItemAtPath(url.path!)
+            } catch {
+                
+            }
         }
         df.createFileAtPath(url.path!, contents: nil, attributes: nil)
 
-        var filePath = url.path?.fileSystemRepresentation()
-        var fd = open(filePath!, O_WRONLY)
+        let filePath = url.fileSystemRepresentation
+        let fd = open(filePath, O_WRONLY)
         if( fd < 0 ) {
-            var err = errno
+            _ = errno
             return
         }
         
@@ -459,16 +468,20 @@ class ExportAsGocadFile : Exporter {
     }
     
     func export(url: NSURL) {
-        var error : NSError?
-        
         let df = NSFileManager.defaultManager()
         if( df.fileExistsAtPath(url.path!) ) {
-            df.removeItemAtPath(url.path!, error: &error)
+            do {
+               try df.removeItemAtPath(url.path!)
+            } catch {
+                
+            }
         }
         df.createFileAtPath(url.path!, contents: nil, attributes: nil)
         
-        let file = NSFileHandle(forWritingToURL: url, error: &error)
-        if( error != nil ) {
+        var file : NSFileHandle?
+        do {
+            try file = NSFileHandle(forWritingToURL: url)
+        } catch {
             return
         }
         
@@ -512,7 +525,7 @@ class ExportAsGocadFile : Exporter {
                 )
             )
             for( var i=0; i < array.count; i++ ) {
-                var p = zpoint(array[i])
+                let p = zpoint(array[i])
                 data = ("VRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)
                 data = ((i as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
@@ -592,7 +605,7 @@ class ExportAsGocadFile : Exporter {
             
             var vrtx_id = 0
             for iadpo in object.dipMeterPoints  {
-                let idpo = adpo as! DipMeterPointObject
+                let idpo = iadpo as! DipMeterPointObject
                 if( idpo.feature != dpo.feature ) {
                     continue;
                 }
@@ -603,7 +616,7 @@ class ExportAsGocadFile : Exporter {
                 file?.writeData(space!)
                 
                 // gather information about the point
-                var loc = idpo.locationInImage.CGPointValue()
+                let loc = idpo.locationInImage.CGPointValue
                 let strike = idpo.strike.doubleValue * M_PI/180
                 let dip = idpo.dip.doubleValue * M_PI / 180
                 let normal = Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip))
@@ -613,7 +626,7 @@ class ExportAsGocadFile : Exporter {
                     p = zpoint(loc)
                 } else {
                     // locate using real location
-                    var rloc = idpo.realLocation as! CLLocation
+                    let rloc = idpo.realLocation as! CLLocation
                     let centerMapPoint = MKMapPointForCoordinate(rloc.coordinate)
                     p = DPoint3(x: centerMapPoint.x, y: centerMapPoint.y, z: rloc.altitude)
                 }
@@ -646,14 +659,14 @@ class ExportAsGocadFile : Exporter {
         // Get the facies vignettes
         for afvo in object.faciesVignettes {
             let fvo = afvo as? FaciesVignetteObject
-            let rect = fvo!.rect.CGRectValue()
+            let rect = fvo!.rect.CGRectValue
             let fv = FaciesVignette(rect: rect, image: fvo!.imageName)
             let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
             
             var inserted_in_column = false
             for fvc in columns {
                 if( fvc.inside(center) ) {
-                    for (index,cfv) in enumerate(fvc.faciesVignettes) {
+                    for (index,cfv) in fvc.faciesVignettes.enumerate() {
                         if( center.y < cfv.rect.minY ) {
                             fvc.faciesVignettes.insert(fv, atIndex: index)
                             inserted_in_column = true
@@ -682,9 +695,9 @@ class ExportAsGocadFile : Exporter {
             file?.writeData(data!)
             
             // Write first point of path
-            var fv0 = col.faciesVignettes[0]
-            var top = CGPoint(x: (fv0.rect.minX + fv0.rect.maxX)/2.0, y: fv0.rect.minY)
-            var topp = zpoint(top)
+            let fv0 = col.faciesVignettes[0]
+            let top = CGPoint(x: (fv0.rect.minX + fv0.rect.maxX)/2.0, y: fv0.rect.minY)
+            let topp = zpoint(top)
             data = ("\n}\nWREF" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             writePoint(file, p: topp)
@@ -693,9 +706,9 @@ class ExportAsGocadFile : Exporter {
             writePoint(file, p: topp)
 
             // Write last point
-            var fv1 = col.faciesVignettes[col.faciesVignettes.count-1]
-            var bot = CGPoint(x: top.x, y: fv1.rect.maxY)
-            var botp = zpoint(bot)
+            let fv1 = col.faciesVignettes[col.faciesVignettes.count-1]
+            let bot = CGPoint(x: top.x, y: fv1.rect.maxY)
+            let botp = zpoint(bot)
             data = ("VRTX" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
             file?.writeData(data!)
             writePoint(file, p: botp)

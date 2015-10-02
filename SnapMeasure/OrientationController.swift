@@ -44,7 +44,7 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
                 if( motion == nil ) {
                     return
                 }
-                let rotquat = motion.attitude.quaternion
+                let rotquat = motion!.attitude.quaternion
                 // find the normal vector to the device
                 let norm = self.rotate(rotquat, vec: Vector3(x: 0, y:0, z:1))
                 self.curNormal = norm
@@ -79,24 +79,27 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
        )
     }
     
-    func locationManager(manager: CLLocationManager!, didUpdateLocations locations: [AnyObject]!) {
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // test the age of the location measurement to determine if the measurement is cached
         // in most cases you will not want to rely on cached measurements
-        let newLocation = locations.last as! CLLocation
-        let locationAge = newLocation.timestamp.timeIntervalSinceNow;
+        let newLocation = locations.last
+        if( newLocation == nil ) {
+            return
+        }
+        let locationAge = newLocation!.timestamp.timeIntervalSinceNow;
         if (abs(locationAge) > 5.0) {
             return;
         }
         // test that the horizontal accuracy does not indicate an invalid measurement
-        if (newLocation.horizontalAccuracy < 0) {
+        if (newLocation!.horizontalAccuracy < 0) {
             return;
         }
-        if( curLocation == nil || curLocation!.horizontalAccuracy > newLocation.horizontalAccuracy ) {
-            curLocation = newLocation
+        if( curLocation == nil || curLocation!.horizontalAccuracy > newLocation!.horizontalAccuracy ) {
+            curLocation = newLocation!
         }
     }
     
-    func locationManager(manager: CLLocationManager!, didFailWithError error: NSError!) {
+    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
         NSLog("%@",error)
         locationManager.stopUpdatingLocation()
     }

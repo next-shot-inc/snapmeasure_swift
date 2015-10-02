@@ -47,7 +47,7 @@ class FaciesCatalog {
     }
     
     func image(name: String) -> (image: UIImage?, tile: Bool) {
-        for (i,n) in enumerate(faciesTypes) {
+        for (i,n) in faciesTypes.enumerate() {
             if( n == name ) {
                 return (UIImage(named: name), predefinedTiling[i])
             }
@@ -87,12 +87,12 @@ class FaciesCatalog {
         let managedContext = appDelegate.managedObjectContext!
         
         let fetchRequest = NSFetchRequest(entityName:"FaciesImageObject")
-        
-        var error: NSError?
-        var images = (managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [FaciesImageObject])!
-        
-        faciesImages = images
+        do  {
+           let images = try managedContext.executeFetchRequest(fetchRequest)
+           self.faciesImages = images as! [FaciesImageObject]
+        }  catch {
+            
+        }
     }
 }
 
@@ -110,7 +110,7 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("PixmapCell", forIndexPath: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("PixmapCell", forIndexPath: indexPath)
         let row = indexPath.row
         let imageInfo = faciesCatalog!.element(row)
         cell.imageView!.image = imageInfo.image
@@ -192,9 +192,9 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
     
     func imagePickerController(
         picker: UIImagePickerController,
-        didFinishPickingMediaWithInfo info: [NSObject : AnyObject]
+        didFinishPickingMediaWithInfo info: [String : AnyObject]
     ) {
-        var chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+        let chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
         dismissViewControllerAnimated(true, completion: nil)
         askImageName(chosenImage)
     }
@@ -215,19 +215,19 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         alert.addAction(noAction)
         let yesScaleAction: UIAlertAction = UIAlertAction(title: "Ok & Scale", style: .Default) { action -> Void in
             // scale to 128 pixels.
-            var scale = 128.0/max(image.size.width, image.size.height)
-            var size = CGSize(width: image.size.width*scale, height: image.size.height*scale)
-            var nimage = self.resizeImage(image, newSize: size)
+            let scale = 128.0/max(image.size.width, image.size.height)
+            let size = CGSize(width: image.size.width*scale, height: image.size.height*scale)
+            let nimage = self.resizeImage(image, newSize: size)
             
             // Create ImageObject
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext!
             
-            var detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
+            let detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
                 inManagedObjectContext: managedContext) as? FaciesImageObject
             
-            detailedImage!.imageData = UIImageJPEGRepresentation(nimage, 1.0)
-            detailedImage!.name = inputTextField!.text
+            detailedImage!.imageData = UIImageJPEGRepresentation(nimage, 1.0)!
+            detailedImage!.name = inputTextField!.text!
             detailedImage!.tilePixmap = true
             
             self.tableController.faciesCatalog!.faciesImages.append(detailedImage!)
@@ -240,11 +240,11 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
             let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext!
             
-            var detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
+            let detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
                 inManagedObjectContext: managedContext) as? FaciesImageObject
             
-            detailedImage!.imageData = UIImageJPEGRepresentation(image, 1.0)
-            detailedImage!.name = inputTextField!.text
+            detailedImage!.imageData = UIImageJPEGRepresentation(image, 1.0)!
+            detailedImage!.name = inputTextField!.text!
             detailedImage!.tilePixmap = false
             
             self.tableController.faciesCatalog!.faciesImages.append(detailedImage!)
@@ -263,19 +263,19 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         let context = UIGraphicsGetCurrentContext()
         
         // Set the quality level to use when rescaling
-        CGContextSetInterpolationQuality(context, kCGInterpolationHigh)
+        CGContextSetInterpolationQuality(context, CGInterpolationQuality.High)
         let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, newSize.height)
         
         CGContextConcatCTM(context, flipVertical)
         // Draw into the context; this scales the image
         CGContextDrawImage(context, newRect, imageRef)
         
-        let newImageRef = CGBitmapContextCreateImage(context) as CGImage
-        let newImage = UIImage(CGImage: newImageRef)
+        let newImageRef = CGBitmapContextCreateImage(context)
+        let newImage = UIImage(CGImage: newImageRef!)
         
         // Get the resized image from the context and a UIImage
         UIGraphicsEndImageContext()
         
-        return newImage!
+        return newImage
     }
 }

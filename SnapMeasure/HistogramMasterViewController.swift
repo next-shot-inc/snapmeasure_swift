@@ -21,6 +21,7 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     @IBOutlet weak var binNumSlider: UISlider!
     @IBOutlet weak var maxNumBins: UILabel!
     @IBOutlet weak var binNumLabel: UILabel!
+    @IBOutlet weak var generateHistogramButton: UIButton!
     
     @IBOutlet weak var sortingPickerView: UIPickerView!
 
@@ -51,6 +52,7 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         managedContext = appDelegate.managedObjectContext!
         fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
+        fetchRequest.predicate = NSPredicate(format: "image.project.name==%@", currentProject.name)
         self.getFeatureCountForCurrentFetchRequest()
         
         //set up Slider
@@ -65,7 +67,9 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     
     func getFeatureCountForCurrentFetchRequest() {
         featureCount = managedContext.countForFetchRequest(fetchRequest, error: nil)
-        
+    }
+    
+    override func viewDidAppear(animated: Bool) {
         if featureCount == 0 {
             let alert = UIAlertController(title: nil, message: "No feature data available to plot. Features can be defined in the image editor", preferredStyle: .Alert)
             let action = UIAlertAction(title: "OK", style: .Default) { action -> Void in
@@ -75,12 +79,16 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
             alert.addAction(action)
             self.presentViewController(alert, animated: true, completion: nil)
         }
+        
+        generateHistogramButton.enabled = featureCount > 0
     }
     
     func loadFeatures() {
-        var error: NSError?
-        features = (managedContext.executeFetchRequest(fetchRequest,
-            error: &error) as? [FeatureObject])!
+        do {
+           features = (try managedContext.executeFetchRequest(fetchRequest) as? [FeatureObject])!
+        } catch {
+            
+        }
     }
     
     //Mark: - UIPickerView Methods
@@ -96,7 +104,7 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     }
     
     //set what is in the pickerview
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return possibleSortingCats[row]
     }
     

@@ -89,7 +89,7 @@ class CustomCalloutView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func calloutClicked() {
+    func calloutClicked(sender: UIButton) {
         if (self.delegate != nil) {
             if (self.delegate!.respondsToSelector("calloutViewClicked:")) {
                 self.delegate!.calloutViewClicked!(self)
@@ -423,7 +423,7 @@ class CustomCalloutView: UIView {
         self.hidden = true;
         
         // create the appropriate animation, even if we're not animated
-        var animation = self.animationWithType(self.presentAnimation, presenting:true)
+        let animation = self.animationWithType(self.presentAnimation, presenting:true)
         
         // nuke the duration if no animation requested - we'll still need to "run" the animation to get delays and callbacks
         if (!animated) {
@@ -481,7 +481,7 @@ class CustomCalloutView: UIView {
         self.popupCancelled = true;
     
         if (animated) {
-            var animation = self.animationWithType(self.dismissAnimation, presenting: false)
+            let animation = self.animationWithType(self.dismissAnimation, presenting: false)
             animation.delegate = self;
             self.layer.addAnimation(animation, forKey: "dismiss")
         }
@@ -508,7 +508,7 @@ class CustomCalloutView: UIView {
     
         if (type == CalloutAnimation.Bounce) {
     
-            var fade = CABasicAnimation(keyPath: "opacity")
+            let fade = CABasicAnimation(keyPath: "opacity")
             fade.duration = 0.23;
             if (presenting) {
                 fade.fromValue = 0
@@ -519,7 +519,7 @@ class CustomCalloutView: UIView {
             }
             fade.timingFunction = CAMediaTimingFunction(name:kCAMediaTimingFunctionEaseInEaseOut)
     
-            var bounce = CABasicAnimation(keyPath: "transform.scale")
+            let bounce = CABasicAnimation(keyPath: "transform.scale")
             bounce.duration = 0.23;
             if (presenting) {
                 bounce.fromValue = 0.7
@@ -530,14 +530,14 @@ class CustomCalloutView: UIView {
             }
             bounce.timingFunction = CAMediaTimingFunction(controlPoints: 0.59367, 0.12066, 0.18878, 1.5814)
     
-            var group = CAAnimationGroup()
+            let group = CAAnimationGroup()
             group.animations = [fade, bounce];
             group.duration = 0.23;
     
             animation = group;
         }
         else  { //if (type == CalloutAnimation.Fade)
-            var fade = CABasicAnimation(keyPath: "opacity")
+            let fade = CABasicAnimation(keyPath: "opacity")
             fade.duration = 1.0/3.0;
             if (presenting) {
                 fade.fromValue = 0
@@ -717,7 +717,7 @@ class CalloutBackgroundView: UIView {
     var contentMask : CALayer {
         UIGraphicsBeginImageContextWithOptions(self.bounds.size, false, 0);
         
-        self.layer.renderInContext(UIGraphicsGetCurrentContext());
+        self.layer.renderInContext(UIGraphicsGetCurrentContext()!);
         
         let maskImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();

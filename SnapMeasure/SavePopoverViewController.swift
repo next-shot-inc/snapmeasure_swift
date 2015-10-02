@@ -42,7 +42,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         featureTable.dataSource = self
         featureTable.rowHeight = 51
-        featureTable.tableFooterView = UIView(frame: CGRect.zeroRect)
+        featureTable.tableFooterView = UIView(frame: CGRect.zero)
         featureTable.reloadData()
     }
     
@@ -82,14 +82,17 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             if textField.text == "" {
                 project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
             } else {
-                project.name = textField.text
+                project.name = textField.text!
             }
             project.date = NSDate()
             currentProject = project
             projects.append(project)
             
-            var error: NSError?
-            drawingVC!.managedContext!.save(&error)
+            do {
+                try drawingVC!.managedContext!.save()
+            } catch let error as NSError {
+                print(error)
+            }
             
             projectNameLabel.text = currentProject.name
             menuController!.dismissViewControllerAnimated(true, completion: nil)
@@ -107,7 +110,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         var labelWidth : CGFloat = 0
         for i in 0..<projects.count {
-           let t = projects[0].name as NSString
+           let t = projects[i].name as NSString
            let size = t.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(UIFont.buttonFontSize())])
            labelWidth = max(labelWidth, size.width)
         }
@@ -115,7 +118,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         let width : CGFloat = max(sender.frame.width+40, labelWidth+40)
         let height : CGFloat = 45
         for i in 0..<projects.count {
-            let button = UIButton.buttonWithType(UIButtonType.System) as! UIButton
+            let button = UIButton(type: UIButtonType.System)
             button.setTitle(projects[i].name, forState: UIControlState.Normal)
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
@@ -163,7 +166,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
-        newImage.imageData = UIImageJPEGRepresentation(drawingVC!.image, 1.0)
+        newImage.imageData = UIImageJPEGRepresentation(drawingVC!.image!, 1.0)!
         newImage.longitude = drawingVC!.imageInfo.longitude
         newImage.latitude = drawingVC!.imageInfo.latitude
         newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
@@ -172,7 +175,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         newImage.project = currentProject
         newImage.features = drawingVC!.detailedImage!.features.copy() as! NSSet
         if (nameTextField.text != "") {
-            newImage.name = nameTextField.text
+            newImage.name = nameTextField.text!
         } else {
             newImage.name = "New Image " + String(currentProject.detailedImages.count+1)
         }
@@ -186,7 +189,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             
             lineObject!.name = line.name
             lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                UIColor(CGColor: line.color)!
+                UIColor(CGColor: line.color)
             )
             lineObject!.type = LineViewTool.typeName(line.role)
             
@@ -197,7 +200,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
             lineObject!.image = newImage
             linesSet.addObject(lineObject!)
-            println("Added a line")
+            print("Added a line")
         }
         newImage.lines = linesSet
         
@@ -257,11 +260,12 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         newImage.dipMeterPoints = dipMeterPoints
         
         //save the managedObjectContext
-        var error: NSError?
-        if !drawingVC!.managedContext.save(&error) {
-            println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
+        do {
+           try drawingVC!.managedContext.save()
+           print("Saved the ManagedObjectContext")
+        } catch let error as NSError {
+            print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
-        println("Saved the ManagedObjectContext")
 
 
         self.dismissViewControllerAnimated(true, completion: nil)
@@ -284,14 +288,14 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
         currentImage.project = currentProject
-        currentImage.imageData = UIImageJPEGRepresentation(drawingVC!.image, 1.0)
+        currentImage.imageData = UIImageJPEGRepresentation(drawingVC!.image!, 1.0)!
         currentImage.longitude = drawingVC!.imageInfo.longitude
         currentImage.latitude = drawingVC!.imageInfo.latitude
         currentImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
         currentImage.altitude = drawingVC!.imageInfo.altitude
         currentImage.date = drawingVC!.imageInfo.date
         if (nameTextField.text != "") {
-            currentImage.name = nameTextField.text
+            currentImage.name = nameTextField.text!
         } else {
             currentImage.name = "New Image " + String(currentProject.detailedImages.count+1)
         }
@@ -305,7 +309,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             
             lineObject!.name = line.name
             lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                UIColor(CGColor: line.color)!
+                UIColor(CGColor: line.color)
             )
             lineObject!.type = LineViewTool.typeName(line.role)
             
@@ -316,7 +320,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
             lineObject!.image = currentImage
             linesSet.addObject(lineObject!)
-            println("Added a line")
+            print("Added a line")
         }
         currentImage.lines = linesSet
         
@@ -376,11 +380,11 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         currentImage.dipMeterPoints = dipMeterPoints
         
         //save the managedObjectContext
-        var error: NSError?
-        if !drawingVC!.managedContext.save(&error) {
-            println("Could not save in DrawingViewController \(error), \(error?.userInfo)")
+        do {
+            try drawingVC!.managedContext.save()
+        } catch let error as NSError {
+            print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
-        println("Saved the ManagedObjectContext")
         self.dismissViewControllerAnimated(true, completion: nil)
     }
     
