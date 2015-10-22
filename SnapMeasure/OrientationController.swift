@@ -34,6 +34,8 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
     var locationManager = CLLocationManager()
     var curNormal = Vector3(x: 0, y: 0, z:0)
     var curLocation : CLLocation?
+    var drawingViewController : DrawingViewController?
+    var currentButton : UIButton?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,6 +59,9 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
         )
         
         locationManager.delegate = self
+        if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.NotDetermined {
+            locationManager.requestWhenInUseAuthorization()
+        }
     }
     
     func rotate( quat: CMQuaternion, vec: Vector3) -> Vector3 {
@@ -99,6 +104,14 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
         }
     }
     
+    // this is called when authorization status changes and when locationManager is initialiazed
+    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+        if status == CLAuthorizationStatus.AuthorizedAlways || status == CLAuthorizationStatus.AuthorizedWhenInUse {
+            manager.startUpdatingLocation()
+        }
+    }
+
+    
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
         NSLog("%@",error)
         locationManager.stopUpdatingLocation()
@@ -106,13 +119,13 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
     
     @IBAction func doLocate(sender: AnyObject) {
         dismissViewControllerAnimated(true, completion: nil)
-        let dvc = presentingViewController as? DrawingViewController
-        if( dvc != nil ) {
-            let drawingView = dvc!.imageView as! DrawingView
+        if( drawingViewController != nil ) {
+            let drawingView = drawingViewController!.imageView as! DrawingView
             drawingView.dipMarkerView.pickTool = DipMarkerPickTool(
                 normal: curNormal,
                 realLocation: curLocation,
-                toolMode: drawingView.drawMode.rawValue
+                toolMode: drawingView.drawMode.rawValue,
+                prevButton: currentButton
             )
             drawingView.drawMode = DrawingView.ToolMode.DipMarker
         }
@@ -120,10 +133,10 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
     
     @IBAction func doStore(sender: AnyObject) {
         dismissViewControllerAnimated(true, completion: nil)
-        let dvc = presentingViewController as? DrawingViewController
-        if( dvc != nil && curLocation != nil ) {
-            let drawingView = dvc!.imageView as! DrawingView
+        if( drawingViewController != nil && curLocation != nil ) {
+            let drawingView = drawingViewController!.imageView as! DrawingView
             drawingView.dipMarkerView.addPoint(realLocation: curLocation!, normal: curNormal)
+            drawingViewController?.highlightButton(currentButton!)
         }
     }
     

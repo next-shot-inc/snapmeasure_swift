@@ -13,43 +13,62 @@ import CoreData
 
 class FaciesCatalog {
     let faciesTypes = [
-        "sandstone", "shale", "conglomerate", "limestone", "dolomite", "granites",
-        "planar-bedding", "cross-lamination", "ripple-marked-bedding", "gradded-bedding", "cut-and-fill-bedding"
+        "sandstone", "shale", "conglomerate", "limestone", "dolomite", "granites"
     ]
-    let predefinedTiling = [
-        true, true, true, true, true, true,
-        false,false,false,false,false
+    let sedimentationStyles = [
+        "planar-bedding", "cross-lamination", "ripple-marked-bedding", "gradded-bedding", "cut-and-fill-bedding"
     ]
     var faciesImages = [FaciesImageObject]()
     
-    func count() -> Int {
-       return faciesTypes.count + faciesImages.count
+    enum ImageType : Int { case Facies = 0, SedimentationStyle, UserDefined }
+    
+    func count(type: ImageType) -> Int {
+        if( type == ImageType.Facies ) {
+            return faciesTypes.count
+        } else if( type == ImageType.SedimentationStyle ) {
+            return sedimentationStyles.count;
+        } else {
+          return faciesImages.count
+        }
     }
     
-    func element(index: Int) -> (name: String, image: UIImage) {
+    func element(index: (type: ImageType, index: Int)) -> (name: String, image: UIImage) {
         var name : String
         var image: UIImage
-        if( index < faciesTypes.count ) {
-            image = UIImage(named: faciesTypes[index])!
-            name = faciesTypes[index]
+        if( index.type == ImageType.Facies ) {
+            image = UIImage(named: faciesTypes[index.index])!
+            name = faciesTypes[index.index]
+
+        } else if( index.type == ImageType.SedimentationStyle ) {
+            image = UIImage(named: sedimentationStyles[index.index])!
+            name = sedimentationStyles[index.index]
+
         } else {
-            image = UIImage(data: faciesImages[index-faciesTypes.count].imageData)!
-            name = faciesImages[index-faciesTypes.count].name
+            image = UIImage(data: faciesImages[index.index].imageData)!
+            name = faciesImages[index.index].name
         }
         return (name, image)
     }
-    func name(index: Int) -> String {
-        if( index < faciesTypes.count ) {
-            return faciesTypes[index]
+    
+    func name(index: (type: ImageType, index: Int)) -> String {
+        if( index.type == ImageType.Facies ) {
+             return faciesTypes[index.index]
+        } else if( index.type == ImageType.SedimentationStyle ) {
+            return sedimentationStyles[index.index]
         } else {
-            return faciesImages[index-faciesTypes.count].name
+            return faciesImages[index.index].name
         }
     }
     
     func image(name: String) -> (image: UIImage?, tile: Bool) {
-        for (i,n) in faciesTypes.enumerate() {
+        for n in faciesTypes {
             if( n == name ) {
-                return (UIImage(named: name), predefinedTiling[i])
+                return (UIImage(named: name), true)
+            }
+        }
+        for n in sedimentationStyles {
+            if( n == name ) {
+                return (UIImage(named: name), true)
             }
         }
         for fio in faciesImages {
@@ -60,25 +79,29 @@ class FaciesCatalog {
         return (nil,false)
     }
     
-    func imageIndex(name: String) -> Int {
-        var index = 0
-        for n in faciesTypes {
+    func imageIndex(name: String) -> (type: ImageType, index:Int) {
+        for (i,n) in faciesTypes.enumerate() {
             if( n == name ) {
-                return index
+                return (ImageType.Facies, i)
             }
-            index++
         }
-        for fio in faciesImages {
+        for (i,n) in sedimentationStyles.enumerate() {
+            if( n == name ) {
+                return (ImageType.SedimentationStyle, i)
+            }
+        }
+        for (i,fio) in faciesImages.enumerate() {
             if( name == fio.name ) {
-                return index
+                return (ImageType.SedimentationStyle, i)
             }
-            index++
         }
-        return -1
+        return (ImageType.Facies, -1)
     }
     
-    func remove(index: Int) {
-        faciesImages.removeAtIndex(index - faciesTypes.count)
+    func remove(type: ImageType, index: Int) {
+        if( type == ImageType.UserDefined ) {
+           faciesImages.removeAtIndex(index)
+        }
     }
     
     func loadImages() {
@@ -102,17 +125,16 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
     var drawingView: DrawingView?
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 1
+        return 3
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return faciesCatalog!.count()
+        return faciesCatalog!.count(FaciesCatalog.ImageType(rawValue: section)!)
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("PixmapCell", forIndexPath: indexPath)
-        let row = indexPath.row
-        let imageInfo = faciesCatalog!.element(row)
+        let imageInfo = faciesCatalog!.element((FaciesCatalog.ImageType(rawValue: indexPath.section)!, indexPath.row))
         cell.imageView!.image = imageInfo.image
         cell.textLabel!.text = imageInfo.name
         
@@ -120,15 +142,25 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let row = indexPath.row
-        let name = faciesCatalog!.name(row)
+        let name = faciesCatalog!.name((FaciesCatalog.ImageType(rawValue: indexPath.section)!, indexPath.row))
         typeButton?.setTitle(name, forState: UIControlState.Normal)
         drawingView?.faciesView.curImageName = name
     }
     
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let section = FaciesCatalog.ImageType(rawValue: section)!
+        if( section == FaciesCatalog.ImageType.Facies ) {
+            return "Facies"
+        } else if( section == FaciesCatalog.ImageType.SedimentationStyle ) {
+            return "Sedimentation Structure"
+        } else {
+            return "User Defined"
+        }
+    }
+    
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
-        let row = indexPath.row
-        if( row < faciesCatalog!.faciesTypes.count ) {
+        let section = FaciesCatalog.ImageType(rawValue: indexPath.section)!
+        if( section != FaciesCatalog.ImageType.UserDefined ) {
             return UITableViewCellEditingStyle.None
         } else {
             return UITableViewCellEditingStyle.Delete
@@ -137,9 +169,9 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         let row = indexPath.row
-        if( editingStyle == UITableViewCellEditingStyle.Delete && row >= faciesCatalog!.faciesTypes.count ) {
+        if( editingStyle == UITableViewCellEditingStyle.Delete ) {
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
-            faciesCatalog!.remove(row)
+            faciesCatalog!.remove(FaciesCatalog.ImageType.UserDefined, index: row)
         }
     }
     
@@ -175,9 +207,10 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
     
     override func viewWillAppear(animated: Bool) {
         if( drawingView != nil && faciesCatalog != nil ) {
+            let index = faciesCatalog!.imageIndex(drawingView!.faciesView.curImageName)
             tableView.selectRowAtIndexPath(
                 NSIndexPath(
-                    forRow: faciesCatalog!.imageIndex(drawingView!.faciesView.curImageName), inSection: 0
+                    forRow: index.index, inSection: index.type.rawValue
                 ),
                 animated: true, scrollPosition: UITableViewScrollPosition.Middle
             )

@@ -726,7 +726,7 @@ class ExportAsGocadFile : Exporter {
                 file?.writeData(space!)
                 var index =  -1
                 if( faciesCatalog != nil ) {
-                    index = faciesCatalog!.imageIndex(fv.imageName)
+                    index = faciesCatalog!.imageIndex(fv.imageName).index
                 }
                 data = ((index as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)

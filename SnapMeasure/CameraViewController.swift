@@ -254,7 +254,9 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        previewLayer!.frame = previewView.bounds
+        if( previewLayer != nil ) {
+             previewLayer!.frame = previewView.bounds
+        }
         self.addNotificationObservers()
     }
     

@@ -147,7 +147,10 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
             minValue = min(minValue, features[i].width.floatValue)
             maxValue = max(maxValue, features[i].width.floatValue)
         }
-        let delta = maxValue - minValue
+        var delta = maxValue - minValue
+        if( delta == 0 ) {
+            delta = 1
+        }
         let binSize = delta/Float(numBins)
         for var i = 0; i < features.count; i++  {
             var bin = Int(floor((features[i].width.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost
@@ -174,7 +177,10 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
             minValue = min(minValue, features[i].height.floatValue)
             maxValue = max(maxValue, features[i].height.floatValue)
         }
-        let delta = maxValue - minValue
+        var delta = maxValue - minValue
+        if( delta == 0 ) {
+           delta = 1
+        }
         let binSize = delta/Float(numBins)
         for var i = 0; i < features.count; i++  {
             var bin = Int(floor((features[i].height.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost

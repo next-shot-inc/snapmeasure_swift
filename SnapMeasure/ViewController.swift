@@ -171,13 +171,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext!
         
-        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
+        var fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
         var error: NSError?
-        let fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+        var fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
             error: &error)
         
         selectExistingButton.enabled = fetchedResultsCount > 0
-        showHistogram.enabled = fetchedResultsCount > 0
+        
+        fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
+        fetchRequest.predicate = NSPredicate(format: "image.project.name==%@", currentProject.name)
+        fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+            error: &error)
+        
+        showHistogram.enabled = fetchedResultsCount > 1
     }
     
     override func viewDidDisappear(animated: Bool) {

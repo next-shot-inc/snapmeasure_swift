@@ -136,6 +136,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     var newDetailedImage = false
     var loadedFromDetailedImage = false
     var center = CGPoint()
+    var hasChanges = false
     
     var saveMenuController : PopupMenuController?
     
@@ -227,6 +228,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         }
         
         faciesCatalog.loadImages()
+        
+        NSNotificationCenter.defaultCenter().addObserver(
+            self, selector: "keyboardWasShown:", name: UIKeyboardDidShowNotification, object:nil)
+        NSNotificationCenter.defaultCenter().addObserver(
+            self, selector: "keyboardWillBeHidden:", name: UIKeyboardDidHideNotification, object: nil)
     }
     
     override func didReceiveMemoryWarning() {
@@ -253,6 +259,10 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
         center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
+    }
+    
+    deinit  {
+       NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     func initButton(button: UIButton) {
@@ -403,46 +413,30 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         highlightButton(sender)
     }
     
-    //Mark: UITextFeildDelegateMethods 
-    //This doesn't work ... ????????
-    func textFieldDidBeginEditing(textField: UITextField) {
+    var keyboardHeight : CGFloat = 0.0
+    
+    func keyboardWasShown(notification: NSNotification) {
+        let tmp : [NSObject : AnyObject] = notification.userInfo!
+        let rectV = tmp[UIKeyboardFrameBeginUserInfoKey]
+        let rect = rectV?.CGRectValue
+        keyboardHeight = rect!.height
         
-        if textField.tag == 1 { //lineNameTextField
-            var newFrame = lineContainerView.frame
-            newFrame.origin.y -= self.view.frameHeight*2/3
-            
-            UIView.beginAnimations(nil, context: nil)
-            UIView.setAnimationBeginsFromCurrentState(true)
-            
-            UIView.setAnimationDuration(NSTimeInterval(0.25))
-            
-            lineContainerView.frame = newFrame
-            
-            UIView.commitAnimations()
-
-        } else { //referenceSizeTextFeild tag = 2
-            referenceSizeContainerView.frame.origin = CGPoint(x: referenceSizeContainerView.frame.origin.x, y: referenceSizeContainerView.frame.origin.y-self.view.frameHeight*2/3)
-        }
+        UIView.animateWithDuration(0.25, animations: { ()-> Void in
+            self.view.center.y -= self.keyboardHeight
+        })
+    }
+    
+    func keyboardWillBeHidden(notification: NSNotification) {
+        UIView.animateWithDuration(0.25, animations: { ()-> Void in
+            self.view.center.y += self.keyboardHeight
+        })
+    }
+    
+    //Mark: UITextFieldDelegateMethods
+    func textFieldDidBeginEditing(textField: UITextField) {
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
-        
-        if textField.tag == 1 { //lineNameTextField
-            var newFrame = lineContainerView.frame
-            newFrame.origin.y += self.view.frameHeight*2/3
-            
-            UIView.beginAnimations(nil, context: nil)
-            UIView.setAnimationBeginsFromCurrentState(true)
-            
-            UIView.setAnimationDuration(NSTimeInterval(0.25))
-            
-            lineContainerView.frame = newFrame
-            
-            UIView.commitAnimations()
-        } else { //referenceSizeTextFeild tag = 2
-            referenceSizeContainerView.frame.origin = CGPoint(x: referenceSizeContainerView.frame.origin.x, y: self.view.frameHeight-100)
-        }
-        
     }
     
     
@@ -484,32 +478,31 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                     
         } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
             //drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
+        } else if( drawingView.drawMode == DrawingView.ToolMode.Select ) {
+            let point = sender.locationInView(drawingView)
+            
+            // Find if an object is selected
+            let line = drawingView.select(point)
+            
+            if( line != nil ) {
+                // Initialize UI with selected object
+                lineNameTextField.text = line!.name
+                colButton.backgroundColor = UIColor(CGColor: line!.color)
+                
+                // Initialize drawing information
+                drawingView.lineView.tool.lineName = line!.name
+                drawingView.curColor = line!.color
+                drawingView.lineView.tool.lineType = LineViewTool.typeName(line!.role)
+                horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, forState: UIControlState.Normal)
+            }
         }
     }
     
     @IBAction func handleDoubleTap(sender: AnyObject) {
-        let drawingView = imageView as! DrawingView
-        let recognizer = sender as! UITapGestureRecognizer
-        let point = recognizer.locationInView(drawingView)
-        
-        // Find if an object is selected
-        let line = drawingView.select(point)
-        
-        if( line != nil && drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            // Initialize UI with selected object
-            lineNameTextField.text = line!.name
-            colButton.backgroundColor = UIColor(CGColor: line!.color)
-            
-            // Initialize drawing information
-            drawingView.lineView.tool.lineName = line!.name
-            drawingView.curColor = line!.color
-            drawingView.lineView.tool.lineType = LineViewTool.typeName(line!.role)
-            horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, forState: UIControlState.Normal)
-        } else {
-            self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
-            self.imageView.transform = CGAffineTransformIdentity
-            center = self.imageView.center
-        }
+        // Center view and reset zoom
+        self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
+        self.imageView.transform = CGAffineTransformIdentity
+        center = self.imageView.center
     }
     
     func askText(label: UILabel) {
@@ -577,7 +570,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     }
     
     @IBAction func closeWindow(sender: AnyObject) {
-        if managedContext.hasChanges {
+        if hasChanges || managedContext.hasChanges {
             let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
             //let drawingView = self.imageView as! DrawingView
             //get scale for the image
@@ -795,6 +788,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
         ctrler.preferredContentSize = size
         
+        ctrler.drawingViewController = self
+        ctrler.currentButton = curButton
+        
         self.presentViewController(ctrler, animated: true, completion: nil)
         
         highlightButton(sender)
@@ -809,6 +805,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         if(scale.defined) {
             detailedImage!.scale = scale.scale
         }
+        
+        UIImageWriteToSavedPhotosAlbum(imageView.image!, nil, nil, nil)
         
         if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
             !MFMailComposeViewController.canSendMail()
@@ -873,6 +871,16 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.lineView.drawPolygon = sender.selected
         drawingView.lineView.computePolygon()
         drawingView.lineView.setNeedsDisplay()
+    }
+    
+    @IBAction func editSelectToggleButtonPressed(sender: UIButton) {
+        sender.selected = !sender.selected
+        let drawingView = imageView as! DrawingView
+        if( sender.selected ) {
+            drawingView.drawMode = DrawingView.ToolMode.Select
+        } else {
+            drawingView.drawMode = DrawingView.ToolMode.Draw
+        }
     }
 }
 

@@ -53,13 +53,13 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         let width : CGFloat = 100
         let height : CGFloat = 45
         
-        let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
-        textFeild.placeholder = "New Project"
-        textFeild.delegate = self
-        textFeild.tag = 1
-        textFeild.becomeFirstResponder()
+        let textField = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
+        textField.placeholder = "New Project"
+        textField.delegate = self
+        textField.tag = 1
+        textField.becomeFirstResponder()
         
-        menuController!.cellContents[0][0] = textFeild
+        menuController!.cellContents[0][0] = textField
         
         //set up menu Controller
         menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
@@ -179,85 +179,11 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         } else {
             newImage.name = "New Image " + String(currentProject.detailedImages.count+1)
         }
-        let linesSet = NSMutableSet()
         
-        // Always store the coordinates in image coordinates (reverse any viewing transform due to scaling)
-        let affineTransform = CGAffineTransformInvert(drawingView.affineTransform)
-        for line in drawingView.lineView.lines  {
-            let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
-                inManagedObjectContext: managedContext) as? LineObject
-            
-            lineObject!.name = line.name
-            lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                UIColor(CGColor: line.color)
-            )
-            lineObject!.type = LineViewTool.typeName(line.role)
-            
-            var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
-            for( var i=0; i < line.points.count; ++i ) {
-                points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
-            }
-            lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
-            lineObject!.image = newImage
-            linesSet.addObject(lineObject!)
-            print("Added a line")
-        }
-        newImage.lines = linesSet
+        // Update project date
+        currentProject.date = NSDate()
         
-        
-        let faciesVignetteSet = NSMutableSet()
-        
-        for fc in drawingView.faciesView.faciesColumns {
-            for fv in fc.faciesVignettes {
-                let faciesVignetteObject = NSEntityDescription.insertNewObjectForEntityForName(
-                    "FaciesVignetteObject", inManagedObjectContext: managedContext) as? FaciesVignetteObject
-                
-                faciesVignetteObject!.imageName = fv.imageName
-                let scaledRect = CGRectApplyAffineTransform(fv.rect, affineTransform)
-                faciesVignetteObject!.rect = NSValue(CGRect: scaledRect)
-                faciesVignetteSet.addObject(faciesVignetteObject!)
-            }
-        }
-        newImage.faciesVignettes = faciesVignetteSet
-        
-        let textSet = NSMutableSet()
-        for tv in drawingView.textView.subviews {
-            let label = tv as? UILabel
-            if( label != nil ) {
-                let textObject = NSEntityDescription.insertNewObjectForEntityForName(
-                    "TextObject", inManagedObjectContext: managedContext) as? TextObject
-                
-                let scaledRect = CGRectApplyAffineTransform(tv.frame, affineTransform)
-                textObject!.rect = NSValue(CGRect: scaledRect)
-                
-                textObject!.string = label!.text!
-                
-                textSet.addObject(textObject!)
-            }
-        }
-        newImage.texts = textSet
-        
-        let dipMeterPoints = NSMutableSet()
-        for dmp in drawingView.dipMarkerView.points {
-            let dmpo = NSEntityDescription.insertNewObjectForEntityForName(
-                "DipMeterPointObject", inManagedObjectContext: managedContext) as? DipMeterPointObject
-            var tpoint = dmp.loc
-            if( dmp.loc.x != 0 && dmp.loc.y != 0 ) {
-                tpoint = CGPointApplyAffineTransform(dmp.loc, affineTransform)
-            }
-            dmpo!.locationInImage = NSValue(CGPoint: tpoint)
-            dmpo!.realLocation = dmp.realLocation
-            let sad = dmp.normal.strikeAndDip()
-            dmpo!.strike = sad.strike
-            dmpo!.dip = sad.dip
-            if( dmp.snappedLine != nil ) {
-                dmpo!.feature = dmp.snappedLine!.name
-            } else {
-                dmpo!.feature = "unassigned"
-            }
-            dipMeterPoints.addObject(dmpo!)
-        }
-        newImage.dipMeterPoints = dipMeterPoints
+        saveDrawingView(drawingView, image: newImage, managedContext: managedContext)
         
         //save the managedObjectContext
         do {
@@ -299,6 +225,24 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         } else {
             currentImage.name = "New Image " + String(currentProject.detailedImages.count+1)
         }
+        
+        // Update project date
+        currentProject.date = NSDate()
+   
+        saveDrawingView(drawingView, image: currentImage, managedContext: managedContext)
+        
+        //save the managedObjectContext
+        do {
+            try drawingVC!.managedContext.save()
+        } catch let error as NSError {
+            print("Could not save in DrawingViewController \(error), \(error.userInfo)")
+        }
+        self.dismissViewControllerAnimated(true, completion: nil)
+        
+        drawingVC!.hasChanges = false
+    }
+    
+    func saveDrawingView(drawingView: DrawingView, image: DetailedImageObject, managedContext: NSManagedObjectContext) {
         let linesSet = NSMutableSet()
         
         // Always store the coordinates in image coordinates (reverse any viewing transform due to scaling)
@@ -318,11 +262,11 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
                 points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
             }
             lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
-            lineObject!.image = currentImage
+            lineObject!.image = image
             linesSet.addObject(lineObject!)
             print("Added a line")
         }
-        currentImage.lines = linesSet
+        image.lines = linesSet
         
         
         let faciesVignetteSet = NSMutableSet()
@@ -338,7 +282,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
                 faciesVignetteSet.addObject(faciesVignetteObject!)
             }
         }
-        currentImage.faciesVignettes = faciesVignetteSet
+        image.faciesVignettes = faciesVignetteSet
         
         let textSet = NSMutableSet()
         for tv in drawingView.textView.subviews {
@@ -355,7 +299,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
                 textSet.addObject(textObject!)
             }
         }
-        currentImage.texts = textSet
+        image.texts = textSet
         
         let dipMeterPoints = NSMutableSet()
         for dmp in drawingView.dipMarkerView.points {
@@ -377,18 +321,11 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             }
             dipMeterPoints.addObject(dmpo!)
         }
-        currentImage.dipMeterPoints = dipMeterPoints
+        image.dipMeterPoints = dipMeterPoints
         
-        //save the managedObjectContext
-        do {
-            try drawingVC!.managedContext.save()
-        } catch let error as NSError {
-            print("Could not save in DrawingViewController \(error), \(error.userInfo)")
-        }
-        self.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    //Mark: UITableView Data Source Methods
+    //Mark: UITableView Data Source Methods for table of Features
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1

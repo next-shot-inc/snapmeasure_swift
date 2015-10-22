@@ -19,6 +19,7 @@ struct Line {
     var name = String()
     var color = UIColor.blackColor().CGColor
     var role : Role = Role.Horizon
+    var label = UILabel()
     
     mutating func merge(line: Line) {
         var points0 = points
@@ -230,13 +231,23 @@ class LineView : UIView {
                 CGContextAddLineToPoint (context, line.points[k].x, line.points[k].y);
             }
             CGContextStrokePath(context)
+            
+            let loc = CGPoint(x: line.points[0].x, y: line.points[0].y)
+            line.label.text = line.name
+            line.label.frame = CGRectMake(loc.x, loc.y, 100, 20)
+            if( line.label.superview == nil ) {
+                addSubview(line.label)
+            }
         }
         
         // Fill color
         if( polygons != nil ) {
             for p in polygons!.polygons  {
+                if( p.color == nil ) {
+                    continue
+                }
                 CGContextSetAlpha(context, 0.2)
-                CGContextSetFillColorWithColor(context, p.color)
+                CGContextSetFillColorWithColor(context, p.color!)
                 var first = true
                 for l in p.lines  {
                     if( l.reverse ) {
@@ -633,13 +644,15 @@ struct DipMarkerPoint {
 class DipMarkerPickTool {
     var normal : Vector3
     var previousToolMode : Int
+    var previousButton : UIButton?
     var curPoint = CGPoint()
     var realLocation : CLLocation?
     
-    init( normal: Vector3, realLocation: CLLocation?, toolMode: Int){
+    init( normal: Vector3, realLocation: CLLocation?, toolMode: Int, prevButton: UIButton?){
         self.normal = normal
         self.previousToolMode = toolMode
         self.realLocation = realLocation
+        self.previousButton = prevButton
     }
     
     func move(point: CGPoint) {
@@ -736,7 +749,8 @@ class DipMarkerView : UIView {
 
 class DrawingView : UIImageView {
     enum ToolMode : Int {
-        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5, DipMarker = 6
+        case Draw = 0, Erase = 1, Measure = 2, Reference = 3, Facies = 4, Text = 5,
+        DipMarker = 6, Select = 7
     }
     
     var lineView = LineView()
@@ -1049,7 +1063,9 @@ class DrawingView : UIImageView {
             for (index,value) in lineView.lines.enumerate() {
                 if( value.intersectBox(rect) ) {
                     lineView.lines.removeAtIndex(index)
+                    value.label.removeFromSuperview()
                     lineView.setNeedsDisplay()
+                    controller!.hasChanges = true
                     break
                 }
             }
@@ -1062,6 +1078,7 @@ class DrawingView : UIImageView {
                             faciesView.faciesColumns.removeAtIndex(fcindex)
                         }
                         faciesView.setNeedsDisplay()
+                        controller!.hasChanges = true
                         break
                     }
                 }
@@ -1070,6 +1087,7 @@ class DrawingView : UIImageView {
             for lv in textView.subviews {
                 if( lv.frame.intersects(rect) ) {
                     lv.removeFromSuperview()
+                    controller!.hasChanges = true
                     break
                 }
             }
@@ -1118,6 +1136,7 @@ class DrawingView : UIImageView {
             lineView.currentLine.cleanOrientation()
             lineView.add(lineView.currentLine)
             lineView.computePolygon()
+            controller!.hasChanges = true
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)
             if( lineView.currentLine.points.count >= 2 ) {
@@ -1136,8 +1155,11 @@ class DrawingView : UIImageView {
                 let rect = CGRectMake(minX, minY, maxX-minX, maxY-minY)
                 for (index,value) in lineView.lines.enumerate() {
                     if( value.intersectBox(rect) ) {
+                        value.label.removeFromSuperview()
                         lineView.lines.removeAtIndex(index)
                         lineView.computePolygon()
+                        lineView.setNeedsDisplay()
+                        controller!.hasChanges = true
                         break
                     }
                 }
@@ -1145,6 +1167,7 @@ class DrawingView : UIImageView {
                     if( rect.contains(dipMarkerView.points[i].loc) ) {
                         dipMarkerView.points.removeAtIndex(i)
                         dipMarkerView.setNeedsDisplay()
+                        controller!.hasChanges = true
                         break
                     }
                 }
@@ -1152,15 +1175,18 @@ class DrawingView : UIImageView {
         } else if( drawMode == ToolMode.Facies ) {
             if( faciesView.drawTool != nil ) {
                 faciesView.drawTool!.end(imageName: faciesView.curImageName)
+                controller!.hasChanges = true
             }
             faciesView.drawTool = nil
             faciesView.setNeedsDisplay()
         } else if( drawMode == ToolMode.Text && textView.drawTool != nil ) {
             let label = textView.addText("", rect: textView.drawTool!.curRect)
+            controller!.hasChanges = true
             textView.drawTool = nil
             controller?.askText(label)
         } else if( drawMode == ToolMode.DipMarker && dipMarkerView.pickTool != nil ) {
             drawMode = ToolMode(rawValue: dipMarkerView.pickTool!.previousToolMode)!
+            controller!.highlightButton(dipMarkerView.pickTool!.previousButton!)
             let rect = CGRectMake(point.x-10.0, point.y-10, 20.0, 20.0)
             var snappedLine : Line?
             for l in lineView.lines {
@@ -1171,6 +1197,7 @@ class DrawingView : UIImageView {
             dipMarkerView.addPoint(point, line: snappedLine)
             dipMarkerView.pickTool = nil
             dipMarkerView.setNeedsDisplay()
+            controller!.hasChanges = true
         }
         lineView.currentLine = Line()
         lineView.setNeedsDisplay()

@@ -112,7 +112,7 @@ func ==(left: OrientedLine, right: OrientedLine) -> Bool {
 
 class OrientedPolygon {
     var lines = [OrientedLine]()
-    var color = UIColor.grayColor().CGColor
+    var color : CGColor?
     
     func computeColor() {
         var ymin : CGFloat = 1e+30
@@ -128,7 +128,7 @@ class OrientedPolygon {
                 }
             }
         }
-        if( lmin != nil ) {
+        if( lmin != nil && lmin!.role == Line.Role.Horizon ) {
             color = lmin!.color
         }
     }
