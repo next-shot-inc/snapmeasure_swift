@@ -262,7 +262,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     }
     
     deinit  {
-       NSNotificationCenter.defaultCenter().removeObserver(self)
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+        image = nil
     }
     
     func initButton(button: UIButton) {
@@ -616,6 +617,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             faciesPopover.drawingController = self
             //let size = faciesPopover.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
             //faciesPopover.preferredContentSize = size
+        } else if segue.identifier == "unwindFromDrawingToMain" || segue.identifier == "cancelUnwind" {
+            image = nil
+            imageView.image = nil
+            managedContext.reset() // Free all ImageDetailedObjects and ProjectObjects
+            projects.removeAll()
         }
     }
     
@@ -806,7 +812,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             detailedImage!.scale = scale.scale
         }
         
-        UIImageWriteToSavedPhotosAlbum(imageView.image!, nil, nil, nil)
+        //UIImageWriteToSavedPhotosAlbum(imageView.image!, nil, nil, nil)
         
         if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
             !MFMailComposeViewController.canSendMail()
@@ -850,7 +856,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             )
             //}
             mailComposer.addAttachmentData(
-                detailedImage!.imageData, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
+                detailedImage!.imageData()!, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
             )
             
             mailComposer.setToRecipients([String]())

@@ -72,7 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t1.setCoordinate(30.0, longitude: -100.0)
         t1.date = dateFormater.dateFromString("6/19/2015 09:00 AM")!
-        t1.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
+        //t1.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t1.scale = 0.005
         t1.compassOrientation = 0
         t1.name = "Day"
@@ -82,7 +82,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t2.setCoordinate(35.0, longitude: -120.0)
         t2.date = dateFormater.dateFromString("6/13/2015 09:00 AM")!
-        t2.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
+        //t2.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t2.scale = 0.005
         t2.compassOrientation = 0
         t2.name = "Week"
@@ -92,7 +92,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t3.setCoordinate(45.0, longitude: -70.0)
         t3.date = dateFormater.dateFromString("5/25/2015 09:00 AM")!
-        t3.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
+        //t3.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t3.scale = 0.005
         t3.compassOrientation = 0
         t3.name = "Month"
@@ -102,7 +102,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             inManagedObjectContext: managedContext) as! DetailedImageObject
         t4.setCoordinate(40.0, longitude: -100.0)
         t4.date = dateFormater.dateFromString("9/8/2014 09:00 AM")!
-        t4.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
+        //t4.imageData = UIImageJPEGRepresentation(UIImage(named: "sand")!,1.0)!
         t4.scale = 0.005
         t4.compassOrientation = 0
         t4.name = "Year"
@@ -488,7 +488,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
 
             if( drawingVC != nil ) {
                 drawingVC!.detailedImage = self.selectedImage!
-                drawingVC!.image = UIImage(data: self.selectedImage!.imageData)
+                drawingVC!.image = selectedImage!.image()!
                 
                 //get ImageInfo
                 var imageInfo = ImageInfo()

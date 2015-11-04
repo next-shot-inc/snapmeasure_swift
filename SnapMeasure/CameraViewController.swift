@@ -141,9 +141,8 @@ extension UIImage {
             || self.imageOrientation == UIImageOrientation.LeftMirrored
             || self.imageOrientation == UIImageOrientation.Right
             || self.imageOrientation == UIImageOrientation.RightMirrored
-            ) {
-                
-                CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage)
+        ) {
+            CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage)
         } else {
             CGContextDrawImage(ctx, CGRectMake(0,0,self.size.width,self.size.height), self.CGImage)
         }

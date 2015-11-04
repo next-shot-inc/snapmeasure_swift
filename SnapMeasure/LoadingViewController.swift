@@ -31,6 +31,12 @@ class DetailedImageProxy {
             if( objects.count == 1 ) {
                 return objects[0] as? DetailedImageObject
             } else {
+                for o in objects {
+                    let dio = o as? DetailedImageObject
+                    if( dio != nil && dio!.name == name ) {
+                        return dio;
+                    }
+                }
                 return nil
             }
         } catch {
@@ -44,7 +50,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     var filteredDetailedImages: [DetailedImageProxy] = []
     var searchController = UISearchController()
     var managedContext : NSManagedObjectContext!
-    var faciesCatalog = FaciesCatalog()
+    //var faciesCatalog = FaciesCatalog()
     var edited = false
     var scopeSelected = false
     
@@ -95,7 +101,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         super.viewDidDisappear(animated)
         detailedImages.removeAll(keepCapacity: false)
         filteredDetailedImages.removeAll(keepCapacity: false)
-        faciesCatalog = FaciesCatalog()
+        //faciesCatalog = FaciesCatalog()
         self.tableView.reloadData()
     }
     
@@ -151,7 +157,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
-        cell.faciesCatalog = faciesCatalog
+        //cell.faciesCatalog = faciesCatalog
         cell.controller = self
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
@@ -191,7 +197,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             let destinationDetailedImage = destinationDetailedImageProxy.getObject()
             if( destinationDetailedImage != nil ) {
                 drawingVC.detailedImage = destinationDetailedImage!
-                drawingVC.image = UIImage(data: destinationDetailedImage!.imageData)
+                drawingVC.image = destinationDetailedImage!.image()
                 
                 //get ImageInfo
                 var imageInfo = ImageInfo()
@@ -225,6 +231,25 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         if (editingStyle == UITableViewCellEditingStyle.Delete) {
             
             if (self.searchController.active || scopeSelected) {
+                let deletedImage = filteredDetailedImages[indexPath.row].getObject()
+                if( deletedImage != nil ) {
+                    var fullIndex : Int?
+                    for (index, di) in detailedImages.enumerate() {
+                        if( di.date == deletedImage!.date && di.name == deletedImage!.name ) {
+                            fullIndex = index
+                            break
+                        }
+                    }
+                    if( fullIndex != nil ) {
+                       managedContext.deleteObject(deletedImage!)
+                       detailedImages.removeAtIndex(fullIndex!)
+                    
+                       filteredDetailedImages.removeAtIndex(indexPath.row)
+                       tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                    
+                       edited = true
+                    }
+                }
                 
             } else {
                 

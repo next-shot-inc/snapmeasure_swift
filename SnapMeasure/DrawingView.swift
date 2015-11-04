@@ -843,7 +843,27 @@ class DrawingView : UIImageView {
         // Get the lines via the DetailedView NSSet.
         let scalex = self.bounds.width/self.image!.size.width
         let scaley = self.bounds.height/self.image!.size.height
-        affineTransform = CGAffineTransformMakeScale(scalex, scaley)
+        
+        if( self.contentMode == UIViewContentMode.ScaleToFill ) {
+            affineTransform = CGAffineTransformMakeScale(scalex, scaley)
+        } else if( self.contentMode == UIViewContentMode.ScaleAspectFill ) {
+            // scale to maximum while keeping aspect ratio
+            let scale = max(scalex, scaley)
+            affineTransform = CGAffineTransformMakeScale(scale, scale)
+            
+            // Center.
+            let tx = (self.bounds.width - self.image!.size.width * scale)/2.0
+            let ty = (self.bounds.height - self.image!.size.height * scale)/2.0
+            affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
+        } else if( self.contentMode == UIViewContentMode.ScaleAspectFit ) {
+            // scale to minimum
+            let scale = min(scalex, scaley)
+            affineTransform = CGAffineTransformMakeScale(scale, scale)
+            // Center
+            let tx = (self.bounds.width - self.image!.size.width * scale)/2.0
+            let ty = (self.bounds.height - self.image!.size.height * scale)/2.0
+            affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
+        }
         
         for alo in detailedImage.lines {
             let lo = alo as? LineObject
@@ -992,11 +1012,13 @@ class DrawingView : UIImageView {
                 let rect = CGRectApplyAffineTransform(textView.subviews[i].frame, caffineTransform)
                 let fv = textView.subviews[i] 
                 fv.frame = rect
+                textView.setNeedsDisplay()
             }
             for( var i=0; i < dipMarkerView.points.count; ++i ) {
                 if( dipMarkerView.points[i].loc.x != 0 && dipMarkerView.points[i].loc.y != 0 ) {
                     dipMarkerView.points[i].loc = CGPointApplyAffineTransform(dipMarkerView.points[i].loc, caffineTransform)
                 }
+                dipMarkerView.setNeedsDisplay()
             }
             
             for( var i=0; i < lineView.refMeasurePoints.count; ++i ) {

@@ -44,6 +44,15 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         featureTable.rowHeight = 51
         featureTable.tableFooterView = UIView(frame: CGRect.zero)
         featureTable.reloadData()
+        
+        NSNotificationCenter.defaultCenter().addObserver(
+            self, selector: "keyboardWasShown:", name: UIKeyboardDidShowNotification, object:nil)
+        NSNotificationCenter.defaultCenter().addObserver(
+            self, selector: "keyboardWillBeHidden:", name: UIKeyboardDidHideNotification, object: nil)
+    }
+    
+    deinit  {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     @IBAction func newProjectButtonPressed(sender: UIButton) {
@@ -73,7 +82,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         self.presentViewController(menuController!, animated: true, completion: nil)
     }
     
-    //Mark: - UITextFeildDelegateMethods
+    //Mark: - UITextFieldDelegateMethods
     
     func textFieldDidEndEditing(textField: UITextField) {
         if textField.tag == 1 { //new project textfeild
@@ -166,7 +175,7 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
-        newImage.imageData = UIImageJPEGRepresentation(drawingVC!.image!, 1.0)!
+        newImage.saveImage(drawingVC!.image!)
         newImage.longitude = drawingVC!.imageInfo.longitude
         newImage.latitude = drawingVC!.imageInfo.latitude
         newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
@@ -193,8 +202,10 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
 
+        drawingVC!.hasChanges = false
 
         self.dismissViewControllerAnimated(true, completion: nil)
+        drawingVC!.performSegueWithIdentifier("unwindFromDrawingToMain", sender: drawingVC!)
     }
     
     @IBAction func saveButtonPressed(sender: AnyObject) {
@@ -213,8 +224,8 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
+        currentImage.saveImage(drawingVC!.image!)
         currentImage.project = currentProject
-        currentImage.imageData = UIImageJPEGRepresentation(drawingVC!.image!, 1.0)!
         currentImage.longitude = drawingVC!.imageInfo.longitude
         currentImage.latitude = drawingVC!.imageInfo.latitude
         currentImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
@@ -233,13 +244,15 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //save the managedObjectContext
         do {
-            try drawingVC!.managedContext.save()
+            try managedContext.save()
         } catch let error as NSError {
             print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
         self.dismissViewControllerAnimated(true, completion: nil)
         
+        
         drawingVC!.hasChanges = false
+        drawingVC!.performSegueWithIdentifier("unwindFromDrawingToMain", sender: drawingVC!)
     }
     
     func saveDrawingView(drawingView: DrawingView, image: DetailedImageObject, managedContext: NSManagedObjectContext) {
@@ -336,15 +349,19 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return features.count
+        return features.count == 0 ? 1 : features.count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("featureCell", forIndexPath: indexPath) as! FeatureCell
-        cell.useFeature(features[indexPath.row])
-        cell.tag = indexPath.row
-        cell.delegate = self
-        return cell
+        if( features.count == 0 ) {
+            return tableView.dequeueReusableCellWithIdentifier("NoFeaturesCell", forIndexPath: indexPath)
+        } else {
+            let cell = tableView.dequeueReusableCellWithIdentifier("featureCell", forIndexPath: indexPath) as! FeatureCell
+            cell.useFeature(features[indexPath.row])
+            cell.tag = indexPath.row
+            cell.delegate = self
+            return cell
+        }
     }
     
     //Mark : FeatureCellDelegate Methods
@@ -362,6 +379,26 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         //featureTable.reloadData()
     }
     
+    // Mark : Keyboard management
+    var keyboardHeight : CGFloat = 0.0
+    
+    func keyboardWasShown(notification: NSNotification) {
+        let tmp : [NSObject : AnyObject] = notification.userInfo!
+        let rectV = tmp[UIKeyboardFrameBeginUserInfoKey]
+        let rect = rectV?.CGRectValue
+        keyboardHeight = rect!.height
+        
+        //UIView.animateWithDuration(0.25, animations: { ()-> Void in
+            //self.view.center.y -= self.keyboardHeight
+        //})
+    }
+    
+    func keyboardWillBeHidden(notification: NSNotification) {
+       // UIView.animateWithDuration(0.25, animations: { ()-> Void in
+            //self.view.center.y += self.keyboardHeight
+        //})
+    }
+
 }
 
 protocol FeatureCellDelegate: class {

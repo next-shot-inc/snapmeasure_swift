@@ -5,11 +5,12 @@
         <attribute name="compassOrientation" optional="YES" attributeType="Double" defaultValueString="0" syncable="YES"/>
         <attribute name="coordinate" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="date" attributeType="Date" syncable="YES"/>
-        <attribute name="imageData" attributeType="Binary" syncable="YES"/>
+        <attribute name="imageFile" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" attributeType="String" defaultValueString="New Image" syncable="YES"/>
         <attribute name="scale" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="thumbImageFile" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="dipMeterPoints" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="DipMeterPointObject" syncable="YES"/>
         <relationship name="faciesVignettes" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FaciesVignetteObject" syncable="YES"/>
         <relationship name="features" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="FeatureObject" inverseName="image" inverseEntity="FeatureObject" syncable="YES"/>
@@ -56,7 +57,7 @@
         <attribute name="string" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="DetailedImageObject" positionX="-164" positionY="-45" width="128" height="270"/>
+        <element name="DetailedImageObject" positionX="-164" positionY="-45" width="128" height="285"/>
         <element name="DipMeterPointObject" positionX="97" positionY="-99" width="128" height="120"/>
         <element name="FaciesImageObject" positionX="-65" positionY="-165" width="128" height="88"/>
         <element name="FaciesVignetteObject" positionX="313" positionY="-1" width="128" height="73"/>

@@ -33,7 +33,7 @@ class Exporter {
         self.object = detailedImage
         self.faciesCatalog = faciesCatalog
         
-        let image = UIImage(data: detailedImage.imageData)!
+        let image = detailedImage.image()!
         let length = detailedImage.scale!.doubleValue * Double(image.size.width)
         
         xLength = Double(image.size.width)

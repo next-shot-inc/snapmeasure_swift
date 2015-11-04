@@ -30,7 +30,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
     init(detailedImage: DetailedImageObject) {
         self.detailedImage = detailedImage
         self.name = detailedImage.name
-        self.image = UIImage(data: detailedImage.imageData)!
+        self.image = detailedImage.image()!
         self.compassOrientation = detailedImage.compassOrientation?.doubleValue
         self.coordinate = CLLocationCoordinate2D(latitude: detailedImage.latitude!.doubleValue, longitude: detailedImage.longitude!.doubleValue)
         self.date = detailedImage.date
