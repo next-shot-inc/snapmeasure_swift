@@ -184,6 +184,26 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             error: &error)
         
         showHistogram.enabled = fetchedResultsCount > 1
+        
+        if projects.count == 0 {
+            //get the most recent project worked on
+            fetchRequest = NSFetchRequest(entityName: "ProjectObject")
+            //sort so most recent is first
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+            
+            fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
+                error: &error)
+            
+            if fetchedResultsCount > 0 {
+                //println("Project already exists in context")
+                let fprojects = try? managedContext.executeFetchRequest(fetchRequest)
+                if( fprojects != nil ) {
+                    projects = fprojects as! [ProjectObject]
+                    currentProject = projects[0] as ProjectObject
+                }
+            }
+        }
+
     }
     
     override func viewDidDisappear(animated: Bool) {

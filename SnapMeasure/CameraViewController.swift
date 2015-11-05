@@ -170,6 +170,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     
     @IBOutlet weak var stillButton: UIButton!
     @IBOutlet weak var locationLabel: UILabel!
+    @IBOutlet weak var elevationLabel: UILabel!
     
     @IBOutlet weak var flipCameraButton: UIButton!
     
@@ -276,7 +277,8 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if( segue.identifier == "toDrawingView" ) {
-            let destinationVC = segue.destinationViewController as? DrawingViewController
+            let drawingNC = segue.destinationViewController as! UINavigationController
+            let destinationVC = drawingNC.topViewController as? DrawingViewController
             if( destinationVC != nil ) {
                 destinationVC!.image = image?.fixOrientation()
                 destinationVC!.imageInfo = imageInfo
@@ -586,7 +588,12 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
             self.bestEffortAtLocation = newLocation;
             let lat : Double = bestEffortAtLocation!.coordinate.latitude
             let long : Double = bestEffortAtLocation!.coordinate.longitude
-            print("%f, %f", lat, long)
+            print(lat, long, newLocation.altitude)
+            
+            // Show altitude to user
+            let nf = NSNumberFormatter()
+            let number = nf.stringFromNumber(bestEffortAtLocation!.altitude)
+            self.elevationLabel.text = number! + "m"
             
             // test the measurement to see if it meets the desired accuracy
             if (newLocation.horizontalAccuracy <= self.locationManager!.desiredAccuracy) {
@@ -637,7 +644,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         print(message)
         let lat : Double = bestEffortAtLocation!.coordinate.latitude
         let long : Double = bestEffortAtLocation!.coordinate.longitude
-        print("%f, %f", lat, long)
+        print(lat, long, bestEffortAtLocation!.altitude)
     }
     
     func getLocation() {

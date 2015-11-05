@@ -49,6 +49,7 @@ class Exporter {
                 2*M_PI+compassOrientation! * M_PI/180 : compassOrientation! * M_PI/180
             
             let scale = MKMetersPerMapPointAtLatitude(coordinate.latitude)
+            print(scale)
             
             var centerMapPoint = MKMapPointForCoordinate(coordinate)
             
@@ -103,9 +104,9 @@ class Exporter {
             
             let mapLength = length/scale
             
-            startMapPoint = MKMapPoint(x: centerMapPoint.x+mapLength*cos(orientation)/2, y: centerMapPoint.y+mapLength*sin(orientation)/2)
+            startMapPoint = MKMapPoint(x: centerMapPoint.x*scale+mapLength*cos(orientation)/2, y: centerMapPoint.y*scale+mapLength*sin(orientation)/2)
             
-            endMapPoint = MKMapPoint(x: centerMapPoint.x-mapLength*cos(orientation)/2, y: centerMapPoint.y-mapLength*sin(orientation)/2)
+            endMapPoint = MKMapPoint(x: centerMapPoint.x*scale-mapLength*cos(orientation)/2, y: centerMapPoint.y*scale-mapLength*sin(orientation)/2)
             
         } else {
             startMapPoint = MKMapPoint(x: 0.0, y:0.0)
