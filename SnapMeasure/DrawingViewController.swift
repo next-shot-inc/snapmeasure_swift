@@ -88,14 +88,14 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     }
 }
 
-class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailComposeViewControllerDelegate {
+class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailComposeViewControllerDelegate, UIScrollViewDelegate {
     
     @IBOutlet var twoTapsGestureRecognizer: UITapGestureRecognizer!
     @IBOutlet var oneTapGestureRecognizer: UITapGestureRecognizer!
     
     @IBOutlet weak var colButton: UIButton!
     //@IBOutlet weak var toolbarSegmentedControl: UISegmentedControl!
-    @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var referenceSizeTextField: UITextField!
     @IBOutlet weak var lineNameTextField: UITextField!
     @IBOutlet weak var colorPickerView: UIPickerView!
@@ -120,6 +120,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     @IBOutlet weak var textButton: UIButton!
     @IBOutlet weak var solidFillButton: UIButton!
     
+    var imageView: UIImageView!
+    var tilingView : TilingView?
     var image : UIImage?
     var imageInfo = ImageInfo()
     var colorPickerCtrler = ColorPickerController()
@@ -134,9 +136,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     var feature : FeatureObject?
     var detailedImage : DetailedImageObject?
     var newDetailedImage = false
-    var loadedFromDetailedImage = false
-    var center = CGPoint()
+    //var center = CGPoint()
     var hasChanges = false
+    var defaultLayout = false
     
     var saveMenuController : PopupMenuController?
     
@@ -174,13 +176,38 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         horizonTypePickerCtrler.typeButton = horizonTypeButton
         horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
         
+        //5. ImageView
+        imageView = DrawingView(frame: CGRect(x: 0,y: 0,width: imageInfo.xDimension, height: imageInfo.yDimension))
         let drawingView = imageView as! DrawingView
+        //imageView.image = image
+        drawingView.imageSize = CGSize(width: imageInfo.xDimension, height: imageInfo.yDimension)
+        scrollView.addSubview(imageView)
+        imageView.userInteractionEnabled = true
+        
+        //6. ScrollView
+        scrollView.delegate = self
+        scrollView.minimumZoomScale = 0.1
+        scrollView.maximumZoomScale = 5
+        scrollView.panGestureRecognizer.minimumNumberOfTouches = 2
+        self.scrollView.contentSize = drawingView.imageSize;
+        
+        
+        // compute minimum scale
+        let scrollViewSize = self.scrollView.bounds.size;
+        let zoomViewSize = self.imageView.bounds.size;
+        var scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
+        if (scaleToFit > 1.0 ) {
+            scaleToFit = 1.0;
+        }
+        self.scrollView.zoomScale = scaleToFit;
+        //centerScrollViewContents()
+
         drawingView.faciesView.curImageName = "sandstone"
-        drawingView.image = image
         drawingView.imageInfo = imageInfo
         drawingView.controller = self
-
-
+        drawingView.faciesView.faciesCatalog = faciesCatalog
+        drawingView.lineView.zoomScale = scaleToFit
+        
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
 
@@ -221,11 +248,22 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                 inManagedObjectContext: managedContext) as? DetailedImageObject
             newDetailedImage = true
             detailedImage!.project = currentProject
+            detailedImage!.saveImage(image!)
+            image = nil
+            hasChanges = true
             //detailedImage!.features = NSSet()
-            loadedFromDetailedImage = true
         } else {
-            loadedFromDetailedImage = false
+            drawingView.initFrame()
+            drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
+            drawingView.setNeedsDisplay()
         }
+        
+        if( detailedImage == nil ) {
+            tilingView = TilingView(name: " ", size: image!.size)
+        } else {
+            tilingView = TilingView(name: (detailedImage?.imageFile)!, size: drawingView.imageSize)
+        }
+        imageView.insertSubview(tilingView!, atIndex: 0)
         
         faciesCatalog.loadImages()
         
@@ -240,25 +278,20 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         // Dispose of any resources that can be recreated.
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        imageView.setNeedsDisplay()
         
         let drawingView = imageView as! DrawingView
-        
-        if( !loadedFromDetailedImage ) {
-            drawingView.initFrame()
-            drawingView.initFromObject(detailedImage!, catalog: faciesCatalog)
-            loadedFromDetailedImage = true
-        }
-        
         drawingView.lineView.tool.lineName = lineNameTextField.text!
         drawingView.curColor = (colButton.backgroundColor?.CGColor)!
         drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
-        center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
     }
     
     deinit  {
@@ -282,6 +315,10 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             curButton?.selected = false
             curButton = sender
         }
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
     }
     
     /**
@@ -361,7 +398,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         
         let nf = NSNumberFormatter()
         referenceSizeTextField.text =
-            nf.stringFromNumber(drawingView.lineView.refMeasureValue)
+            nf.stringFromNumber(drawingView.lineView.refMeasureValue == 0 ? 1 : drawingView.lineView.refMeasureValue)
         
         //from storyboard height = 49 and width = 186
         let centerX = sender.frame.origin.x + sender.frame.size.width/2
@@ -433,28 +470,53 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         })
     }
     
-    //Mark: UITextFieldDelegateMethods
+    //Mark: UITextFieldDelegate Methods
     func textFieldDidBeginEditing(textField: UITextField) {
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
     }
     
+    //Mark: UIScrollViewDelegate Methods
+    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+        return imageView
+    }
+    
+    func scrollViewDidEndZooming(scrollView: UIScrollView, withView view: UIView?, atScale scale: CGFloat) {
+        // Recenter the image view when it is smaller than the scrollView
+        //self.centerScrollViewContents()
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.zoomScale = scale
+        drawingView.lineView.setNeedsDisplay()
+    }
+    
+    func centerScrollViewContents() {
+        let boundsSize = self.scrollView.bounds.size
+        //var contentsFrame = self.imageView.frame
+        var contentsFrame = self.tilingView!.frame
+        
+        if (contentsFrame.size.width < boundsSize.width) {
+            contentsFrame.origin.x = (boundsSize.width - contentsFrame.size.width) / 2.0;
+        } else {
+            contentsFrame.origin.x = 0.0;
+        }
+        
+        if (contentsFrame.size.height < boundsSize.height) {
+            contentsFrame.origin.y = (boundsSize.height - contentsFrame.size.height) / 2.0;
+        } else {
+            contentsFrame.origin.y = 0.0;
+        }
+        
+        self.imageView.frame = contentsFrame
+        //self.tilingView!.frame = contentsFrame
+    }
     
     @IBAction func handlePinch(sender: AnyObject) {
-        let recognizer = sender as! UIPinchGestureRecognizer
-        let scaleFactor = recognizer.scale
-        self.imageView.transform = CGAffineTransformScale(self.imageView.transform, scaleFactor, scaleFactor)
-        recognizer.scale = 1
+        // Scrollview implements it now
     }
     
     @IBAction func handlePan(sender: AnyObject) {
-        let recognizer = sender as! UIPanGestureRecognizer
-        let translation = recognizer.translationInView(self.view)
-        self.imageView.center = CGPointMake(self.imageView.center.x + translation.x,
-            self.imageView.center.y + translation.y);
-        recognizer.setTranslation(CGPoint(x: 0,y: 0), inView: self.view)
-        center = self.imageView.center
+        // Scrollview implements it now
     }
     
     @IBAction func handleTap(sender: AnyObject) {
@@ -463,7 +525,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         lineNameTextField.resignFirstResponder()
         colorPickerView.hidden = true
         horizonTypePickerView.hidden = true
-        self.imageView.center = center
+        //self.imageView.center = center
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
@@ -501,9 +563,16 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     @IBAction func handleDoubleTap(sender: AnyObject) {
         // Center view and reset zoom
-        self.imageView.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds))
-        self.imageView.transform = CGAffineTransformIdentity
-        center = self.imageView.center
+        let scrollViewSize = self.scrollView.bounds.size;
+        let zoomViewSize = self.imageView.bounds.size;
+        
+        var scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
+        if (scaleToFit > 1.0 ) {
+            scaleToFit = 1.0;
+        }
+        
+        self.scrollView.zoomScale = scaleToFit;
+        self.centerScrollViewContents()
     }
     
     func askText(label: UILabel) {
@@ -620,6 +689,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         } else if segue.identifier == "unwindFromDrawingToMain" || segue.identifier == "cancelUnwind" {
             image = nil
             imageView.image = nil
+            if( newDetailedImage && detailedImage!.hasChanges ) {
+                detailedImage?.removeImage()
+            }
             managedContext.reset() // Free all ImageDetailedObjects and ProjectObjects
             projects.removeAll()
         }
@@ -663,11 +735,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     @IBAction func pushSetHeightButton(sender : UIButton) {
         let drawingView = imageView as! DrawingView
-        var height = 0.0 as NSNumber
-        if( drawingView.lineView.label.text != nil ) {
-            let decode_height = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
-            height = decode_height == nil ? 0.0 : decode_height!
-        }
+        let height = drawingView.lineView.currentMeasure as NSNumber
         if (height.isEqualToNumber(0.0)) {
             let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .Alert)
             let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
@@ -695,6 +763,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             
             //Remove measurement line to force user to draw a new line to define the width
             drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.currentMeasure = 0.0
             drawingView.lineView.setNeedsDisplay()
         }
         
@@ -703,11 +772,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     @IBAction func pushSetWdithButton(sender : UIButton) {
         let drawingView = imageView as! DrawingView
-        var width = 0.0 as NSNumber
-        if( drawingView.lineView.label.text != nil ) {
-            let decode_width = NSNumberFormatter().numberFromString(drawingView.lineView.label.text!)
-            width = decode_width == nil ? 0.0 : decode_width!
-        }
+        let width = drawingView.lineView.currentMeasure as NSNumber
         if (width.isEqualToNumber(0.0)) {
             let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .Alert)
             let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
@@ -775,6 +840,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             
             // Remove measurement line
             drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.currentMeasure = 0.0
             drawingView.lineView.setNeedsDisplay()
         }
         highlightButton(sender)
@@ -788,7 +854,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("OrientationController") as! OrientationController
         
         ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
-        ctrler.popoverPresentationController?.sourceView = sender.viewForBaselineLayout()
+        ctrler.popoverPresentationController?.sourceView = sender.viewForFirstBaselineLayout
         ctrler.popoverPresentationController?.sourceRect = sender.bounds
         ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
         let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)

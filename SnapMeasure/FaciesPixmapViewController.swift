@@ -201,7 +201,7 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
     
     override func viewDidDisappear(animated: Bool) {
         if( drawingController != nil ) {
-            drawingController!.imageView.center = drawingController!.center
+            //drawingController!.imageView.center = drawingController!.center
         }
     }
     

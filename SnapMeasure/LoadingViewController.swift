@@ -48,7 +48,7 @@ class DetailedImageProxy {
 class LoadingViewController: UITableViewController, UISearchResultsUpdating, UISearchBarDelegate {
     var detailedImages: [DetailedImageProxy] = []
     var filteredDetailedImages: [DetailedImageProxy] = []
-    var searchController = UISearchController()
+    var searchController : UISearchController!
     var managedContext : NSManagedObjectContext!
     //var faciesCatalog = FaciesCatalog()
     var edited = false
@@ -87,6 +87,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             return controller
         })()
         
+        definesPresentationContext = true
+        
         loadImages()
         
         updateSearchResultsForSearchController(searchController)
@@ -99,10 +101,13 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     override func viewDidDisappear(animated: Bool) {
         super.viewDidDisappear(animated)
-        detailedImages.removeAll(keepCapacity: false)
-        filteredDetailedImages.removeAll(keepCapacity: false)
-        //faciesCatalog = FaciesCatalog()
-        self.tableView.reloadData()
+        if( searchController != nil ) {
+           searchController.dismissViewControllerAnimated(false, completion: nil)
+           searchController.searchBar.delegate = nil
+           searchController.searchResultsUpdater = nil
+           tableView.tableHeaderView = nil
+           searchController = nil
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -147,7 +152,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if searchController.active || scopeSelected {
+        if( (searchController != nil && searchController.active) || scopeSelected ){
             return filteredDetailedImages.count
         } else {
             return detailedImages.count
@@ -157,8 +162,6 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
         cell.backgroundColor = UIColor.clearColor()
-        //cell.faciesCatalog = faciesCatalog
-        cell.controller = self
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
         var detailedImage: DetailedImageProxy
@@ -197,12 +200,14 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             let destinationDetailedImage = destinationDetailedImageProxy.getObject()
             if( destinationDetailedImage != nil ) {
                 drawingVC.detailedImage = destinationDetailedImage!
-                drawingVC.image = destinationDetailedImage!.image()
+                let imageSize = CGSize(
+                    width: Int(destinationDetailedImage!.imageWidth!.intValue), height: Int(destinationDetailedImage!.imageHeight!.intValue)
+                )
                 
                 //get ImageInfo
                 var imageInfo = ImageInfo()
-                imageInfo.xDimension = Int(drawingVC.image!.size.width)
-                imageInfo.yDimension = Int(drawingVC.image!.size.height)
+                imageInfo.xDimension = Int(imageSize.width)
+                imageInfo.yDimension = Int(imageSize.height)
                 imageInfo.latitude = destinationDetailedImage!.latitude?.doubleValue
                 imageInfo.longitude = destinationDetailedImage!.longitude?.doubleValue
                 imageInfo.compassOrienation = destinationDetailedImage!.compassOrientation?.doubleValue
@@ -218,6 +223,14 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
               try self.managedContext.save()
             } catch let error as NSError {
                 print("Could not save in LoadingingViewController \(error), \(error.userInfo)")
+            }
+        }
+        
+        // Free memory
+        for cell in self.tableView.visibleCells {
+            let c = cell as? CardTableViewCell
+            if( c != nil ) {
+                c!.cleanImage()
             }
         }
     }
@@ -254,6 +267,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             } else {
                 
                 let deletedImage = detailedImages[indexPath.row].getObject()
+                deletedImage?.removeImage()
                 if( deletedImage != nil ) {
                    managedContext.deleteObject(deletedImage!)
                 }
@@ -268,11 +282,13 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     
     // Mark: - Filtering
     func updateSearchResultsForSearchController(searchController: UISearchController) {
-        filteredDetailedImages.removeAll(keepCapacity: false)
-        let scopes = self.searchController.searchBar.scopeButtonTitles!
-        let selectedScope = scopes[self.searchController.searchBar.selectedScopeButtonIndex]
-        self.filterContentForSearchText(searchController.searchBar.text!, scope: selectedScope)
-        self.tableView.reloadData();
+        let scopes = self.searchController.searchBar.scopeButtonTitles
+        if( scopes != nil ) {
+           filteredDetailedImages.removeAll(keepCapacity: false)
+           let selectedScope = scopes![self.searchController.searchBar.selectedScopeButtonIndex]
+           self.filterContentForSearchText(searchController.searchBar.text!, scope: selectedScope)
+           self.tableView.reloadData();
+        }
     }
     
     func filterContentForSearchText(searchText: String, scope: String = "All") {

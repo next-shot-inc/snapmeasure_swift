@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="8195" systemVersion="14F27" minimumToolsVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9057" systemVersion="14F1021" minimumToolsVersion="Automatic">
     <entity name="DetailedImageObject" representedClassName="SnapMeasure.DetailedImageObject" syncable="YES">
         <attribute name="altitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="compassOrientation" optional="YES" attributeType="Double" defaultValueString="0" syncable="YES"/>
         <attribute name="coordinate" optional="YES" transient="YES" syncable="YES"/>
         <attribute name="date" attributeType="Date" syncable="YES"/>
         <attribute name="imageFile" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="imageHeight" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="imageWidth" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="latitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="longitude" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="name" attributeType="String" defaultValueString="New Image" syncable="YES"/>
@@ -57,7 +59,7 @@
         <attribute name="string" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="DetailedImageObject" positionX="-164" positionY="-45" width="128" height="285"/>
+        <element name="DetailedImageObject" positionX="-164" positionY="-45" width="128" height="315"/>
         <element name="DipMeterPointObject" positionX="97" positionY="-99" width="128" height="120"/>
         <element name="FaciesImageObject" positionX="-65" positionY="-165" width="128" height="88"/>
         <element name="FaciesVignetteObject" positionX="313" positionY="-1" width="128" height="73"/>

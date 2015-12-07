@@ -16,8 +16,6 @@ class CardTableViewCell: UITableViewCell {
     @IBOutlet var myImageView: UIImageView!
 
     var detailedImageProxy : DetailedImageProxy?
-    //var faciesCatalog: FaciesCatalog?
-    var controller: LoadingViewController?
     
     deinit {
         myImageView.image = nil
@@ -36,8 +34,10 @@ class CardTableViewCell: UITableViewCell {
         if( detailedImage != nil ) {
             myImageView.image = detailedImage!.smallImage()
         }
-        //myImageView.initFrame()
-        //myImageView.initFromObject(detailedImage, catalog: faciesCatalog!)
         
+    }
+    
+    func cleanImage() {
+        myImageView.image = nil
     }
 }

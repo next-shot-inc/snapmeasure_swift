@@ -18,6 +18,7 @@
 		2F1286981B0E3DDF0095D500 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286971B0E3DDF0095D500 /* PreviewView.swift */; };
 		2F12869A1B0E57C50095D500 /* DrawingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F1286991B0E57C50095D500 /* DrawingViewController.swift */; };
 		2F12869C1B0E60300095D500 /* DrawingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F12869B1B0E60300095D500 /* DrawingView.swift */; };
+		2F190F5E1C0CAE5700E26A27 /* TilingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F190F5D1C0CAE5700E26A27 /* TilingView.swift */; };
 		2F682F5E1B1623FE002C1BA7 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */; };
 		2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */; };
 		2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F671B1F6169002C1BA7 /* Feature.swift */; };
@@ -70,6 +71,7 @@
 		2F1286971B0E3DDF0095D500 /* PreviewView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		2F1286991B0E57C50095D500 /* DrawingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingViewController.swift; sourceTree = "<group>"; };
 		2F12869B1B0E60300095D500 /* DrawingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DrawingView.swift; sourceTree = "<group>"; };
+		2F190F5D1C0CAE5700E26A27 /* TilingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TilingView.swift; sourceTree = "<group>"; };
 		2F682F5D1B1623FE002C1BA7 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
 		2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = boundaryrep.swift; sourceTree = "<group>"; };
 		2F682F671B1F6169002C1BA7 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Feature.swift; path = ../Feature.swift; sourceTree = "<group>"; };
@@ -166,6 +168,7 @@
 				FD44BFF71B3322A500339F98 /* FaciesImageObject.swift */,
 				2FCDF11D1B3086A4004308D6 /* TextObject.swift */,
 				2F1286741B0E3A150095D500 /* SnapMeasure.xcdatamodeld */,
+				2F190F5D1C0CAE5700E26A27 /* TilingView.swift */,
 				2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */,
 				2F12867E1B0E3A150095D500 /* LaunchScreen.xib */,
 				2F12867C1B0E3A150095D500 /* Images.xcassets */,
@@ -314,6 +317,7 @@
 				2F682F601B1CAB87002C1BA7 /* boundaryrep.swift in Sources */,
 				2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */,
 				2F1286781B0E3A150095D500 /* ViewController.swift in Sources */,
+				2F190F5E1C0CAE5700E26A27 /* TilingView.swift in Sources */,
 				FD4C17D21B4DD34000BC46BA /* OrientationController.swift in Sources */,
 				FD4A71451B2203B800AD51B4 /* CardTableViewCell.swift in Sources */,
 				2FCD8F951B4ACFA0009F6E07 /* DipMeterPointObject.swift in Sources */,
@@ -410,7 +414,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -449,7 +453,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -466,12 +470,13 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				INFOPLIST_FILE = SnapMeasure/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "next-shot-inc.com.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -484,11 +489,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				INFOPLIST_FILE = SnapMeasure/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "next-shot-inc.com.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

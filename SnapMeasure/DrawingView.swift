@@ -19,7 +19,6 @@ struct Line {
     var name = String()
     var color = UIColor.blackColor().CGColor
     var role : Role = Role.Horizon
-    var label = UILabel()
     
     mutating func merge(line: Line) {
         var points0 = points
@@ -201,27 +200,53 @@ class LineView : UIView {
     var lines = [Line]()
     var measure = [CGPoint]()
     var refMeasurePoints = [CGPoint]()
-    var currentLine = Line()
-    var label = UILabel()
-    var refLabel = UILabel()
+    var currentMeasure : Float = 0.0
+    private var _currentLine = Line()
     var refMeasureValue : Float = 0.0
     var tool = LineViewTool()
     var polygons : Polygons?
     var drawPolygon = false
+    var zoomScale : CGFloat = 1.0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.addSubview(label)
-        self.addSubview(refLabel)
     }
 
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override class func layerClass() -> AnyClass {
+        return CATiledLayer.self
+    }
+    
+    func with(queue: dispatch_queue_t, f: Void->Void) {
+        dispatch_sync(queue, f)
+    }
+    
+    // Handle thread safety for currentLine
+    private let queue = dispatch_queue_create("...", nil)
+    var currentLine : Line {
+        get {
+            var result : Line?
+            with(queue) {
+                result = self._currentLine
+            }
+            return result!
+        }
+        set {
+            with(queue) {
+                self._currentLine = newValue
+            }
+        }
+    }
+    
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
-        CGContextSetLineWidth(context, 2.0)
+        
+        let line_width = 2.0/zoomScale
+        let font_size = 16.0/zoomScale
+        CGContextSetLineWidth(context, line_width)
         
         // Draw digitized lines
         for line in lines {
@@ -232,12 +257,10 @@ class LineView : UIView {
             }
             CGContextStrokePath(context)
             
-            let loc = CGPoint(x: line.points[0].x, y: line.points[0].y)
-            line.label.text = line.name
-            line.label.frame = CGRectMake(loc.x, loc.y, 100, 20)
-            if( line.label.superview == nil ) {
-                addSubview(line.label)
-            }
+            NSString(string: line.name).drawAtPoint(
+                CGPointMake(line.points[0].x, line.points[0].y),
+                withAttributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(font_size)]
+            )
         }
         
         // Fill color
@@ -273,14 +296,15 @@ class LineView : UIView {
         }
         
         // Draw line being drawn
-        if( currentLine.points.count > 2 ) {
+        let curLine = currentLine
+        if( curLine.points.count > 2 ) {
             CGContextSetStrokeColorWithColor(context, UIColor.blackColor().CGColor)
             // Draw as dash line
             let dashes:[CGFloat] = [6, 2]
             CGContextSetLineDash(context, 0, dashes, 2)
-            CGContextMoveToPoint (context, currentLine.points[0].x, currentLine.points[0].y);
-            for ( var k = 1; k < currentLine.points.count; k++) {
-                CGContextAddLineToPoint (context, currentLine.points[k].x, currentLine.points[k].y);
+            CGContextMoveToPoint (context, curLine.points[0].x, curLine.points[0].y);
+            for ( var k = 1; k < curLine.points.count; k++) {
+                CGContextAddLineToPoint (context, curLine.points[k].x, curLine.points[k].y);
             }
             CGContextStrokePath(context)
             
@@ -293,22 +317,26 @@ class LineView : UIView {
         if( refMeasurePoints.count == 2 ) {
             // Draw reference line
             CGContextSetStrokeColorWithColor(context, UIColor.blueColor().CGColor)
+            
+            // Add Label
             let loc = CGPoint(
                 x: (refMeasurePoints[1].x+refMeasurePoints[0].x)/2.0,
                 y: (refMeasurePoints[1].y+refMeasurePoints[0].y)/2.0
             )
-            refLabel.text = String(format: "%g", refMeasureValue)
-            refLabel.frame = CGRectMake(loc.x, loc.y, 100, 20)
+            NSString(format: "%g", refMeasureValue).drawAtPoint(
+                loc,
+                withAttributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(font_size)]
+            )
             
             CGContextMoveToPoint (context, refMeasurePoints[0].x, refMeasurePoints[0].y);
             CGContextAddLineToPoint (context, refMeasurePoints[1].x, refMeasurePoints[1].y);
             CGContextStrokePath(context)
             
-            // Draw scale
+            // Draw scale bar
             if( refMeasurePoints[0].y == refMeasurePoints[1].y ) {
                let minp = CGPoint(x: min(refMeasurePoints[0].x, refMeasurePoints[1].x), y: refMeasurePoints[0].y)
                let width = abs(refMeasurePoints[0].x-refMeasurePoints[1].x)
-                let height : CGFloat = 5
+               let height : CGFloat = 5/zoomScale
                CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
                CGContextFillRect(context, CGRectMake(minp.x, refMeasurePoints[0].y-height, width/2, height))
                CGContextSetFillColorWithColor(context, UIColor.whiteColor().CGColor)
@@ -328,15 +356,17 @@ class LineView : UIView {
             let dy = measure[1].y - measure[0].y
             let dist = sqrt(dx*dx + dy*dy)
             
+            // Add label
+            currentMeasure = Float(dist) * Float(scale)
             let loc = CGPoint(x: (measure[1].x+measure[0].x)/2.0, y: (measure[1].y+measure[0].y)/2.0)
-            label.text = String(format: "%g", Float(dist) * Float(scale))
-            label.frame = CGRectMake(loc.x, loc.y, 100, 20)
+            NSString(format: "%g", currentMeasure).drawAtPoint(
+                loc,
+                withAttributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(font_size)]
+            )
             
             CGContextMoveToPoint (context, measure[0].x, measure[0].y);
             CGContextAddLineToPoint (context, measure[1].x, measure[1].y);
             CGContextStrokePath(context)
-        } else {
-            label.text = ""
         }
         
         // Draw bounding rectangle
@@ -349,7 +379,7 @@ class LineView : UIView {
         CGContextStrokePath(context)
     }
     
-    // Add or merge a new line 
+    // Add or merge a new line
     // The merge is done when the name of the new line is the same as the name of an existing line
     func add(line: Line) {
         // Find if it needs to be merged with an existing line
@@ -536,6 +566,10 @@ class FaciesView : UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override class func layerClass() -> AnyClass {
+        return CATiledLayer.self
+    }
+    
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         CGContextSetLineWidth(context, 2.0)
@@ -615,6 +649,10 @@ class TextView : UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override class func layerClass() -> AnyClass {
+        return CATiledLayer.self
+    }
+    
     func addText(label: String, rect: CGRect) -> UILabel {
         let uilabel = UILabel(frame: rect)
         uilabel.adjustsFontSizeToFitWidth = true
@@ -671,6 +709,10 @@ class DipMarkerView : UIView {
     
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override class func layerClass() -> AnyClass {
+        return CATiledLayer.self
     }
     
     override func drawRect(rect: CGRect) {
@@ -757,6 +799,7 @@ class DrawingView : UIImageView {
     var faciesView = FaciesView()
     var textView = TextView()
     var dipMarkerView = DipMarkerView()
+    var imageSize = CGSize()
     
     var drawMode : ToolMode = ToolMode.Draw
     var imageInfo = ImageInfo()
@@ -770,21 +813,25 @@ class DrawingView : UIImageView {
         lineView = LineView(frame: frame)
         lineView.opaque = false
         lineView.backgroundColor = nil
+        lineView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(lineView)
         
         faciesView = FaciesView(frame: frame)
         faciesView.opaque = false
         faciesView.backgroundColor = nil
+        faciesView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(faciesView)
         
         textView = TextView(frame: frame)
         textView.opaque = false
         textView.backgroundColor = nil
+        textView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(textView)
         
         dipMarkerView = DipMarkerView(frame: frame)
         dipMarkerView.opaque = false
         dipMarkerView.backgroundColor = nil
+        dipMarkerView.autoresizingMask = [UIViewAutoresizing.FlexibleWidth,UIViewAutoresizing.FlexibleHeight]
         self.addSubview(dipMarkerView)
 
     }
@@ -827,13 +874,13 @@ class DrawingView : UIImageView {
         faciesView.faciesCatalog = catalog
         if( detailedImage.scale != nil && detailedImage.scale!.floatValue != 0 ) {
             // Draw scale at approximatevely 10% of image width
-            let refValue = Float(self.image!.size.width)*0.1*detailedImage.scale!.floatValue
+            let refValue = Float(self.imageSize.width)*0.1*detailedImage.scale!.floatValue
             // Compute a nice reference number to draw
             let niceRefValue = getNiceNumber(refValue)
             // Recompute image pixel distance from this reference number and scale
             let dist = niceRefValue / detailedImage.scale!.floatValue
             lineView.refMeasureValue = niceRefValue
-            let p1 = CGPoint(x: self.image!.size.width-100.0, y: self.image!.size.height-100.0)
+            let p1 = CGPoint(x: self.imageSize.width-100.0, y: self.imageSize.height-100.0)
             var p0 = p1
             p0.x -= CGFloat(dist)
             lineView.refMeasurePoints.append(p0)
@@ -841,8 +888,8 @@ class DrawingView : UIImageView {
         }
         
         // Get the lines via the DetailedView NSSet.
-        let scalex = self.bounds.width/self.image!.size.width
-        let scaley = self.bounds.height/self.image!.size.height
+        let scalex = self.bounds.width/self.imageSize.width
+        let scaley = self.bounds.height/self.imageSize.height
         
         if( self.contentMode == UIViewContentMode.ScaleToFill ) {
             affineTransform = CGAffineTransformMakeScale(scalex, scaley)
@@ -852,16 +899,16 @@ class DrawingView : UIImageView {
             affineTransform = CGAffineTransformMakeScale(scale, scale)
             
             // Center.
-            let tx = (self.bounds.width - self.image!.size.width * scale)/2.0
-            let ty = (self.bounds.height - self.image!.size.height * scale)/2.0
+            let tx = (self.bounds.width - self.imageSize.width * scale)/2.0
+            let ty = (self.bounds.height - self.imageSize.height * scale)/2.0
             affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
         } else if( self.contentMode == UIViewContentMode.ScaleAspectFit ) {
             // scale to minimum
             let scale = min(scalex, scaley)
             affineTransform = CGAffineTransformMakeScale(scale, scale)
             // Center
-            let tx = (self.bounds.width - self.image!.size.width * scale)/2.0
-            let ty = (self.bounds.height - self.image!.size.height * scale)/2.0
+            let tx = (self.bounds.width - self.imageSize.width * scale)/2.0
+            let ty = (self.bounds.height - self.imageSize.height * scale)/2.0
             affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
         }
         
@@ -964,13 +1011,10 @@ class DrawingView : UIImageView {
         willSet(newBounds) {
             // First take the inverse of the previous transform
             var caffineTransform = CGAffineTransformInvert(self.affineTransform)
-            if( self.image == nil ) {
-                return
-            }
             
             // Compute scaling factors
-            let scalex = newBounds.width/self.image!.size.width
-            let scaley = newBounds.height/self.image!.size.height
+            let scalex = newBounds.width/self.imageSize.width
+            let scaley = newBounds.height/self.imageSize.height
             
             affineTransform = CGAffineTransformIdentity
             
@@ -982,16 +1026,16 @@ class DrawingView : UIImageView {
                 affineTransform = CGAffineTransformMakeScale(scale, scale)
         
                 // Center.
-                let tx = (newBounds.width - self.image!.size.width * scale)/2.0
-                let ty = (newBounds.height - self.image!.size.height * scale)/2.0
+                let tx = (newBounds.width - self.imageSize.width * scale)/2.0
+                let ty = (newBounds.height - self.imageSize.height * scale)/2.0
                 affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
             } else if( self.contentMode == UIViewContentMode.ScaleAspectFit ) {
                 // scale to minimum
                 let scale = min(scalex, scaley)
                 affineTransform = CGAffineTransformMakeScale(scale, scale)
                 // Center
-                let tx = (newBounds.width - self.image!.size.width * scale)/2.0
-                let ty = (newBounds.height - self.image!.size.height * scale)/2.0
+                let tx = (newBounds.width - self.imageSize.width * scale)/2.0
+                let ty = (newBounds.height - self.imageSize.height * scale)/2.0
                 affineTransform = CGAffineTransformConcat(affineTransform, CGAffineTransformMakeTranslation(tx, ty))
             }
             
@@ -1035,6 +1079,7 @@ class DrawingView : UIImageView {
     
     override var center : CGPoint {
         willSet(newCenter) {
+            //print(newCenter, center, transform)
         }
     }
     
@@ -1085,7 +1130,6 @@ class DrawingView : UIImageView {
             for (index,value) in lineView.lines.enumerate() {
                 if( value.intersectBox(rect) ) {
                     lineView.lines.removeAtIndex(index)
-                    value.label.removeFromSuperview()
                     lineView.setNeedsDisplay()
                     controller!.hasChanges = true
                     break
@@ -1121,7 +1165,7 @@ class DrawingView : UIImageView {
         let point = touch.locationInView(self)
         
         if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
-            drawMode != ToolMode.DipMarker
+            drawMode != ToolMode.DipMarker && drawMode != DrawingView.ToolMode.Select
         ) {
            lineView.currentLine.points.append(point)
            if( drawMode != ToolMode.Erase ) {
@@ -1177,7 +1221,6 @@ class DrawingView : UIImageView {
                 let rect = CGRectMake(minX, minY, maxX-minX, maxY-minY)
                 for (index,value) in lineView.lines.enumerate() {
                     if( value.intersectBox(rect) ) {
-                        value.label.removeFromSuperview()
                         lineView.lines.removeAtIndex(index)
                         lineView.computePolygon()
                         lineView.setNeedsDisplay()

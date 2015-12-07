@@ -17,45 +17,40 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
     @IBOutlet weak var xLabel: UILabel!
     @IBOutlet weak var yLabel: UILabel!
     
-    var titleLabelText  = "Title"
+    var rotatedYLabel : UILabel!
+    var histogramData : HistogramData?
+    var titleLabelText  = "Title (Click to Edit)"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        histogramView.hidden = true
-        navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
-        navigationItem.leftItemsSupplementBackButton = true
+        histogramView.hidden = false
         
         let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTappedLabel:")
         doubleTap.numberOfTapsRequired = 2
         titleLabel.addGestureRecognizer(doubleTap)
-    }
-    
-    override func viewWillTransitionToSize(size: CGSize,
-        withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
-            // willRotateToInterfaceOrientation code goes here
-            coordinator.animateAlongsideTransition({ (UIViewControllerTransitionCoordinatorContext) -> Void in
-                // willAnimateRotationToInterfaceOrientation code goes here
-                super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
-                
-                }, completion: { (UIViewControllerTransitionCoordinatorContext) -> Void in
-                    // didRotateFromInterfaceOrientation goes here
-                    self.histogramView.setNeedsDisplay()
-            })
+        
+        rotatedYLabel = UILabel()
+        rotatedYLabel.hidden = true
+        self.view.addSubview(rotatedYLabel)
+        
+        // Setup initial histogram with features sorted by type
+        histogramData = HistogramData()
+        drawHistogram(possibleFeatureTypes.count, features: histogramData!.getFeatures(), sortedBy: "Type")
     }
     
     func doubleTappedLabel(sender: AnyObject) { // sender is doubleTap
         let label = (sender as! UITapGestureRecognizer).view as! UILabel
-        let textFeild = UITextField(frame: label.bounds)
-        textFeild.text = label.text
-        textFeild.textAlignment = NSTextAlignment.Center
-        textFeild.textColor = label.textColor
-        textFeild.font = label.font
-        textFeild.backgroundColor = UIColor.whiteColor()
-        textFeild.delegate = self
-        textFeild.becomeFirstResponder() //open keyboard when
+        let textField = UITextField(frame: label.bounds)
+        textField.text = label.text
+        textField.textAlignment = NSTextAlignment.Center
+        textField.textColor = label.textColor
+        textField.font = label.font
+        textField.backgroundColor = UIColor.whiteColor()
+        textField.delegate = self
+        textField.becomeFirstResponder() //open keyboard when
         label.userInteractionEnabled = false
-        label.addSubview(textFeild)
+        label.addSubview(textField)
         
     }
     
@@ -101,13 +96,22 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         xLabel.font = UIFont.systemFontOfSize(xLabel.frame.height*4/5)
         xLabel.adjustsFontSizeToFitWidth = true
         
-        
-        yLabel.textColor = UIColor.darkGrayColor()
-        yLabel.textAlignment = NSTextAlignment.Center
-        yLabel.hidden = false
-        yLabel.text = "# of Features"
-        yLabel.font = UIFont.systemFontOfSize(yLabel.frame.height*4/5)
-        yLabel.transform = CGAffineTransformMakeRotation(CGFloat(-M_PI_2))
+        // Manually place the true Y Axis label (rotated 90 deg)
+        rotatedYLabel.textColor = UIColor.darkGrayColor()
+        rotatedYLabel.textAlignment = NSTextAlignment.Center
+        rotatedYLabel.hidden = false
+        rotatedYLabel.text = "# of Features"
+        rotatedYLabel.font = UIFont.systemFontOfSize(yLabel.frame.height*4/5)
+        let t = rotatedYLabel.text! as NSString
+        let size = t.sizeWithAttributes([NSFontAttributeName: rotatedYLabel.font])
+        rotatedYLabel.bounds = CGRectMake(0, 0, size.width, size.height);
+        rotatedYLabel.center = CGPoint(x: 0, y: 0)
+        //rotatedYLabel.layer.anchorPoint = CGPointMake(size.width/2, size.height/2)
+        rotatedYLabel.transform =
+            CGAffineTransformConcat(CGAffineTransformMakeRotation(CGFloat(-M_PI_2)),
+            CGAffineTransformMakeTranslation(yLabel.frame.origin.x, yLabel.frame.origin.y)
+        )
+        yLabel.hidden = true
         
     }
     
@@ -195,7 +199,23 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         
         return (barHeights, scale)
     }
+    
+    @IBAction func cancelAction(sender: AnyObject) {
+        //self.dismissViewControllerAnimated(true, completion: nil)
+        //self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
+        //self.splitViewController?.dismissViewControllerAnimated(true, completion: nil)
+        //splitViewController?.performSegueWithIdentifier("unwindToMainFromSplit", sender: nil)
+    }
 
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if( segue.identifier == "toHistogramMasterView") {
+            let destinationVC = segue.destinationViewController as? HistogramMasterViewController
+            if( destinationVC != nil ) {
+               destinationVC!.delegate = self
+                destinationVC!.histogramData = self.histogramData
+            }
+        }
+    }
 }
 
 class HistogramView : UIView {
@@ -209,7 +229,6 @@ class HistogramView : UIView {
     var initialized = false
     var axisWidth : CGFloat = 3
     var tickWidth : CGFloat = 2
-    var font = UIFont.systemFontOfSize(20)
     
     func initAttributes(barHeights: [Int], xAxisScale: [AnyObject]) {
         self.barHeights = barHeights
@@ -217,11 +236,12 @@ class HistogramView : UIView {
         self.maxBarHeight = CGFloat(barHeights.maxElement()!)
         self.xScalePoints = []
         self.yScalePoints = []
-        
         self.initialized = true
     }
     
     override func drawRect(rect: CGRect) {
+        let font = UIFont.systemFontOfSize(20)
+
         if (initialized) {
             let context = UIGraphicsGetCurrentContext()!
             CGContextSetStrokeColorWithColor(context, UIColor.darkGrayColor().CGColor)
@@ -236,6 +256,27 @@ class HistogramView : UIView {
             self.drawBars(context)
         
             CGContextStrokePath(context)
+        } else {
+            let context = UIGraphicsGetCurrentContext()!
+            CGContextSetStrokeColorWithColor(context, UIColor.lightGrayColor().CGColor)
+            CGContextSetFillColorWithColor(context, UIColor.lightGrayColor().CGColor)
+
+            
+            let adjust = font.pointSize/2
+            let axisRect = CGRect(x: rect.origin.x+50, y: rect.origin.y+adjust, width: rect.width-100, height: rect.height-50-adjust)
+            CGContextSetLineWidth(context, axisWidth)
+            CGContextMoveToPoint(context, axisRect.origin.x, axisRect.origin.y-2)
+            CGContextAddLineToPoint(context, axisRect.origin.x, axisRect.origin.y+axisRect.height+2)
+            CGContextStrokePath(context)
+            
+            //draw x axis
+            CGContextSetLineWidth(context, axisWidth)
+            CGContextMoveToPoint(context, axisRect.origin.x, axisRect.origin.y+axisRect.height)
+            CGContextAddLineToPoint(context, axisRect.origin.x + axisRect.width+2, axisRect.origin.y+axisRect.height)
+            CGContextStrokePath(context)
+            
+            let fillRect = CGRect(x: axisRect.origin.x + 5, y: axisRect.origin.y - 5, width: axisRect.width-5, height: axisRect.height-5)
+            CGContextFillRect(context, fillRect)
         }
     }
     
@@ -273,6 +314,8 @@ class HistogramView : UIView {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.ByClipping
         paragraphStyle.alignment = NSTextAlignment.Center
+        
+        let font = UIFont.systemFontOfSize(20)
         
         let labelAttributes = [ NSFontAttributeName: font,
             NSForegroundColorAttributeName: UIColor.darkGrayColor(),
@@ -338,6 +381,8 @@ class HistogramView : UIView {
         let numSections = CGFloat(barHeights!.count)
         let dx = (endX-startX)/numSections
         
+        var font = UIFont.systemFontOfSize(20)
+        
         //this section gets the smallest font used and starts the formatting of the labels
         var attributedLabels : [NSMutableAttributedString] = []
         if xScaleLables![0].isKindOfClass(NSString) {
@@ -377,7 +422,7 @@ class HistogramView : UIView {
             numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
             numFormatter.usesSignificantDigits = true
             numFormatter.maximumSignificantDigits = 3
-            numFormatter.minimumSignificantDigits = 3
+            numFormatter.minimumSignificantDigits = 0
             for object in xScaleLables! {
                 let labelNum = object as! NSNumber
                 let label = numFormatter.stringFromNumber(labelNum)!
@@ -388,6 +433,14 @@ class HistogramView : UIView {
                 ]
                 
                 let attributedLabel = NSMutableAttributedString(string: label, attributes: labelAttributes)
+                var labelSize = attributedLabel.size()
+                let range = NSRange(location: 0,length: attributedLabel.length)
+                while labelSize.width > dx { //need the tick label width to be less than the distance between two ticks
+                    font = UIFont.systemFontOfSize(font.pointSize - 2)
+                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
+                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    labelSize = attributedLabel.size()
+                }
                 
                 attributedLabels.append(attributedLabel)
             }
@@ -415,6 +468,9 @@ class HistogramView : UIView {
                     attributedLabel.drawInRect(textRect)
                 } else  {
                     let attributedLabel = attributedLabels[i]
+                    let range = NSRange(location: 0,length: attributedLabel.length)
+                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
+                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
                     
                     let labelSize = attributedLabel.size()
                     let textRect = CGRect(origin: CGPoint(x: xPos-labelSize.width/2, y: y+tickLength+5), size: labelSize)

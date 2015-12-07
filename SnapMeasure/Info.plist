@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>I-Outcrop</string>
+	<string>Outcrop</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

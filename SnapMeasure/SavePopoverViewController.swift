@@ -45,14 +45,6 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         featureTable.tableFooterView = UIView(frame: CGRect.zero)
         featureTable.reloadData()
         
-        NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: "keyboardWasShown:", name: UIKeyboardDidShowNotification, object:nil)
-        NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: "keyboardWillBeHidden:", name: UIKeyboardDidHideNotification, object: nil)
-    }
-    
-    deinit  {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     
     @IBAction func newProjectButtonPressed(sender: UIButton) {
@@ -175,7 +167,6 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
-        newImage.saveImage(drawingVC!.image!)
         newImage.longitude = drawingVC!.imageInfo.longitude
         newImage.latitude = drawingVC!.imageInfo.latitude
         newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
@@ -224,7 +215,6 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
-        currentImage.saveImage(drawingVC!.image!)
         currentImage.project = currentProject
         currentImage.longitude = drawingVC!.imageInfo.longitude
         currentImage.latitude = drawingVC!.imageInfo.latitude
@@ -249,7 +239,6 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
             print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
         self.dismissViewControllerAnimated(true, completion: nil)
-        
         
         drawingVC!.hasChanges = false
         drawingVC!.performSegueWithIdentifier("unwindFromDrawingToMain", sender: drawingVC!)
@@ -379,26 +368,6 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         //featureTable.reloadData()
     }
     
-    // Mark : Keyboard management
-    var keyboardHeight : CGFloat = 0.0
-    
-    func keyboardWasShown(notification: NSNotification) {
-        let tmp : [NSObject : AnyObject] = notification.userInfo!
-        let rectV = tmp[UIKeyboardFrameBeginUserInfoKey]
-        let rect = rectV?.CGRectValue
-        keyboardHeight = rect!.height
-        
-        //UIView.animateWithDuration(0.25, animations: { ()-> Void in
-            //self.view.center.y -= self.keyboardHeight
-        //})
-    }
-    
-    func keyboardWillBeHidden(notification: NSNotification) {
-       // UIView.animateWithDuration(0.25, animations: { ()-> Void in
-            //self.view.center.y += self.keyboardHeight
-        //})
-    }
-
 }
 
 protocol FeatureCellDelegate: class {
@@ -418,6 +387,10 @@ class FeatureCell: UITableViewCell {
         typeLabel.text = feat.type
         
         let numFormatter = NSNumberFormatter()
+        numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
+        numFormatter.usesSignificantDigits = true
+        numFormatter.maximumSignificantDigits = 3
+        numFormatter.minimumSignificantDigits = 0
         sizeLabel.text = "Height: " + numFormatter.stringFromNumber(feat.height)! + " Width: " + numFormatter.stringFromNumber(feat.width)!
     }
     

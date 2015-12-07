@@ -14,6 +14,38 @@ protocol HistogramCreationDelegate: class {
     func drawHistogram(numBins: Int, features : [FeatureObject], sortedBy : String)
 }
 
+class HistogramData {
+    var managedContext: NSManagedObjectContext!
+    var fetchRequest : NSFetchRequest!
+    var featureCount: Int!
+    private var features : [FeatureObject] = []
+    
+    init() {
+        //set up intitial fetchRequest
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        managedContext = appDelegate.managedObjectContext!
+        fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
+        
+        // Default to current project
+        fetchRequest.predicate = NSPredicate(format: "image.project.name==%@", currentProject.name)
+        
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "type", ascending: true)] // default sorting
+        self.getFeatureCountForCurrentFetchRequest()
+    }
+    
+    func getFeatureCountForCurrentFetchRequest() {
+        featureCount = managedContext.countForFetchRequest(fetchRequest, error: nil)
+    }
+    
+    func getFeatures() -> [FeatureObject] {
+        do {
+            features = (try managedContext.executeFetchRequest(fetchRequest) as? [FeatureObject])!
+        } catch {
+            
+        }
+        return features
+    }
+}
 
 class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
 
@@ -27,18 +59,10 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
 
     var possibleSortingCats = ["Type","Width","Height"]
     var selectedCat = "Type" //Default sorting by type
-    
     var binNum = 1
     
     weak var delegate : HistogramCreationDelegate?
-    
-    var managedContext: NSManagedObjectContext!
-    var fetchRequest : NSFetchRequest!
-    var featureCount: Int!
-    var features : [FeatureObject] = []
-    
-    //global var possibleFeatureTypes = ["Channel","Lobe","Canyon", "Dune","Bar","Levee"]
-
+    var histogramData : HistogramData?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,30 +71,20 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         //set up PickerView
         sortingPickerView.delegate = self
         sortingPickerView.dataSource = self
-                
-        //set up intitial fetchRequest with no sort or predicate
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        managedContext = appDelegate.managedObjectContext!
-        fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
-        fetchRequest.predicate = NSPredicate(format: "image.project.name==%@", currentProject.name)
-        self.getFeatureCountForCurrentFetchRequest()
         
         //set up Slider
-        binNumSlider.maximumValue = Float(featureCount)
+        binNumSlider.maximumValue = Float(histogramData!.featureCount)
         binNumSlider.minimumValue = 1
-        binNumSlider.value  = Float(featureCount)/2
+        binNumSlider.value  = Float(histogramData!.featureCount)/2
         self.sliderValueChanged("")
         self.pickerView(sortingPickerView, didSelectRow: 0, inComponent: 0)
         
-        maxNumBins.text = String(featureCount)
+        maxNumBins.text = String(histogramData!.featureCount)
     }
     
-    func getFeatureCountForCurrentFetchRequest() {
-        featureCount = managedContext.countForFetchRequest(fetchRequest, error: nil)
-    }
     
     override func viewDidAppear(animated: Bool) {
-        if featureCount == 0 {
+        if histogramData!.featureCount == 0 {
             let alert = UIAlertController(title: nil, message: "No feature data available to plot. Features can be defined in the image editor", preferredStyle: .Alert)
             let action = UIAlertAction(title: "OK", style: .Default) { action -> Void in
                 alert.dismissViewControllerAnimated(true, completion: nil)
@@ -80,16 +94,10 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
             self.presentViewController(alert, animated: true, completion: nil)
         }
         
-        generateHistogramButton.enabled = featureCount > 0
+        generateHistogramButton.enabled = histogramData!.featureCount > 0
     }
     
-    func loadFeatures() {
-        do {
-           features = (try managedContext.executeFetchRequest(fetchRequest) as? [FeatureObject])!
-        } catch {
-            
-        }
-    }
+    
     
     //Mark: - UIPickerView Methods
     
@@ -112,7 +120,7 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         selectedCat = possibleSortingCats[row]
         
         //we want the result of the fetch request to be sorted according to the category selected by the user
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercaseString, ascending: true)]
+        histogramData!.fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercaseString, ascending: true)]
         
         if selectedCat.isEqual("Type") {
             binNumSlider.userInteractionEnabled = false
@@ -133,8 +141,8 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         binNumLabel.text = String(binNum)
     }
     
-    @IBAction func genertateHistogramButtonPressed(sender: AnyObject) {
-        loadFeatures()
-        delegate?.drawHistogram(binNum, features: features, sortedBy: selectedCat)
+    @IBAction func generateHistogramButtonPressed(sender: AnyObject) {
+        delegate?.drawHistogram(binNum, features: histogramData!.getFeatures(), sortedBy: selectedCat)
+        dismissViewControllerAnimated(true, completion: nil)
     }
 }

@@ -127,8 +127,49 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         dismissViewControllerAnimated(true, completion: nil)
         
-        self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        askForPictureSize(chosenImage)
     }
+    
+    // Ask to lower potentially the resolution of the image
+    // And perform segue
+    func askForPictureSize(image: UIImage) {
+        if( image.size.width < 1024 || image.size.height < 1024 ) {
+            self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        }
+        
+        let nf = NSNumberFormatter()
+        let message = "The resolution of the image is " +
+            nf.stringFromNumber(image.size.width)! + "x" +
+            nf.stringFromNumber(image.size.height)! + ". You can lower the resolution to simplify digitizing."
+        let alert = UIAlertController(
+            title: "Image Resolution", message: message, preferredStyle: .Alert
+        )
+        let cancelAction: UIAlertAction = UIAlertAction(title: "Actual Size", style: .Cancel) { action -> Void in
+            self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        }
+        alert.addAction(cancelAction)
+        
+        // Minimum image size 1024x1024
+        let scalex = image.size.width/1024.0
+        let scaley = image.size.height/1024.0
+        let scale = min(scalex, scaley)
+        for( var inc = 0 ; inc < Int(scale); ++inc ) {
+            let scaled_width = ceil(image.size.width/(scale - CGFloat(inc)))
+            let scaled_height = ceil(image.size.height/(scale - CGFloat(inc)))
+            let title = nf.stringFromNumber(scaled_width)! + "x" +
+                nf.stringFromNumber(scaled_height)!
+            let nextAction: UIAlertAction = UIAlertAction(title: title, style: .Default) { action -> Void in
+                // Resize image
+                self.image = DetailedImageObject.resizeImage(image, newSize: CGSize(width: scaled_width, height: scaled_height))
+                self.imageInfo.xDimension = Int(scaled_width)
+                self.imageInfo.yDimension = Int(scaled_height)
+                self.performSegueWithIdentifier("toDrawingView", sender: nil)
+            }
+            alert.addAction(nextAction)
+        }
+        self.presentViewController(alert, animated: true, completion: nil)
+    }
+
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController) {
         dismissViewControllerAnimated(true, completion: nil)
