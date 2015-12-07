@@ -18,6 +18,7 @@ class HistogramData {
     var managedContext: NSManagedObjectContext!
     var fetchRequest : NSFetchRequest!
     var featureCount: Int!
+    var selectedCat = "Type" //Default sorting by type
     private var features : [FeatureObject] = []
     
     init() {
@@ -34,6 +35,7 @@ class HistogramData {
     }
     
     func getFeatureCountForCurrentFetchRequest() {
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercaseString, ascending: true)]
         featureCount = managedContext.countForFetchRequest(fetchRequest, error: nil)
     }
     
@@ -58,7 +60,6 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     @IBOutlet weak var sortingPickerView: UIPickerView!
 
     var possibleSortingCats = ["Type","Width","Height"]
-    var selectedCat = "Type" //Default sorting by type
     var binNum = 1
     
     weak var delegate : HistogramCreationDelegate?
@@ -66,18 +67,20 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = UIColor.lightGrayColor()
+        //self.view.backgroundColor = UIColor.lightGrayColor()
         
         //set up PickerView
+        let rowIndex = possibleSortingCats.indexOf(histogramData!.selectedCat)!
         sortingPickerView.delegate = self
         sortingPickerView.dataSource = self
+        sortingPickerView.selectRow(rowIndex, inComponent: 0, animated: false)
         
         //set up Slider
         binNumSlider.maximumValue = Float(histogramData!.featureCount)
         binNumSlider.minimumValue = 1
         binNumSlider.value  = Float(histogramData!.featureCount)/2
         self.sliderValueChanged("")
-        self.pickerView(sortingPickerView, didSelectRow: 0, inComponent: 0)
+        self.pickerView(sortingPickerView, didSelectRow: rowIndex,inComponent: 0)
         
         maxNumBins.text = String(histogramData!.featureCount)
     }
@@ -117,20 +120,19 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     }
     
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        selectedCat = possibleSortingCats[row]
+        histogramData!.selectedCat = possibleSortingCats[row]
         
         //we want the result of the fetch request to be sorted according to the category selected by the user
-        histogramData!.fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercaseString, ascending: true)]
         
-        if selectedCat.isEqual("Type") {
-            binNumSlider.userInteractionEnabled = false
+        if histogramData!.selectedCat.isEqual("Type") {
+            binNumSlider.enabled = false
             binNumLabel.text = String(possibleFeatureTypes.count) + "\n set by # of possible feature types" //second line isn't currently visible, TODO: investigate better location? or different message
             binNum = possibleFeatureTypes.count
             binNumSlider.value = Float(binNum)
         } else {
             binNum = Int(round(binNumSlider.value))
             binNumLabel.text = String(binNum)
-            binNumSlider.userInteractionEnabled = true
+            binNumSlider.enabled = true
 
         }
     }
@@ -142,7 +144,9 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     }
     
     @IBAction func generateHistogramButtonPressed(sender: AnyObject) {
-        delegate?.drawHistogram(binNum, features: histogramData!.getFeatures(), sortedBy: selectedCat)
+        delegate?.drawHistogram(
+            binNum, features: histogramData!.getFeatures(), sortedBy: histogramData!.selectedCat
+        )
         dismissViewControllerAnimated(true, completion: nil)
     }
 }
