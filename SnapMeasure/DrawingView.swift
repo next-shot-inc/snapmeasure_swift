@@ -201,8 +201,7 @@ class LineView : UIView {
     var measure = [CGPoint]()
     var refMeasurePoints = [CGPoint]()
     var currentMeasure : Float = 0.0
-    private var _currentLine = Line()
-    var refMeasureValue : Float = 0.0
+        var refMeasureValue : Float = 0.0
     var tool = LineViewTool()
     var polygons : Polygons?
     var drawPolygon = false
@@ -219,13 +218,16 @@ class LineView : UIView {
     override class func layerClass() -> AnyClass {
         return CATiledLayer.self
     }
-    
+
+    /*
+    // Handle thread safety for currentLine
+    private var _currentLine = Line()
+    private let queue = dispatch_queue_create("...", nil)
     func with(queue: dispatch_queue_t, f: Void->Void) {
         dispatch_sync(queue, f)
     }
     
-    // Handle thread safety for currentLine
-    private let queue = dispatch_queue_create("...", nil)
+    
     var currentLine : Line {
         get {
             var result : Line?
@@ -240,6 +242,8 @@ class LineView : UIView {
             }
         }
     }
+    */
+    var currentLine = Line()
     
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
@@ -1097,8 +1101,8 @@ class DrawingView : UIImageView {
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
        let touch = touches.first
        let point = touch!.locationInView(self)
-    
-        if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
+        
+       if( drawMode != ToolMode.Facies && drawMode != ToolMode.Text &&
             drawMode != ToolMode.DipMarker
         ) {
             lineView.currentLine = Line()
@@ -1196,13 +1200,16 @@ class DrawingView : UIImageView {
                 lineView.measure.append(lineView.currentLine.points[lineView.currentLine.points.count-1])
             }
         } else if( drawMode == ToolMode.Draw) {
-            lineView.currentLine.color = curColor
-            lineView.currentLine.name = lineView.tool.lineName
-            lineView.currentLine.role = LineViewTool.role(lineView.tool.lineType)
-            lineView.currentLine.cleanOrientation()
-            lineView.add(lineView.currentLine)
-            lineView.computePolygon()
-            controller!.hasChanges = true
+            // Avoid wrong digitizing with doubleTap event
+            if( lineView.currentLine.points.count > 2 ) {
+                lineView.currentLine.color = curColor
+                lineView.currentLine.name = lineView.tool.lineName
+                lineView.currentLine.role = LineViewTool.role(lineView.tool.lineType)
+                lineView.currentLine.cleanOrientation()
+                lineView.add(lineView.currentLine)
+                lineView.computePolygon()
+                controller!.hasChanges = true
+            }
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)
             if( lineView.currentLine.points.count >= 2 ) {

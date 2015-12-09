@@ -492,8 +492,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     func centerScrollViewContents() {
         let boundsSize = self.scrollView.bounds.size
-        //var contentsFrame = self.imageView.frame
-        var contentsFrame = self.tilingView!.frame
+        var contentsFrame = self.imageView.frame
+        //var contentsFrame = self.tilingView!.frame
         
         if (contentsFrame.size.width < boundsSize.width) {
             contentsFrame.origin.x = (boundsSize.width - contentsFrame.size.width) / 2.0;
@@ -572,7 +572,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         }
         
         self.scrollView.zoomScale = scaleToFit;
-        self.centerScrollViewContents()
+        //self.centerScrollViewContents()
+        
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.zoomScale = scaleToFit
+        drawingView.lineView.setNeedsDisplay()
     }
     
     func askText(label: UILabel) {

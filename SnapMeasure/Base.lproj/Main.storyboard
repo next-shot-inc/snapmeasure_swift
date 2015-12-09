@@ -1341,19 +1341,19 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="ProjectLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O7V-N1-XkW">
-                                <rect key="frame" x="150" y="68" width="96" height="21"/>
+                                <rect key="frame" x="116" y="68" width="96" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Name:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HPC-Wc-It6">
-                                <rect key="frame" x="74" y="110" width="55" height="21"/>
+                                <rect key="frame" x="40" y="110" width="55" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="bezel" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Zu6-Od-2WU">
-                                <rect key="frame" x="150" y="109" width="150" height="22"/>
+                                <rect key="frame" x="116" y="109" width="150" height="22"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="150" id="ugR-N7-1A8"/>
                                 </constraints>
@@ -1389,7 +1389,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="AjS-2V-zKI">
-                                <rect key="frame" x="276" y="64" width="31" height="30"/>
+                                <rect key="frame" x="242" y="64" width="31" height="30"/>
                                 <state key="normal" title="New">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -1398,7 +1398,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Xpd-hf-ghF">
-                                <rect key="frame" x="346" y="64" width="44" height="30"/>
+                                <rect key="frame" x="303" y="64" width="44" height="30"/>
                                 <state key="normal" title="Select">
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -1407,7 +1407,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Project:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fjB-0z-iAX">
-                                <rect key="frame" x="74" y="68" width="59" height="21"/>
+                                <rect key="frame" x="40" y="68" width="59" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -1501,7 +1501,7 @@
                             <constraint firstItem="wGf-D2-DVG" firstAttribute="leading" secondItem="t2F-33-ZF1" secondAttribute="leading" id="3gN-6h-iJy"/>
                             <constraint firstItem="O7V-N1-XkW" firstAttribute="leading" secondItem="Zu6-Od-2WU" secondAttribute="leading" id="8ZJ-gL-HBB"/>
                             <constraint firstItem="nCv-H8-r1N" firstAttribute="width" secondItem="wGf-D2-DVG" secondAttribute="width" id="9Mw-wX-RRk"/>
-                            <constraint firstItem="Xpd-hf-ghF" firstAttribute="leading" secondItem="AjS-2V-zKI" secondAttribute="trailing" constant="39" id="9mg-Ea-LpP"/>
+                            <constraint firstItem="Xpd-hf-ghF" firstAttribute="leading" secondItem="AjS-2V-zKI" secondAttribute="trailing" constant="30" id="9mg-Ea-LpP"/>
                             <constraint firstItem="t2F-33-ZF1" firstAttribute="leading" secondItem="LsB-C5-Uzn" secondAttribute="leading" id="9p4-gf-8Rc"/>
                             <constraint firstItem="LsB-C5-Uzn" firstAttribute="leading" secondItem="org-Na-437" secondAttribute="leadingMargin" constant="20" id="A2h-qe-YbM"/>
                             <constraint firstAttribute="trailingMargin" secondItem="AjL-HC-CuN" secondAttribute="trailing" id="CIf-ge-qe5"/>
@@ -1520,7 +1520,7 @@
                             <constraint firstItem="AjL-HC-CuN" firstAttribute="top" secondItem="nCv-H8-r1N" secondAttribute="bottom" id="WsX-76-HTq"/>
                             <constraint firstItem="Zu6-Od-2WU" firstAttribute="leading" secondItem="HPC-Wc-It6" secondAttribute="trailing" constant="21" id="XCx-pV-rlf"/>
                             <constraint firstItem="nCv-H8-r1N" firstAttribute="centerX" secondItem="LsB-C5-Uzn" secondAttribute="centerX" id="Yd7-gL-wLF"/>
-                            <constraint firstItem="fjB-0z-iAX" firstAttribute="leading" secondItem="org-Na-437" secondAttribute="leadingMargin" constant="54" id="aCi-Kz-IdZ"/>
+                            <constraint firstItem="fjB-0z-iAX" firstAttribute="leading" secondItem="org-Na-437" secondAttribute="leadingMargin" constant="20" id="aCi-Kz-IdZ"/>
                             <constraint firstItem="t2F-33-ZF1" firstAttribute="leading" secondItem="org-Na-437" secondAttribute="leadingMargin" constant="100" id="bIY-57-ADg"/>
                             <constraint firstAttribute="centerX" secondItem="nCv-H8-r1N" secondAttribute="centerX" id="bjG-kz-Bh9"/>
                             <constraint firstItem="nCv-H8-r1N" firstAttribute="baseline" secondItem="wGf-D2-DVG" secondAttribute="baseline" id="gBk-pl-834"/>
