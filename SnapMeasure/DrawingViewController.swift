@@ -28,6 +28,18 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         colorButton!.backgroundColor =
             UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
         drawingView?.curColor = (colorButton!.backgroundColor?.CGColor)!
+        
+        // Change current line (per Value)
+        for (index, line) in drawingView!.lineView.lines.enumerate() {
+            if( line.name == drawingView?.lineView.tool.lineName ) {
+                var changedLine = line
+                changedLine.color = (drawingView?.curColor)!
+                drawingView!.lineView.lines.removeAtIndex(index)
+                drawingView!.lineView.lines.insert(changedLine, atIndex: index)
+                drawingView?.lineView.setNeedsDisplay()
+                break
+            }
+        }
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -77,6 +89,18 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
         typeButton?.setTitle(horizonTypes[row], forState: UIControlState.Normal)
         drawingView?.lineView.tool.lineType = horizonTypes[row]
+        
+        // Change current line (per Value)
+        for (index, line) in drawingView!.lineView.lines.enumerate() {
+            if( line.name == drawingView?.lineView.tool.lineName ) {
+                var changedLine = line
+                changedLine.role = LineViewTool.role(horizonTypes[row])
+                drawingView!.lineView.lines.removeAtIndex(index)
+                drawingView!.lineView.lines.insert(changedLine, atIndex: index)
+                drawingView?.lineView.setNeedsDisplay()
+                break
+            }
+        }
     }
     
     func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
@@ -475,6 +499,23 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
+        if( textField === lineNameTextField ) {
+            let drawingView = imageView as! DrawingView
+            let oldName = drawingView.lineView.tool.lineName
+            drawingView.lineView.tool.lineName = lineNameTextField.text!
+            
+            // Change current line (per Value)
+            for (index, line) in drawingView.lineView.lines.enumerate() {
+                if( line.name == oldName ) {
+                    var changedLine = line
+                    changedLine.name = lineNameTextField.text!
+                    drawingView.lineView.lines.removeAtIndex(index)
+                    drawingView.lineView.lines.insert(changedLine, atIndex: index)
+                    drawingView.lineView.setNeedsDisplay()
+                    break
+                }
+            }
+        }
     }
     
     //Mark: UIScrollViewDelegate Methods
@@ -949,10 +990,10 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.lineView.setNeedsDisplay()
     }
     
-    @IBAction func editSelectToggleButtonPressed(sender: UIButton) {
-        sender.selected = !sender.selected
+    @IBAction func editSelectSegmentedControllerChanged(sender: UISegmentedControl) {
+        
         let drawingView = imageView as! DrawingView
-        if( sender.selected ) {
+        if( sender.selectedSegmentIndex == 1 ) {
             drawingView.drawMode = DrawingView.ToolMode.Select
         } else {
             drawingView.drawMode = DrawingView.ToolMode.Draw

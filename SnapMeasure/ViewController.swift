@@ -13,7 +13,7 @@ import CoreData
 var projects : [ProjectObject] = []
 var currentProject : ProjectObject!
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UITextFieldDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     let picker = UIImagePickerController()
     var image :  UIImage?
     var imageInfo = ImageInfo()
@@ -260,34 +260,26 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     @IBAction func newProjectButtonTapped(sender: UIButton) {
-        menuController = PopupMenuController()
-        menuController!.initCellContents(1, cols: 1)
+        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .Alert)
+        alertController.addTextFieldWithConfigurationHandler { (textField: UITextField) -> Void in
+            textField.placeholder = "New Project"
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default, handler: {
+            (action : UIAlertAction!) -> Void in
+        })
+        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: {
+            alert -> Void in
+            
+            let firstTextField = alertController.textFields![0] as UITextField
+            self.setNewProject(firstTextField)
+        })
         
-        let width : CGFloat = sender.frame.width+20
-        let height : CGFloat = 45
-        
-        let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
-        textFeild.placeholder = "New Project"
-        textFeild.delegate = self
-        textFeild.becomeFirstResponder()
-        
-        menuController!.cellContents[0][0] = textFeild
-        
-        //set up menu Controller
-        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
-        menuController!.preferredContentSize.width = width
-        menuController!.tableView.rowHeight = height
-        menuController!.preferredContentSize.height = menuController!.preferredHeight()
-        menuController!.popoverPresentationController?.sourceRect = sender.bounds
-        menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left //will use a different direction if it can't be to the left
-        
-        self.presentViewController(menuController!, animated: true, completion: nil)
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        self.presentViewController(alertController, animated: false, completion: nil)
     }
     
-    //Mark: - UITextFeildDelegateMethods
-    
-    func textFieldDidEndEditing(textField: UITextField) {
+    func setNewProject(textField: UITextField) {
         let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
             inManagedObjectContext: managedContext!) as! ProjectObject
         if textField.text == "" {
@@ -306,13 +298,6 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
         projectNameLabel.text = currentProject.name
-        menuController!.dismissViewControllerAnimated(true, completion: nil)
-
-    }
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
     }
     
     @IBAction func loadProjectButtonTapped(sender: UIButton) {
@@ -333,9 +318,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         //set up menu Controller
         menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
-        menuController!.preferredContentSize.width = width
+        //menuController!.preferredContentSize.width = width
         menuController!.tableView.rowHeight = height
-        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        //menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
         menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left

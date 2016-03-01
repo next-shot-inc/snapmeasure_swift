@@ -201,7 +201,7 @@ class LineView : UIView {
     var measure = [CGPoint]()
     var refMeasurePoints = [CGPoint]()
     var currentMeasure : Float = 0.0
-        var refMeasureValue : Float = 0.0
+    var refMeasureValue : Float = 0.0
     var tool = LineViewTool()
     var polygons : Polygons?
     var drawPolygon = false

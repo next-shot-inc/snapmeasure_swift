@@ -11,7 +11,7 @@ import UIKit
 import CoreData
 
 
-class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, FeatureCellDelegate {
+class SavePopoverViewController: UIViewController, UITableViewDataSource, FeatureCellDelegate {
     var drawingVC : DrawingViewController?
     var menuController : PopupMenuController?
     var features : [FeatureObject] = []
@@ -48,61 +48,45 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
     }
     
     @IBAction func newProjectButtonPressed(sender: UIButton) {
-        menuController = PopupMenuController()
-        menuController!.initCellContents(1, cols: 1)
-        
-        let width : CGFloat = 100
-        let height : CGFloat = 45
-        
-        let textField = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
-        textField.placeholder = "New Project"
-        textField.delegate = self
-        textField.tag = 1
-        textField.becomeFirstResponder()
-        
-        menuController!.cellContents[0][0] = textField
-        
-        //set up menu Controller
-        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
-        menuController!.preferredContentSize.width = width
-        menuController!.tableView.rowHeight = height
-        menuController!.preferredContentSize.height = menuController!.preferredHeight()
-        menuController!.popoverPresentationController?.sourceRect = sender.bounds
-        menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up //will use a different direction if it can't be to the left
-        
-        self.presentViewController(menuController!, animated: true, completion: nil)
-    }
-    
-    //Mark: - UITextFieldDelegateMethods
-    
-    func textFieldDidEndEditing(textField: UITextField) {
-        if textField.tag == 1 { //new project textfeild
-            let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
-                inManagedObjectContext: drawingVC!.managedContext!) as! ProjectObject
-            if textField.text == "" {
-                project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
-            } else {
-                project.name = textField.text!
-            }
-            project.date = NSDate()
-            currentProject = project
-            projects.append(project)
-            
-            do {
-                try drawingVC!.managedContext!.save()
-            } catch let error as NSError {
-                print(error)
-            }
-            
-            projectNameLabel.text = currentProject.name
-            menuController!.dismissViewControllerAnimated(true, completion: nil)
+        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .Alert)
+        alertController.addTextFieldWithConfigurationHandler { (textField: UITextField) -> Void in
+            textField.placeholder = "New Project"
         }
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default, handler: {
+            (action : UIAlertAction!) -> Void in
+        })
+        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: {
+            alert -> Void in
+            
+            let firstTextField = alertController.textFields![0] as UITextField
+            self.setNewProject(firstTextField)
+        })
+
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        self.presentViewController(alertController, animated: false, completion: nil)
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
+    func setNewProject(textField: UITextField) {
+        let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
+            inManagedObjectContext: drawingVC!.managedContext!) as! ProjectObject
+        if textField.text == "" {
+            project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
+        } else {
+            project.name = textField.text!
+        }
+        project.date = NSDate()
+        currentProject = project
+        projects.append(project)
+        
+        do {
+            try drawingVC!.managedContext!.save()
+        } catch let error as NSError {
+            print(error)
+        }
+        
+        projectNameLabel.text = currentProject.name
+        
     }
     
     @IBAction func loadProjectButtonPressed(sender: UIButton) {
@@ -130,9 +114,9 @@ class SavePopoverViewController: UIViewController, UITextFieldDelegate, UITableV
         
         //set up menu Controller
         menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
-        menuController!.preferredContentSize.width = width
+        //menuController!.preferredContentSize.width = width
         menuController!.tableView.rowHeight = height
-        menuController!.preferredContentSize.height = menuController!.preferredHeight()
+        //menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
         menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up

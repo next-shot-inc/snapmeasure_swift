@@ -24,6 +24,8 @@
 		2F682F681B1F6169002C1BA7 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F671B1F6169002C1BA7 /* Feature.swift */; };
 		2F682F6A1B1F616A002C1BA7 /* DetailedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F691B1F616A002C1BA7 /* DetailedImage.swift */; };
 		2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F682F6B1B1F616A002C1BA7 /* Line.swift */; };
+		2F8E30381C84E32B00C99FA2 /* DocumentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F8E30371C84E32B00C99FA2 /* DocumentationController.swift */; };
+		2F8E303E1C85147200C99FA2 /* help in Resources */ = {isa = PBXBuildFile; fileRef = 2F8E303D1C85147200C99FA2 /* help */; };
 		2FCD8F951B4ACFA0009F6E07 /* DipMeterPointObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */; };
 		2FCDF11E1B3086A4004308D6 /* TextObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11D1B3086A4004308D6 /* TextObject.swift */; };
 		2FCDF1201B30A41E004308D6 /* FaciesPixmapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */; };
@@ -77,6 +79,8 @@
 		2F682F671B1F6169002C1BA7 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Feature.swift; path = ../Feature.swift; sourceTree = "<group>"; };
 		2F682F691B1F616A002C1BA7 /* DetailedImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DetailedImage.swift; path = ../DetailedImage.swift; sourceTree = "<group>"; };
 		2F682F6B1B1F616A002C1BA7 /* Line.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Line.swift; path = ../Line.swift; sourceTree = "<group>"; };
+		2F8E30371C84E32B00C99FA2 /* DocumentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentationController.swift; sourceTree = "<group>"; };
+		2F8E303D1C85147200C99FA2 /* help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = help; sourceTree = "<group>"; };
 		2FCD8F941B4ACFA0009F6E07 /* DipMeterPointObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DipMeterPointObject.swift; sourceTree = "<group>"; };
 		2FCDF11D1B3086A4004308D6 /* TextObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObject.swift; sourceTree = "<group>"; };
 		2FCDF11F1B30A41E004308D6 /* FaciesPixmapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FaciesPixmapViewController.swift; sourceTree = "<group>"; };
@@ -159,6 +163,8 @@
 				FD19C5511B38AB66008B2D02 /* HistogramMasterViewController.swift */,
 				FD19C5531B38AB76008B2D02 /* HistogramDetailViewController.swift */,
 				2F1286791B0E3A150095D500 /* Main.storyboard */,
+				2F8E303D1C85147200C99FA2 /* help */,
+				2F8E30371C84E32B00C99FA2 /* DocumentationController.swift */,
 				2F682F5F1B1CAB87002C1BA7 /* boundaryrep.swift */,
 				2F682F6B1B1F616A002C1BA7 /* Line.swift */,
 				FD335FD51B4DCC650075E3B8 /* ProjectObject.swift */,
@@ -287,6 +293,7 @@
 				2F12867B1B0E3A150095D500 /* Main.storyboard in Resources */,
 				2F1286801B0E3A150095D500 /* LaunchScreen.xib in Resources */,
 				2F12867D1B0E3A150095D500 /* Images.xcassets in Resources */,
+				2F8E303E1C85147200C99FA2 /* help in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -327,6 +334,7 @@
 				2F1286961B0E3BFF0095D500 /* CameraViewController.swift in Sources */,
 				2F682F6C1B1F616A002C1BA7 /* Line.swift in Sources */,
 				FD89543B1B33433D006D78B2 /* PopupMenuController.swift in Sources */,
+				2F8E30381C84E32B00C99FA2 /* DocumentationController.swift in Sources */,
 				FD335FD21B4DA8000075E3B8 /* SavePopoverViewController.swift in Sources */,
 				FD4A71531B27527C00AD51B4 /* ImageAnnotation.swift in Sources */,
 				2F1286761B0E3A150095D500 /* SnapMeasure.xcdatamodeld in Sources */,
