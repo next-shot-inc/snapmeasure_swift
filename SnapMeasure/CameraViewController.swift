@@ -12,7 +12,7 @@ import AVFoundation
 import ImageIO
 import CoreLocation
 
-let CapturingStillImageContext = UnsafeMutablePointer<Void>()
+let CapturingStillImageContext = UnsafeMutablePointer<Void>(nil)
 
 struct ImageInfo {
     var focalLength : Float = 0.0
@@ -220,12 +220,12 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         }
         
         // Add a single tap gesture to focus on the point tapped, then lock focus
-        let singleTap = UITapGestureRecognizer(target: self, action: "focusAndExposeTap:")
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(CameraViewController.focusAndExposeTap(_:)))
         singleTap.numberOfTapsRequired = 1
         previewView.addGestureRecognizer(singleTap)
         
         // Add a double tap gesture to reset the focus mode to continuous auto focus
-        let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTaptoContinuouslyAutofocus:")
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(CameraViewController.doubleTaptoContinuouslyAutofocus(_:)))
         doubleTap.numberOfTapsRequired = 2
         singleTap.requireGestureRecognizerToFail(doubleTap)
         previewView.addGestureRecognizer(doubleTap)
@@ -288,6 +288,9 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
 
     
     @IBAction func takePhoto(sender: AnyObject) {
+        if( stillImageOutput == nil ) {
+            return
+        }
         if let videoConnection = stillImageOutput!.connectionWithMediaType(AVMediaTypeVideo) {
             videoConnection.videoOrientation = AVCaptureVideoOrientation.Portrait
             stillImageOutput?.captureStillImageAsynchronouslyFromConnection(videoConnection, completionHandler: {(sampleBuffer, error) in
@@ -436,7 +439,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
             NSNotificationCenter.defaultCenter().removeObserver(self, name:AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
             CameraViewController.setFlashMode(AVCaptureFlashMode.Auto, forDevice: videoDevice)
             
-            NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
+            NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange(_:)), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: currentVideoDevice)
             self.captureSession!.addInput(input)
             self.videoDeviceInput = input
             
@@ -678,7 +681,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     func addNotificationObservers() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "subjectAreaDidChange:", name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange(_:)), name: AVCaptureDeviceSubjectAreaDidChangeNotification, object: self.videoDeviceInput?.device)
         self.addObserver(self, forKeyPath: "stillImageOutput.capturingStillImage", options: NSKeyValueObservingOptions.New, context: CapturingStillImageContext)
     }
     
@@ -714,7 +717,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         let scalex = image.size.width/1024.0
         let scaley = image.size.height/1024.0
         let scale = min(scalex, scaley)
-        for( var inc = 0 ; inc < Int(scale); ++inc ) {
+        for inc in 0 ..< Int(scale) {
             let scaled_width = ceil(image.size.width/(scale - CGFloat(inc)))
             let scaled_height = ceil(image.size.height/(scale - CGFloat(inc)))
             let title = nf.stringFromNumber(scaled_width)! + "x" +

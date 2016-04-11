@@ -20,17 +20,31 @@ struct Line {
     var color = UIColor.blackColor().CGColor
     var role : Role = Role.Horizon
     
-    mutating func merge(line: Line) {
+    mutating func merge(line: Line) -> Bool {
         var points0 = points
         var points1 = line.points
         
+        if( points1.count < 1 ) {
+            return false
+        }
+        if( points0.count < 1 ) {
+            return false
+        }
+        if( points1[0].x > points0[points0.count-1].x ) {
+            // If new line is all after the last point -> separate line
+            return false
+        } else if( points1[points1.count-1].x < points0[0].x ) {
+            // If new line is all before the first point -> separate line
+            return false
+        }
+        
         var newPoints = [CGPoint]()
         var inserted = false
-        for var i=0; i < points0.count; i++ {
+        for i in 0 ..< points0.count {
             if( points0[i].x > points1[0].x ) {
                 // insert new points
                 if( !inserted ) {
-                    for( var j=0 ; j < points1.count; j++ ) {
+                    for j in 0 ..< points1.count {
                         newPoints.append(points1[j])
                     }
                     inserted = true
@@ -42,6 +56,7 @@ struct Line {
             }
         }
         points = newPoints
+        return true
     }
     
     mutating func cleanOrientation() {
@@ -67,7 +82,7 @@ struct Line {
     }
     
     func intersectBox(rect: CGRect) -> Bool {
-        for var i=0; i < points.count-1; ++i {
+        for i in 0 ..< points.count-1 {
             if( segmentIntersectRectangle(rect, p1: points[i], p2: points[i+1])) {
                 return true
             }
@@ -219,14 +234,12 @@ class LineView : UIView {
         return CATiledLayer.self
     }
 
-    /*
     // Handle thread safety for currentLine
     private var _currentLine = Line()
     private let queue = dispatch_queue_create("...", nil)
     func with(queue: dispatch_queue_t, f: Void->Void) {
         dispatch_sync(queue, f)
     }
-    
     
     var currentLine : Line {
         get {
@@ -242,8 +255,7 @@ class LineView : UIView {
             }
         }
     }
-    */
-    var currentLine = Line()
+    //var currentLine = Line()
     
     override func drawRect(rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
@@ -255,8 +267,8 @@ class LineView : UIView {
         // Draw digitized lines
         for line in lines {
             CGContextSetStrokeColorWithColor(context, line.color)
-            CGContextMoveToPoint (context, line.points[0].x, line.points[0].y);
-            for ( var k = 1; k < line.points.count; k++) {
+            CGContextMoveToPoint (context, line.points[0].x, line.points[0].y)
+            for k in 1 ..< line.points.count {
                 CGContextAddLineToPoint (context, line.points[k].x, line.points[k].y);
             }
             CGContextStrokePath(context)
@@ -278,20 +290,20 @@ class LineView : UIView {
                 var first = true
                 for l in p.lines  {
                     if( l.reverse ) {
-                        for( var k=l.line.points.count-1; k >= 0 ; k-- ) {
+                        for p in l.line.points.reverse() {
                             if( first ) {
-                                CGContextMoveToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                                CGContextMoveToPoint (context, p.x, p.y)
                                 first = false
                             }
-                            CGContextAddLineToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                            CGContextAddLineToPoint (context, p.x, p.y)
                         }
                     } else {
-                        for( var k=0; k < l.line.points.count; k++ ) {
+                        for p in l.line.points {
                             if( first ) {
-                                CGContextMoveToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                                CGContextMoveToPoint (context, p.x, p.y)
                                 first = false
                             }
-                            CGContextAddLineToPoint (context, l.line.points[k].x, l.line.points[k].y)
+                            CGContextAddLineToPoint (context, p.x, p.y)
                         }
                     }
                 }
@@ -300,14 +312,14 @@ class LineView : UIView {
         }
         
         // Draw line being drawn
-        let curLine = currentLine
+        let curLine = currentLine // Copy for multi-threaded
         if( curLine.points.count > 2 ) {
             CGContextSetStrokeColorWithColor(context, UIColor.blackColor().CGColor)
             // Draw as dash line
             let dashes:[CGFloat] = [6, 2]
             CGContextSetLineDash(context, 0, dashes, 2)
             CGContextMoveToPoint (context, curLine.points[0].x, curLine.points[0].y);
-            for ( var k = 1; k < curLine.points.count; k++) {
+            for k in 1 ..< curLine.points.count {
                 CGContextAddLineToPoint (context, curLine.points[k].x, curLine.points[k].y);
             }
             CGContextStrokePath(context)
@@ -385,23 +397,29 @@ class LineView : UIView {
     
     // Add or merge a new line
     // The merge is done when the name of the new line is the same as the name of an existing line
+    // And when the new portion and the old portion overlaps. 
     func add(line: Line) {
+        if( line.points.count < 2 ) {
+            return
+        }
+        
         // Find if it needs to be merged with an existing line
         for (index,value) in lines.enumerate() {
             if( value.name == line.name ) {
                 var newline = value
                 newline.color = line.color // Take latest color
                 newline.role = line.role // Take latest role
-                newline.merge(line)
-                lines.removeAtIndex(index)
-                lines.insert(newline, atIndex: index)
-                return
+                if( newline.merge(line) ) {
+                   lines.removeAtIndex(index)
+                   lines.insert(newline, atIndex: index)
+                   return
+                }
             }
         }
         // If not an existing line
         // Order the line from top to bottom (y)
         var inserted = false
-        for var i=0; i < lines.count; i++  {
+        for i in 0 ..< lines.count  {
             if( line.points[0].y < lines[i].points[0].y ) {
                 lines.insert(line, atIndex: i)
                 inserted = true
@@ -521,9 +539,9 @@ class FaciesColumn {
         } else if( index == faciesVignettes.count-1 ) {
             faciesVignettes.removeAtIndex(index)
         } else if( index < faciesVignettes.count/2 ) {
-            faciesVignettes.removeRange(Range(start: 0, end: index+1))
+            faciesVignettes.removeRange(0 ... index+1)
         } else {
-            faciesVignettes.removeRange(Range(start: index, end: faciesVignettes.count))
+            faciesVignettes.removeRange(index ..< faciesVignettes.count)
         }
     }
 }
@@ -930,7 +948,7 @@ class DrawingView : UIImageView {
                     count: arrayData.length/sizeof(CGPoint)
                 )
             )
-            for( var i=0; i < array.count; i++ ) {
+            for i in 0 ..< array.count {
                 line.points.append(CGPointApplyAffineTransform(array[i], affineTransform))
             }
             lineView.lines.append(line)
@@ -1046,8 +1064,8 @@ class DrawingView : UIImageView {
             // Concatenate the inverse of the previous transform with the new transform
             caffineTransform = CGAffineTransformConcat(caffineTransform, affineTransform)
             
-            for( var j=0; j < lineView.lines.count; j++ ) {
-                for( var i=0; i < lineView.lines[j].points.count; i++ ) {
+            for j in 0 ..< lineView.lines.count {
+                for i in 0 ..< lineView.lines[j].points.count {
                     lineView.lines[j].points[i] = CGPointApplyAffineTransform(lineView.lines[j].points[i], caffineTransform)
                 }
             }
@@ -1056,20 +1074,20 @@ class DrawingView : UIImageView {
                     fvc.faciesVignettes[index].rect = CGRectApplyAffineTransform(cfv.rect, caffineTransform)
                 }
             }
-            for( var i=0; i < textView.subviews.count; ++i ) {
+            for i in 0 ..< textView.subviews.count {
                 let rect = CGRectApplyAffineTransform(textView.subviews[i].frame, caffineTransform)
                 let fv = textView.subviews[i] 
                 fv.frame = rect
                 textView.setNeedsDisplay()
             }
-            for( var i=0; i < dipMarkerView.points.count; ++i ) {
+            for i in 0 ..< dipMarkerView.points.count {
                 if( dipMarkerView.points[i].loc.x != 0 && dipMarkerView.points[i].loc.y != 0 ) {
                     dipMarkerView.points[i].loc = CGPointApplyAffineTransform(dipMarkerView.points[i].loc, caffineTransform)
                 }
                 dipMarkerView.setNeedsDisplay()
             }
             
-            for( var i=0; i < lineView.refMeasurePoints.count; ++i ) {
+            for i in 0 ..< lineView.refMeasurePoints.count {
                 lineView.refMeasurePoints[i] = CGPointApplyAffineTransform(lineView.refMeasurePoints[i], caffineTransform)
             }
             
@@ -1193,33 +1211,34 @@ class DrawingView : UIImageView {
         let point = touch.locationInView(self)
         lineView.currentLine.points.append(point)
         
+        var curLine = lineView.currentLine // Copy for multi-threaded
         if( drawMode == ToolMode.Measure ) {
             lineView.measure.removeAll(keepCapacity: true)
-            if( lineView.currentLine.points.count >= 2 ) {
-                lineView.measure.append(lineView.currentLine.points[0])
-                lineView.measure.append(lineView.currentLine.points[lineView.currentLine.points.count-1])
+            if( curLine.points.count >= 2 ) {
+                lineView.measure.append(curLine.points[0])
+                lineView.measure.append(curLine.points[curLine.points.count-1])
             }
         } else if( drawMode == ToolMode.Draw) {
             // Avoid wrong digitizing with doubleTap event
-            if( lineView.currentLine.points.count > 2 ) {
-                lineView.currentLine.color = curColor
-                lineView.currentLine.name = lineView.tool.lineName
-                lineView.currentLine.role = LineViewTool.role(lineView.tool.lineType)
-                lineView.currentLine.cleanOrientation()
-                lineView.add(lineView.currentLine)
+            if( curLine.points.count > 2 ) {
+                curLine.color = curColor
+                curLine.name = lineView.tool.lineName
+                curLine.role = LineViewTool.role(lineView.tool.lineType)
+                curLine.cleanOrientation()
+                lineView.add(curLine)
                 lineView.computePolygon()
                 controller!.hasChanges = true
             }
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)
-            if( lineView.currentLine.points.count >= 2 ) {
-                lineView.refMeasurePoints.append(lineView.currentLine.points[0])
-                lineView.refMeasurePoints.append(lineView.currentLine.points[lineView.currentLine.points.count-1])
+            if( curLine.points.count >= 2 ) {
+                lineView.refMeasurePoints.append(curLine.points[0])
+                lineView.refMeasurePoints.append(curLine.points[curLine.points.count-1])
             }
         } else if( drawMode == ToolMode.Erase ) {
-            if( lineView.currentLine.points.count >= 2 ) {
-                let p0 = lineView.currentLine.points[0]
-                let p1 = lineView.currentLine.points[lineView.currentLine.points.count-1]
+            if( curLine.points.count >= 2 ) {
+                let p0 = curLine.points[0]
+                let p1 = curLine.points[curLine.points.count-1]
                 let minX = min(p1.x, p0.x)
                 let minY = min(p1.y, p0.y)
                 let maxX = max(p1.x, p0.x)
@@ -1235,7 +1254,7 @@ class DrawingView : UIImageView {
                         break
                     }
                 }
-                for( var i=0; i < dipMarkerView.points.count; i++ ) {
+                for i in 0 ..< dipMarkerView.points.count {
                     if( rect.contains(dipMarkerView.points[i].loc) ) {
                         dipMarkerView.points.removeAtIndex(i)
                         dipMarkerView.setNeedsDisplay()

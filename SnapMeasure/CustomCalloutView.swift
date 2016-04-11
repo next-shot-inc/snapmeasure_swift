@@ -82,7 +82,7 @@ class CustomCalloutView: UIView {
         
         self.backgroundColor = UIColor.clearColor()
         self.isAccessibilityElement = false;
-        self.containerView.addTarget(self, action: "calloutClicked:" ,forControlEvents: UIControlEvents.TouchUpInside)
+        self.containerView.addTarget(self, action: #selector(CustomCalloutView.calloutClicked(_:)) ,forControlEvents: UIControlEvents.TouchUpInside)
     }
 
     required init(coder aDecoder: NSCoder) {
@@ -91,7 +91,7 @@ class CustomCalloutView: UIView {
     
     func calloutClicked(sender: UIButton) {
         if (self.delegate != nil) {
-            if (self.delegate!.respondsToSelector("calloutViewClicked:")) {
+            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewClicked(_:)))) {
                 self.delegate!.calloutViewClicked!(self)
             }
         }
@@ -407,7 +407,7 @@ class CustomCalloutView: UIView {
         var delay: NSTimeInterval = 0;
         self.popupCancelled = false // reset this before calling our delegate below
         
-        if (self.delegate!.respondsToSelector("calloutView:delayForRepositionWithSize:") && !CGSizeEqualToSize(offset, CGSizeZero)) {
+        if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutView(_:delayForRepositionWithSize:))) && !CGSizeEqualToSize(offset, CGSizeZero)) {
             delay = self.delegate!.calloutView!(self, delayForRepositionWithSize:offset)
         }
         
@@ -441,7 +441,7 @@ class CustomCalloutView: UIView {
         let presenting : Bool = anim.valueForKey("presenting")!.boolValue
     
         if (presenting) {
-            if (self.delegate!.respondsToSelector("calloutViewWillAppear:")) {
+            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewWillAppear(_:)))) {
                 self.delegate!.calloutViewWillAppear!(self)
             }
     
@@ -449,7 +449,7 @@ class CustomCalloutView: UIView {
             self.hidden = false;
         }
         else if (!presenting) {
-            if (self.delegate!.respondsToSelector("calloutViewWillDisappear:")) {
+            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewWillDisappear(_:)))) {
                 self.delegate!.calloutViewWillDisappear!(self)
             }
         }
@@ -459,14 +459,14 @@ class CustomCalloutView: UIView {
         let presenting : Bool = anim.valueForKey("presenting")!.boolValue
     
         if (presenting && finished) {
-            if (self.delegate!.respondsToSelector("calloutViewDidAppear:")) {
+            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewDidAppear(_:)))) {
                 self.delegate!.calloutViewDidAppear!(self)
             }
         } else if (!presenting && finished) {
             self.removeFromParent()
             self.layer.removeAnimationForKey("dismiss")
     
-            if (self.delegate!.respondsToSelector("calloutViewDidDisappear:")) {
+            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewDidDisappear(_:)))) {
                 self.delegate!.calloutViewDidDisappear!(self)
             }
         }

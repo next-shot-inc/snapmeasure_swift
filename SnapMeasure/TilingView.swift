@@ -73,8 +73,8 @@ class TilingView : UIView {
         let firstRow : Int = Int(floorf(Float(CGRectGetMinY(rect) / tileSize.height)));
         let lastRow : Int = Int(floorf(Float((CGRectGetMaxY(rect)-1) / tileSize.height)));
         
-        for (var row = firstRow; row <= lastRow; row++) {
-            for (var col = firstCol; col <= lastCol; col++) {
+        for row in firstRow ... lastRow {
+            for col in firstCol ... lastCol {
                 
                 let tile = tileForScale(scale, row:row, col:col)
                 

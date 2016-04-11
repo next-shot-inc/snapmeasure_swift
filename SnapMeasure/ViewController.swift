@@ -8,12 +8,13 @@
 
 import UIKit
 import CoreData
+import MessageUI
 
 //global data types
 var projects : [ProjectObject] = []
 var currentProject : ProjectObject!
 
-class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MFMailComposeViewControllerDelegate {
     let picker = UIImagePickerController()
     var image :  UIImage?
     var imageInfo = ImageInfo()
@@ -153,7 +154,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let scalex = image.size.width/1024.0
         let scaley = image.size.height/1024.0
         let scale = min(scalex, scaley)
-        for( var inc = 0 ; inc < Int(scale); ++inc ) {
+        for inc in 0 ..< Int(scale) {
             let scaled_width = ceil(image.size.width/(scale - CGFloat(inc)))
             let scaled_height = ceil(image.size.height/(scale - CGFloat(inc)))
             let title = nf.stringFromNumber(scaled_width)! + "x" +
@@ -311,7 +312,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             button.setTitle(projects[i].name, forState: UIControlState.Normal)
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
-            button.addTarget(self, action: "loadProject:", forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(ViewController.loadProject(_:)), forControlEvents: UIControlEvents.TouchUpInside)
             menuController!.cellContents[i][0] = button
 
         }
@@ -337,6 +338,27 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
        
     @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
     
+    }
+    
+    @IBAction func sendMail(sender: UIButton) {
+        if( !MFMailComposeViewController.canSendMail() ) {
+            print("Mail service unavailable")
+            return
+        }
+        
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.setSubject("Issue with .../Suggestion for ...")
+        mailComposer.setToRecipients(["support@next-shot-inc.com"])
+        mailComposer.setMessageBody("Thank you for your feedback - from the development team @next-shot", isHTML: true)
+        mailComposer.mailComposeDelegate = self
+        presentViewController(mailComposer, animated: true, completion: nil)
+    }
+    
+    func mailComposeController(
+        controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?
+    ) {
+        print(result)
+        controller.dismissViewControllerAnimated(true, completion: nil)
     }
 }
 

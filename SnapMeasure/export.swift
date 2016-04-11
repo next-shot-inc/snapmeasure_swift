@@ -254,7 +254,7 @@ class ExportAsShapeFile : Exporter {
             write(fdx, &offset_s, sizeof(CInt))
             write(fdx, &content_length_s, sizeof(CInt))
 
-            recordNumber++
+            recordNumber += 1
             offset += content_length + 4
         }
         
@@ -330,7 +330,7 @@ class ExportAsShapeFile : Exporter {
         var miny : CGFloat = 1000000
         var maxx : CGFloat = -1000000
         var maxy : CGFloat = -1000000
-        for( var i=0; i < array.count; i++ ) {
+        for i in 0 ..< array.count {
             minx = min(array[i].x, minx)
             miny = min(array[i].y, miny)
             maxx = max(array[i].x, maxx)
@@ -393,7 +393,7 @@ class ExportAsShapeFile : Exporter {
         write(fd, &indexPart, sizeof(CInt))
         
         // Array of x,y
-        for( var i=0; i < array.count; i++ ) {
+        for i in 0 ..< array.count {
             let p = zpoint(array[i])
             writeDouble(fd, d: p.x)
             writeDouble(fd, d: p.y)
@@ -405,7 +405,7 @@ class ExportAsShapeFile : Exporter {
         writeDouble(fd, d: bmax.z)
 
         // Array of z.
-        for( var i=0; i < array.count; i++ ) {
+        for i in 0 ..< array.count {
             let p = zpoint(array[i])
             writeDouble(fd, d: p.z)
         }
@@ -525,7 +525,7 @@ class ExportAsGocadFile : Exporter {
                     count: arrayData.length/sizeof(CGPoint)
                 )
             )
-            for( var i=0; i < array.count; i++ ) {
+            for i in 0 ..< array.count {
                 let p = zpoint(array[i])
                 data = ("VRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)
@@ -612,7 +612,8 @@ class ExportAsGocadFile : Exporter {
                 }
                 data = ("PVRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
                 file?.writeData(data!)
-                data = ((vrtx_id++ as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                data = ((vrtx_id as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                vrtx_id += 1
                 file?.writeData(data!)
                 file?.writeData(space!)
                 

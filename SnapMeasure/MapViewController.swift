@@ -202,31 +202,31 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         let mostRecentButton = UIButton(type: UIButtonType.System)
         mostRecentButton.setTitle("Last Day", forState: UIControlState.Normal)
         mostRecentButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        mostRecentButton.addTarget(self, action: "showAnnotationsForLatestDay:", forControlEvents: UIControlEvents.TouchUpInside)
+        mostRecentButton.addTarget(self, action: #selector(MapViewController.showAnnotationsForLatestDay(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[0][0] = mostRecentButton
         
         let lastWeekButton = UIButton(type: UIButtonType.System)
         lastWeekButton.setTitle("Last Week", forState: UIControlState.Normal)
         lastWeekButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        lastWeekButton.addTarget(self, action: "showAnnotationsForLatestWeek", forControlEvents: UIControlEvents.TouchUpInside)
+        lastWeekButton.addTarget(self, action: #selector(MapViewController.showAnnotationsForLatestWeek), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[1][0] = lastWeekButton
         
         let lastMonthButton = UIButton(type: UIButtonType.System)
         lastMonthButton.setTitle("Last Month", forState: UIControlState.Normal)
         lastMonthButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        lastMonthButton.addTarget(self, action: "showAnnotationsForLatestMonth", forControlEvents: UIControlEvents.TouchUpInside)
+        lastMonthButton.addTarget(self, action: #selector(MapViewController.showAnnotationsForLatestMonth), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[2][0] = lastMonthButton
         
         let lastYearButton = UIButton(type: UIButtonType.System)
         lastYearButton.setTitle("Last Year", forState: UIControlState.Normal)
         lastYearButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        lastYearButton.addTarget(self, action: "showAnnotationsForLatestYear", forControlEvents: UIControlEvents.TouchUpInside)
+        lastYearButton.addTarget(self, action: #selector(MapViewController.showAnnotationsForLatestYear), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[3][0] = lastYearButton
 
         let AllButton = UIButton(type: UIButtonType.System)
         AllButton.setTitle("All", forState: UIControlState.Normal)
         AllButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        AllButton.addTarget(self, action: "showAll", forControlEvents: UIControlEvents.TouchUpInside)
+        AllButton.addTarget(self, action: #selector(MapViewController.showAll), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[4][0] = AllButton
         
         let textFeild = UITextField(frame: CGRect(x: 0, y: 0, width: width-10, height: height-10))
@@ -316,19 +316,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         let standardButton = UIButton(type: UIButtonType.System)
         standardButton.setTitle("Standard", forState: UIControlState.Normal)
         standardButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        standardButton.addTarget(self, action: "showStandardMap", forControlEvents: UIControlEvents.TouchUpInside)
+        standardButton.addTarget(self, action: #selector(MapViewController.showStandardMap), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[0][0] = standardButton
         
         let satelliteButton = UIButton(type: UIButtonType.System)
         satelliteButton.setTitle("Satellite", forState: UIControlState.Normal)
         satelliteButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        satelliteButton.addTarget(self, action: "showSatelliteMap", forControlEvents: UIControlEvents.TouchUpInside)
+        satelliteButton.addTarget(self, action: #selector(MapViewController.showSatelliteMap), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[1][0] = satelliteButton
         
         let hybridButton = UIButton(type: UIButtonType.System)
         hybridButton.setTitle("Hybrid", forState: UIControlState.Normal)
         hybridButton.frame = CGRect(x: 0, y: 0, width: width, height: height)
-        hybridButton.addTarget(self, action: "showHybridMap", forControlEvents: UIControlEvents.TouchUpInside)
+        hybridButton.addTarget(self, action: #selector(MapViewController.showHybridMap), forControlEvents: UIControlEvents.TouchUpInside)
         menuController!.cellContents[2][0] = hybridButton
 
         //set up menu Controller
@@ -414,7 +414,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             imageView.setFrameSize(CGSize(width: 133, height: 133 * aspectRatio))
             imageView.contentMode = UIViewContentMode.ScaleToFill
             imageView.userInteractionEnabled = true
-            imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: "calloutImageTapped"))
+            imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(MapViewController.calloutImageTapped)))
             self.calloutView.contentView = imageView
             
             // Apply the MKAnnotationView's desired calloutOffset (from the top-middle of the view)

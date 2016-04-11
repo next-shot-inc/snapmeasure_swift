@@ -26,7 +26,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         
         histogramView.hidden = false
         
-        let doubleTap = UITapGestureRecognizer(target: self, action: "doubleTappedLabel:")
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(HistogramDetailViewController.doubleTappedLabel(_:)))
         doubleTap.numberOfTapsRequired = 2
         titleLabel.addGestureRecognizer(doubleTap)
         
@@ -147,7 +147,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         }
         var maxValue = features[0].width.floatValue
         var minValue = features[0].width.floatValue
-        for var i=1 ; i < features.count; i++  {
+        for i in 1 ..< features.count {
             minValue = min(minValue, features[i].width.floatValue)
             maxValue = max(maxValue, features[i].width.floatValue)
         }
@@ -156,14 +156,14 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
             delta = 1
         }
         let binSize = delta/Float(numBins)
-        for var i = 0; i < features.count; i++  {
+        for i in 0 ..< features.count  {
             var bin = Int(floor((features[i].width.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost
             bin = max(bin,0)
             bin = min(bin, numBins-1)
             barHeights[bin] = barHeights[bin] + 1
         }
         var scale = [Double]()
-        for var k = 0; k <= numBins; k++ {
+        for k in 0 ... numBins {
             scale.append(Double(binSize*Float(k)+minValue))
         }
         
@@ -177,7 +177,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         }
         var maxValue = features[0].height.floatValue
         var minValue = features[0].height.floatValue
-        for var i=1 ; i < features.count; i++  {
+        for i in 1 ..< features.count  {
             minValue = min(minValue, features[i].height.floatValue)
             maxValue = max(maxValue, features[i].height.floatValue)
         }
@@ -186,14 +186,14 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
            delta = 1
         }
         let binSize = delta/Float(numBins)
-        for var i = 0; i < features.count; i++  {
+        for i in 0 ..< features.count  {
             var bin = Int(floor((features[i].height.floatValue-minValue)/binSize)+0.5) //feature belongs in bin if binLeast < f.w <= binMost
             bin = max(bin,0)
             bin = min(bin, numBins-1)
             barHeights[bin] = barHeights[bin] + 1
         }
         var scale = [Double]()
-        for var k = 0; k <= numBins; k++ {
+        for k in  0 ... numBins {
             scale.append(Double(binSize*Float(k)+minValue))
         }
         
@@ -281,7 +281,7 @@ class HistogramView : UIView {
     }
     
     func drawBars(context: CGContext) {
-        for var i = 0; i < barHeights!.count; i++ {
+        for i in 0  ..< barHeights!.count {
             let x1 = xScalePoints![i]
             let x2 = xScalePoints![i+1]
             let y1 = yScalePoints![0]-axisWidth/2
@@ -333,7 +333,7 @@ class HistogramView : UIView {
         numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
         numFormatter.maximumFractionDigits = 0
         yScalePoints!.removeAll(keepCapacity: false)
-        for var i : CGFloat = 0; i <= maxBarHeight; i = i + 1 {
+        for i in 0 ... Int(maxBarHeight!) {
             
             //draw tick mark
             CGContextMoveToPoint(context, x, yPos)
@@ -348,7 +348,7 @@ class HistogramView : UIView {
                 let labelSize = attributedLabel.size()
                 let textRect = CGRect(origin: CGPoint(x: x-tickLength-font.pointSize, y: yPos-labelSize.height/2), size: labelSize)
                 attributedLabel.drawInRect(textRect)
-            } else if (i%(ticksSkipped+1)) == 0 {
+            } else if (CGFloat(i)%(ticksSkipped+1)) == 0 {
                 let label = numFormatter.stringFromNumber(i)!
                 
                 let attributedLabel = NSMutableAttributedString(string: label, attributes: labelAttributes)
@@ -449,7 +449,8 @@ class HistogramView : UIView {
         //draw the Scale
         xScalePoints!.removeAll(keepCapacity: false)
         var i = 0
-        for var xPos = startX; xPos <= endX+dx/2; xPos = xPos+dx {
+        var xPos = startX
+        while ( xPos <= endX+dx/2 )  {
             //draw tick mark
             CGContextMoveToPoint(context, xPos, y)
             CGContextAddLineToPoint(context, xPos, y+tickLength)
@@ -478,7 +479,8 @@ class HistogramView : UIView {
                     
                 }
             }
-            i++
+            i += 1
+            xPos = xPos+dx
         }
         
     }

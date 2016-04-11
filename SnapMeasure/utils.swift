@@ -19,7 +19,7 @@ class Utility {
             string += {
                 let definedHeadingsNames = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
                 let quad = 360/definedHeadingsNames.count
-                for( var i=0; i < definedHeadingsNames.count; ++i) {
+                for i in 0 ..< definedHeadingsNames.count {
                     let dir = i * quad
                     var vmin = dir - quad/2
                     let vmax = dir + quad/2

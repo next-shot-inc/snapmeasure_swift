@@ -67,7 +67,7 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
     
     func selectNextColor(pickerView: UIPickerView) -> UIColor {
         var curColor = pickerView.selectedRowInComponent(0)
-        curColor++
+        curColor += 1
         if( curColor >= count ) {
             // cycle through
             curColor = 0
@@ -292,9 +292,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         faciesCatalog.loadImages()
         
         NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: "keyboardWasShown:", name: UIKeyboardDidShowNotification, object:nil)
+            self, selector: #selector(DrawingViewController.keyboardWasShown(_:)), name: UIKeyboardDidShowNotification, object:nil)
         NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: "keyboardWillBeHidden:", name: UIKeyboardDidHideNotification, object: nil)
+            self, selector: #selector(DrawingViewController.keyboardWillBeHidden(_:)), name: UIKeyboardDidHideNotification, object: nil)
     }
     
     override func didReceiveMemoryWarning() {
@@ -378,16 +378,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         
         referenceSizeContainerView.hidden = true
         //faciesTypeContainerView.hidden = true
-        
-        //from storyboard height = 49 and width = 235
-        let centerX = sender.frame.origin.x + sender.frame.size.width/2
-        let originY = self.view.frameBottom - 100
-        let originX = centerX-235/2
-        if originX < 0 {
-            lineContainerView.frame = CGRect(x: 0, y: originY, width: 235, height: 49)
-        } else {
-            lineContainerView.frame = CGRect(x: originX, y: originY, width: 235, height: 49)
-        }
         
         lineContainerView.hidden = false
         
@@ -647,8 +637,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     }
     
     @IBAction func pushNewLine(sender: AnyObject) {
-        lineNameTextField.text = String("H") +
-                                      String(++DrawingViewController.lineCount)
+        DrawingViewController.lineCount += 1
+        lineNameTextField.text = String("H") + String(DrawingViewController.lineCount)
         
         let drawingView = imageView as! DrawingView
         let color = colorPickerCtrler.selectNextColor(colorPickerView)

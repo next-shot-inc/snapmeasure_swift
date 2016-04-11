@@ -30,7 +30,7 @@ class RadialNode {
             // Sort by computing the angle of the given line with the segment 0.
             let b = lines[0].endSegment()
             let nangle = angle(loc, b: b, c: c)
-            for( var i=1; i < lines.count; i++ ) {
+            for i in 1 ..< lines.count {
                 let ci = lines[i].endSegment()
                 // compute angle of segment i with segment 0,
                 let iangle = angle(loc, b: b, c: ci)
@@ -90,10 +90,14 @@ class OrientedLine : Hashable {
     init(line: Line, reverse: Bool) {
         self.line = line
         self.reverse = reverse
-        self.index = OrientedLine.globalIndex++
+        self.index = OrientedLine.globalIndex
+        OrientedLine.globalIndex += 1
     }
     
     func endSegment() -> CGPoint {
+        if( line.points.count < 2 ) {
+            return line.points[0]
+        }
         if( reverse ) {
             return line.points[line.points.count-2]
         } else {
@@ -119,7 +123,7 @@ class OrientedPolygon {
         var lmin : Line?
         for l in lines {
             if( l.line.role == Line.Role.Horizon || l.line.role == Line.Role.Border ) {
-                for(var i=0; i < l.line.points.count-1; i++ ) {
+                for i in 0 ..< l.line.points.count-1 {
                     let y = (l.line.points[i].y + l.line.points[i+1].y)*0.5
                     if( y < ymin  ) {
                         ymin = y
@@ -153,7 +157,7 @@ class SplitLine {
     
     func add(seg: SplitSegment) {
         // Add the split of the line in order along the line
-        for( var i=0; i < splits.count; i++ ) {
+        for i in 0 ..< splits.count {
             if( seg.index < splits[i].index ) {
                 splits.insert(seg, atIndex: i)
                 return
@@ -188,8 +192,10 @@ class SplitLine {
         curLine.role = line.role
         for split in splits {
             // Append from prev to split location the points
-            for( var i=prev; i <= split.index ; i++ ) {
-                curLine.points.append(line.points[i])
+            if( prev < split.index ) {
+               for i in prev ... split.index {
+                   curLine.points.append(line.points[i])
+               }
             }
             curLine.points.append(split.loc)
             lines.append(curLine)
@@ -204,7 +210,7 @@ class SplitLine {
         }
         
         // Fill last line
-        for( var i=prev; i < line.points.count ; i++ ) {
+        for i in prev ..< line.points.count {
             curLine.points.append(line.points[i])
         }
         lines.append(curLine)
@@ -239,8 +245,8 @@ class Polygons {
     
     init(lines: [Line]) {
         // Compute all intersections and store then in splitLines
-        for( var i=0 ; i < lines.count; i++ ) {
-            for( var j=i+1; j < lines.count; j++ ) {
+        for  i in 0 ..< lines.count {
+            for j in i+1 ..< lines.count {
                 intersect(lines, iline0: i, iline1: j)
             }
         }
@@ -251,6 +257,9 @@ class Polygons {
         for line in splitLines.values {
             let splitted = line.split()
             for nline in splitted {
+                if( nline.points.count <= 1 ) {
+                    continue
+                }
                 // For every piece of geomtric line,create two oppositely oriented lines
                 let o1 = OrientedLine(line: nline, reverse: false)
                 let o2 = OrientedLine(line: nline, reverse: true)
@@ -308,8 +317,8 @@ class Polygons {
     func intersect(lines: [Line], iline0: Int, iline1: Int) {
         let line0 = lines[iline0]
         let line1 = lines[iline1]
-        for( var i=0 ; i < line0.points.count-1; i++ ) {
-            for( var j=0; j < line1.points.count-1; j++ ) {
+        for i in 0 ..< line0.points.count-1 {
+            for j in 0 ..< line1.points.count-1 {
                 let ipoint = Line.segmentsIntersect(
                     line0.points[i], b: line0.points[i+1], c: line1.points[j], d: line1.points[j+1]
                 )

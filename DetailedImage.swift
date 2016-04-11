@@ -62,8 +62,8 @@ class DetailedImageObject: NSManagedObject {
         let tileSize = CGSize(width: 1024,height: 1024)
         let lastCol = Int(floor(CGFloat(imageWidth!.integerValue-1) / tileSize.width))
         let lastRow = Int(floor(CGFloat(imageHeight!.integerValue-1) / tileSize.height))
-        for (var row = 0; row <= lastRow; row++) {
-            for (var col = 0; col <= lastCol; col++) {
+        for  row  in  0 ... lastRow {
+            for col in  0 ... lastCol {
                 let tileName = NSString(format: "%@_%d_%d", imageFile, col, row)
                 let tileUrl = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent(
                     tileName as String
@@ -157,8 +157,8 @@ class DetailedImageObject: NSManagedObject {
         let tileSize = CGSize(width: 1024,height: 1024)
         let lastCol = Int(floor((image.size.width-1) / tileSize.width))
         let lastRow = Int(floor((image.size.height-1) / tileSize.height))
-        for (var row = 0; row <= lastRow; row++) {
-            for (var col = 0; col <= lastCol; col++) {
+        for row in  0 ... lastRow {
+            for col in  0 ... lastCol {
                 let imageArea = CGRectMake(
                     CGFloat(col*1024), CGFloat(row*1024),
                     min(CGFloat(col+1)*1024-1,image.size.width-1) - CGFloat(col*1024),

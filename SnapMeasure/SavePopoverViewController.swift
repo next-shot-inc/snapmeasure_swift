@@ -107,7 +107,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
             button.setTitle(projects[i].name, forState: UIControlState.Normal)
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
-            button.addTarget(self, action: "loadProject:", forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(SavePopoverViewController.loadProject(_:)), forControlEvents: UIControlEvents.TouchUpInside)
             menuController!.cellContents[i][0] = button
             
         }
@@ -244,7 +244,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
             lineObject!.type = LineViewTool.typeName(line.role)
             
             var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
-            for( var i=0; i < line.points.count; ++i ) {
+            for i in 0 ..< line.points.count {
                 points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
             }
             lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
