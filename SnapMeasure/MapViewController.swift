@@ -32,11 +32,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
     override func viewDidLoad() {
         mapView.delegate = self
 
+        // get all images for project
         self.loadImages()
 
         if (detailedImages.count > 0) {
-            
-            self.centerMapOnLocation(detailedImages[0].coordinate!, withRadius: CLLocationDistance(1.0))
+            // Compute the
+            self.centerMapOnLocation()
         
             self.showAll()
         } else {
@@ -130,10 +131,36 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         
     }
     
-    func centerMapOnLocation(coordinate: CLLocationCoordinate2D, withRadius radius: CLLocationDistance) {
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(coordinate,
-            radius * 2.0, radius * 2.0)
-        mapView.setRegion(coordinateRegion, animated: true)
+    func centerMapOnLocation() {
+        var loc : MKMapPoint?
+        for image in detailedImages {
+            if( image.coordinate != nil ) {
+                loc = MKMapPointForCoordinate(image.coordinate!)
+                break
+            }
+        }
+        if( loc == nil ) {
+            return
+        }
+        
+        var minX = loc!.x
+        var minY = loc!.y
+        var maxX = loc!.x
+        var maxY = loc!.y
+        for image in detailedImages {
+            if( image.coordinate != nil ) {
+               loc = MKMapPointForCoordinate(image.coordinate!)
+               minX = min(loc!.x, minX)
+               minY = min(loc!.y, minY)
+               maxX = max(loc!.x, maxX)
+               maxY = max(loc!.y, maxY)
+            }
+        }
+        let size = MKMapSize(width: maxX-minX, height: maxY-minY)
+        let rect = MKMapRect(origin: MKMapPoint(x: minX-size.width*0.1, y: minY-size.height*0.1), size: MKMapSize(width: size.width*1.2, height: size.height*1.2))
+        let loc_rect = MKCoordinateRegionForMapRect(rect)
+        
+        mapView.setRegion(loc_rect, animated: true)
     }
     
     func seeAllAnnotations(annotations: [MKAnnotation]) {
@@ -405,6 +432,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
             //annView.setMapLineViewOrientation(self.mapView.camera.heading)
             
             // apply the MKAnnotationView's basic properties
+            self.calloutView = CustomCalloutView()
+            self.calloutView.delegate = self
+            self.mapView.calloutView = self.calloutView
+            self.selectedImage = nil
             self.calloutView.title = ann.title;
             self.calloutView.subtitle = ann.subtitle;
             
@@ -439,10 +470,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
     
     func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView) {
         self.calloutView.dismissCalloutAnimated(true)
-        //self.calloutView = CustomCalloutView()
-        //self.calloutView.delegate = self
-        //self.mapView.calloutView = self.calloutView
-        //self.selectedImage = nil
+        
         
         if (overlay != nil) {
             mapView.removeOverlay(overlay!)

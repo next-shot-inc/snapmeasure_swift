@@ -21,19 +21,13 @@ class MapLineOverlay: NSObject, MKOverlay {
     init(length: Double, compassOrientation: CLLocationDirection, coordinate: CLLocationCoordinate2D, object_scale: Double) {
         let orientation : Double
         if (compassOrientation < 0) {
-            orientation = 2*M_PI+compassOrientation * M_PI/180;
+            orientation = 2*M_PI+compassOrientation * M_PI/180
         } else {
-            orientation = compassOrientation * M_PI/180;
+            orientation = compassOrientation * M_PI/180
         }
-        let meteredWidth = abs(length*cos(orientation))
-        let meteredHeight = abs(length*sin(orientation))
+    
         let scale = MKMetersPerMapPointAtLatitude(coordinate.latitude)
         
-        let size = MKMapSize(width: meteredWidth/scale, height: meteredHeight/scale)
-        let centerMapPoint = MKMapPointForCoordinate(coordinate)
-        let origin = MKMapPoint(x: centerMapPoint.x-size.width/2, y: centerMapPoint.y-size.height/2)
-        
-        self.boundingMapRect = MKMapRect(origin: origin, size: size)
         self.coordinate = coordinate
         self.mapLength = length/scale
         self.angle = orientation
@@ -42,14 +36,30 @@ class MapLineOverlay: NSObject, MKOverlay {
         // object (mm) = focal length (mm) * real height of the object (mm) * image height (pixels) / (
         // object height (pixels) * sensor height (mm))
         distanceToObject = 3.3 * object_scale * 1000
-        objectCoordinate = MKMapPointForCoordinate(coordinate)
-        objectCoordinate.x += distanceToObject*sin(orientation)/scale
-        objectCoordinate.y -= distanceToObject*cos(orientation)/scale
+        let objc = MKMapPointForCoordinate(coordinate)
+        let dto = distanceToObject/scale
+        let dtx = dto*sin(orientation)
+        let dty = -dto*cos(orientation)
+        objectCoordinate = MKMapPoint(x: objc.x + dtx, y: objc.y + dty)
+        
+        // Compute bounding box of annotation (including the section and the line to the section)
+        let startMapPoint = MKMapPoint(
+            x: objectCoordinate.x+mapLength*cos(angle)/2,
+            y: objectCoordinate.y+mapLength*sin(angle)/2
+        )
+        let endMapPoint = MKMapPoint(
+            x: objectCoordinate.x-mapLength*cos(angle)/2,
+            y: objectCoordinate.y-mapLength*sin(angle)/2
+        )
+        let minx = min(objc.x, startMapPoint.x, endMapPoint.x)
+        let miny = min(objc.y, startMapPoint.y, endMapPoint.y)
+        let maxx = max(objc.x, startMapPoint.x, endMapPoint.x)
+        let maxy = max(objc.y, startMapPoint.y, endMapPoint.y)
+        self.boundingMapRect = MKMapRect(origin: MKMapPoint(x: minx, y: miny), size: MKMapSize(width: maxx-minx, height: maxy-miny))
      }
 }
 
 class MapLineOverlayView: MKOverlayRenderer {
-    
     
     override func drawMapRect(mapRect: MKMapRect, zoomScale: MKZoomScale, inContext context: CGContext) {
         if let lineOverlay = overlay as? MapLineOverlay {
@@ -100,3 +110,4 @@ class MapLineOverlayView: MKOverlayRenderer {
         }
     }
 }
+

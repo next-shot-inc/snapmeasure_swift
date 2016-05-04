@@ -37,6 +37,7 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
                 drawingView!.lineView.lines.removeAtIndex(index)
                 drawingView!.lineView.lines.insert(changedLine, atIndex: index)
                 drawingView?.lineView.setNeedsDisplay()
+                drawingView?.controller?.hasChanges = true
                 break
             }
         }
@@ -98,6 +99,7 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
                 drawingView!.lineView.lines.removeAtIndex(index)
                 drawingView!.lineView.lines.insert(changedLine, atIndex: index)
                 drawingView?.lineView.setNeedsDisplay()
+                drawingView?.controller?.hasChanges = true
                 break
             }
         }
@@ -410,23 +412,28 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.Reference
         
-        let nf = NSNumberFormatter()
-        referenceSizeTextField.text =
-            nf.stringFromNumber(drawingView.lineView.refMeasureValue == 0 ? 1 : drawingView.lineView.refMeasureValue)
-        
-        //from storyboard height = 49 and width = 186
-        let centerX = sender.frame.origin.x + sender.frame.size.width/2
-        let originY = self.view.frameBottom - 100
-        let originX = centerX-186/2
-        if originX < 0 {
-            referenceSizeContainerView.frame = CGRect(x: 0, y: originY, width: 186, height: 49)
-        } else if originX+186 > self.view.frameRight  {
-            referenceSizeContainerView.frame = CGRect(x: self.view.frameRight-186, y: originY, width: 186, height: 49)
-        } else{
-            referenceSizeContainerView.frame = CGRect(x: originX, y: originY, width: 186, height: 49)
+        let alert = UIAlertController(title: "", message: "Please specify reference value (m)", preferredStyle: .Alert)
+        alert.addTextFieldWithConfigurationHandler { (textField) in
+            let nf = NSNumberFormatter()
+            textField.text =
+                nf.stringFromNumber(drawingView.lineView.refMeasureValue == 0 ? 1 : drawingView.lineView.refMeasureValue)
+            textField.placeholder = "Size"
+            textField.keyboardType = UIKeyboardType.DecimalPad
         }
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        }
+        alert.addAction(noAction)
+        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Default) { action -> Void in
+            let drawingView = self.imageView as! DrawingView
+            drawingView.textView.setNeedsDisplay()
+            
+            let refSizeTextField = alert.textFields![0]
+            drawingView.lineView.refMeasureValue = Float(refSizeTextField.text!)!
+        }
+        alert.addAction(yesAction)
         
-        referenceSizeContainerView.hidden = false
+        self.presentViewController(alert, animated: true, completion: nil)
+
         //faciesTypeContainerView.hidden = true
         lineContainerView.hidden = true
         highlightButton(sender)
@@ -502,6 +509,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                     drawingView.lineView.lines.removeAtIndex(index)
                     drawingView.lineView.lines.insert(changedLine, atIndex: index)
                     drawingView.lineView.setNeedsDisplay()
+                    hasChanges = true
                     break
                 }
             }
@@ -562,11 +570,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let drawingView = imageView as! DrawingView
         
         if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
-            let nf = NSNumberFormatter()
-            let ns = nf.numberFromString(referenceSizeTextField.text!)
-            if( ns != nil ) {
-                drawingView.lineView.refMeasureValue = ns!.floatValue
-            }
+            
         } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
             drawingView.lineView.tool.lineName = lineNameTextField.text!
                     
@@ -753,8 +757,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             
             //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
             drawingView.drawMode = DrawingView.ToolMode.Reference
-            let nf = NSNumberFormatter()
-            referenceSizeTextField.text = nf.stringFromNumber(drawingView.lineView.refMeasureValue)
             
         } else {
             //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue

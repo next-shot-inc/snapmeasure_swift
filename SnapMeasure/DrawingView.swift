@@ -1232,8 +1232,16 @@ class DrawingView : UIImageView {
         } else if( drawMode == ToolMode.Reference ) {
             lineView.refMeasurePoints.removeAll(keepCapacity: true)
             if( curLine.points.count >= 2 ) {
-                lineView.refMeasurePoints.append(curLine.points[0])
-                lineView.refMeasurePoints.append(curLine.points[curLine.points.count-1])
+                let p0 = curLine.points[0]
+                let p1 = curLine.points[curLine.points.count-1]
+                let dx = p1.x - p0.x
+                let dy = p1.y - p0.y
+                let dist = sqrt(dx*dx + dy*dy)
+                if( dist > 0.01 ) {
+                    lineView.refMeasurePoints.append(p0)
+                    lineView.refMeasurePoints.append(p1)
+                    controller!.hasChanges = true
+                }
             }
         } else if( drawMode == ToolMode.Erase ) {
             if( curLine.points.count >= 2 ) {
