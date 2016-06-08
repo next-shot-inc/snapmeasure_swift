@@ -280,6 +280,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         self.presentViewController(alertController, animated: false, completion: nil)
     }
     
+    // Perform the creation of the new project 
     func setNewProject(textField: UITextField) {
         let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
             inManagedObjectContext: managedContext!) as! ProjectObject
@@ -330,16 +331,66 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     }
     
+    // Callback linked to each button of the PopupMenuController initialized in the loadProjectButtonTapped
     func loadProject(sender: UIButton) {
         currentProject = projects[sender.tag]
         projectNameLabel.text = currentProject.name
         menuController!.dismissViewControllerAnimated(true, completion: nil)
     }
        
+    @IBAction func deleteProject(sender: AnyObject) {
+        let alertController = UIAlertController(
+            title: "Do you really want to delete project", message: currentProject.name + "?", preferredStyle: .Alert
+        )
+        let cancelAction = UIAlertAction(title: "No", style: UIAlertActionStyle.Default, handler: {
+            (action : UIAlertAction!) -> Void in
+        })
+        let saveAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default, handler: {
+            alert -> Void in
+            
+            self.doDeleteCurrentProject()
+        })
+        
+        alertController.addAction(saveAction)
+        alertController.addAction(cancelAction)
+        self.presentViewController(alertController, animated: false, completion: nil)
+    }
+    
+    // Perform the deletion of the curent project
+    func doDeleteCurrentProject() {
+        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let managedContext = appDelegate.managedObjectContext!
+        for (i,p) in projects.enumerate(){
+            if( p === currentProject ) {
+                projects.removeAtIndex(i)
+                for imageobj in currentProject.detailedImages {
+                    let io = imageobj as? DetailedImageObject
+                    if( io != nil ) {
+                        io!.removeImage()
+                    }
+                }
+                managedContext.deleteObject(currentProject)
+                
+                // Reset current project
+                currentProject = projects[0]
+                projectNameLabel.text = currentProject.name
+                break
+            }
+        }
+        
+        // Persist project destruction
+        do {
+            try managedContext.save()
+        } catch {
+            
+        }
+    }
+    
     @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
     
     }
     
+    // Send support/enhancement request
     @IBAction func sendMail(sender: UIButton) {
         if( !MFMailComposeViewController.canSendMail() ) {
             print("Mail service unavailable")

@@ -25,6 +25,11 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         currentProject = drawingVC!.detailedImage!.project
         projectNameLabel.text = currentProject.name
         nameTextField.text = drawingVC!.detailedImage!.name
+        // If the image name is the default value (from the data model) or is empty
+        if( nameTextField.text == "New Image" || nameTextField.text == "" ) {
+            // Provide a self incrementing image name (this latest image is already in the count)
+            nameTextField.text = "Image " + String(currentProject.detailedImages.count)
+        }
         
         let drawingView = drawingVC!.imageView as! DrawingView
         //get scale for the image
@@ -161,7 +166,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         if (nameTextField.text != "") {
             newImage.name = nameTextField.text!
         } else {
-            newImage.name = "New Image " + String(currentProject.detailedImages.count+1)
+            newImage.name = "Image " + String(currentProject.detailedImages.count)
         }
         
         // Update project date
@@ -208,7 +213,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         if (nameTextField.text != "") {
             currentImage.name = nameTextField.text!
         } else {
-            currentImage.name = "New Image " + String(currentProject.detailedImages.count+1)
+            currentImage.name = "Image " + String(currentProject.detailedImages.count+1)
         }
         
         // Update project date

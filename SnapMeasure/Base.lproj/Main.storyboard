@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -137,14 +137,29 @@
                                         <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hZR-A1-grU">
+                                        <rect key="frame" x="182" y="87" width="156" height="32"/>
+                                        <state key="normal" title=" Delete Project " image="trash-32">
+                                            <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                            <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                        </state>
+                                        <state key="disabled">
+                                            <color key="titleColor" red="1" green="1" blue="1" alpha="0.59999999999999998" colorSpace="calibratedRGB"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="deleteProject:" destination="BYZ-38-t0r" eventType="touchUpInside" id="sH0-pj-P1o"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" red="0.9570610523223877" green="0.87712746858596802" blue="0.79582935571670532" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstItem="vLB-b8-djg" firstAttribute="bottom" secondItem="mas-Ag-2QZ" secondAttribute="bottomMargin" id="1s2-Y7-gVo"/>
                                     <constraint firstItem="vLB-b8-djg" firstAttribute="leading" secondItem="mas-Ag-2QZ" secondAttribute="leading" constant="20" symbolic="YES" id="9yO-Rn-pI0"/>
+                                    <constraint firstItem="vLB-b8-djg" firstAttribute="centerY" secondItem="hZR-A1-grU" secondAttribute="centerY" id="CgM-Rx-EDX"/>
                                     <constraint firstItem="fQL-Iv-HYz" firstAttribute="top" secondItem="mas-Ag-2QZ" secondAttribute="topMargin" constant="10" id="IsW-Jn-HOB"/>
                                     <constraint firstItem="fQL-Iv-HYz" firstAttribute="baseline" secondItem="3rs-dy-tcG" secondAttribute="baseline" id="OLT-RZ-WUz"/>
                                     <constraint firstItem="y3C-uL-xoU" firstAttribute="top" secondItem="fQL-Iv-HYz" secondAttribute="bottom" constant="8" symbolic="YES" id="b14-LA-tHn"/>
+                                    <constraint firstItem="hZR-A1-grU" firstAttribute="leading" secondItem="vLB-b8-djg" secondAttribute="trailing" constant="8" symbolic="YES" id="d6O-3M-ZRI"/>
                                     <constraint firstItem="vLB-b8-djg" firstAttribute="top" secondItem="y3C-uL-xoU" secondAttribute="bottom" constant="8" symbolic="YES" id="jX6-L7-JAS"/>
                                     <constraint firstItem="vLB-b8-djg" firstAttribute="leading" secondItem="y3C-uL-xoU" secondAttribute="leading" id="ne4-oZ-wqJ"/>
                                     <constraint firstItem="fQL-Iv-HYz" firstAttribute="leading" secondItem="y3C-uL-xoU" secondAttribute="leading" id="pmG-ip-3rC"/>
@@ -191,7 +206,7 @@
                                 <rect key="frame" x="50" y="486" width="85" height="32"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <state key="normal" title=" Help" image="help-32">
-                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
                                     <segue destination="gGf-LL-bzH" kind="presentation" identifier="toHelp" id="2E0-er-KN8"/>
@@ -201,7 +216,7 @@
                                 <rect key="frame" x="50" y="528" width="204" height="32"/>
                                 <inset key="contentEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <state key="normal" title=" Issues/Suggestions" image="sent-32">
-                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="sendMail:" destination="BYZ-38-t0r" eventType="touchDown" id="k4S-gC-QWc"/>
@@ -264,17 +279,17 @@
                             </connections>
                         </searchBar>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="detailDisclosureButton" indentationWidth="10" reuseIdentifier="Card" id="zZL-2J-885" customClass="CardTableViewCell" customModule="SnapMeasure" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Card" id="zZL-2J-885" customClass="CardTableViewCell" customModule="SnapMeasure" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="130" width="600" height="154"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zZL-2J-885" id="4ph-hl-cNB">
-                                    <rect key="frame" x="0.0" y="0.0" width="533" height="153"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="567" height="153"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
+                                        <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vwZ-BT-aWo" userLabel="MainView">
                                             <rect key="frame" x="8" y="13" width="517" height="128"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jBS-1W-do2">
                                                     <rect key="frame" x="379" y="5" width="128" height="118"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="118" id="76H-sK-CVT"/>
@@ -1689,9 +1704,10 @@
         <image name="sent-32" width="32" height="32"/>
         <image name="settings-32" width="32" height="32"/>
         <image name="solidfill-off" width="42" height="42"/>
+        <image name="trash-32" width="32" height="32"/>
         <image name="type" width="42" height="42"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="LFb-Hb-Otc"/>
+        <segue reference="klv-3J-VMp"/>
     </inferredMetricsTieBreakers>
 </document>
