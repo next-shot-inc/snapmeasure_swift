@@ -11,19 +11,19 @@ import UIKit
 import CoreData
 
 protocol HistogramCreationDelegate: class {
-    func drawHistogram(numBins: Int, features : [FeatureObject], sortedBy : String)
+    func drawHistogram(_ numBins: Int, features : [FeatureObject], sortedBy : String)
 }
 
 class HistogramData {
     var managedContext: NSManagedObjectContext!
-    var fetchRequest : NSFetchRequest!
+    var fetchRequest : NSFetchRequest<NSFetchRequestResult>!
     var featureCount: Int!
     var selectedCat = "Type" //Default sorting by type
-    private var features : [FeatureObject] = []
+    fileprivate var features : [FeatureObject] = []
     
     init() {
         //set up intitial fetchRequest
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         managedContext = appDelegate.managedObjectContext!
         fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
         
@@ -35,13 +35,17 @@ class HistogramData {
     }
     
     func getFeatureCountForCurrentFetchRequest() {
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercaseString, ascending: true)]
-        featureCount = managedContext.countForFetchRequest(fetchRequest, error: nil)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: selectedCat.lowercased(), ascending: true)]
+        do {
+           try featureCount = managedContext.count(for: fetchRequest)
+        } catch {
+            
+        }
     }
     
     func getFeatures() -> [FeatureObject] {
         do {
-            features = (try managedContext.executeFetchRequest(fetchRequest) as? [FeatureObject])!
+            features = (try managedContext.fetch(fetchRequest) as? [FeatureObject])!
         } catch {
             
         }
@@ -70,7 +74,7 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         //self.view.backgroundColor = UIColor.lightGrayColor()
         
         //set up PickerView
-        let rowIndex = possibleSortingCats.indexOf(histogramData!.selectedCat)!
+        let rowIndex = possibleSortingCats.index(of: histogramData!.selectedCat)!
         sortingPickerView.delegate = self
         sortingPickerView.dataSource = self
         sortingPickerView.selectRow(rowIndex, inComponent: 0, animated: false)
@@ -79,25 +83,25 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
         binNumSlider.maximumValue = Float(histogramData!.featureCount)
         binNumSlider.minimumValue = 1
         binNumSlider.value  = Float(histogramData!.featureCount)/2
-        self.sliderValueChanged("")
+        self.sliderValueChanged("" as AnyObject)
         self.pickerView(sortingPickerView, didSelectRow: rowIndex,inComponent: 0)
         
         maxNumBins.text = String(histogramData!.featureCount)
     }
     
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         if histogramData!.featureCount == 0 {
-            let alert = UIAlertController(title: nil, message: "No feature data available to plot. Features can be defined in the image editor", preferredStyle: .Alert)
-            let action = UIAlertAction(title: "OK", style: .Default) { action -> Void in
-                alert.dismissViewControllerAnimated(true, completion: nil)
-                self.dismissViewControllerAnimated(true, completion: nil)
+            let alert = UIAlertController(title: nil, message: "No feature data available to plot. Features can be defined in the image editor", preferredStyle: .alert)
+            let action = UIAlertAction(title: "OK", style: .default) { action -> Void in
+                alert.dismiss(animated: true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             }
             alert.addAction(action)
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
         }
         
-        generateHistogramButton.enabled = histogramData!.featureCount > 0
+        generateHistogramButton.isEnabled = histogramData!.featureCount > 0
     }
     
     
@@ -105,48 +109,48 @@ class HistogramMasterViewController: UIViewController, UIPickerViewDataSource, U
     //Mark: - UIPickerView Methods
     
     //columns of data
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
     //number of rows
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return possibleSortingCats.count
     }
     
     //set what is in the pickerview
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return possibleSortingCats[row]
     }
     
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         histogramData!.selectedCat = possibleSortingCats[row]
         
         //we want the result of the fetch request to be sorted according to the category selected by the user
         
         if histogramData!.selectedCat.isEqual("Type") {
-            binNumSlider.enabled = false
+            binNumSlider.isEnabled = false
             binNumLabel.text = String(possibleFeatureTypes.count) + "\n set by # of possible feature types" //second line isn't currently visible, TODO: investigate better location? or different message
             binNum = possibleFeatureTypes.count
             binNumSlider.value = Float(binNum)
         } else {
             binNum = Int(round(binNumSlider.value))
             binNumLabel.text = String(binNum)
-            binNumSlider.enabled = true
+            binNumSlider.isEnabled = true
 
         }
     }
     
     //Mark: UISlider
-    @IBAction func sliderValueChanged(sender: AnyObject) {
+    @IBAction func sliderValueChanged(_ sender: AnyObject) {
         binNum = Int(round(binNumSlider.value))
         binNumLabel.text = String(binNum)
     }
     
-    @IBAction func generateHistogramButtonPressed(sender: AnyObject) {
+    @IBAction func generateHistogramButtonPressed(_ sender: AnyObject) {
         delegate?.drawHistogram(
             binNum, features: histogramData!.getFeatures(), sortedBy: histogramData!.selectedCat
         )
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
 }

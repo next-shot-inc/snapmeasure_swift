@@ -40,9 +40,9 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         motionManager.deviceMotionUpdateInterval = 0.1
-        motionManager.startDeviceMotionUpdatesUsingReferenceFrame(
-            CMAttitudeReferenceFrame.XTrueNorthZVertical,
-            toQueue: NSOperationQueue.currentQueue()!, withHandler: { (motion, error) -> Void in
+        motionManager.startDeviceMotionUpdates(
+            using: CMAttitudeReferenceFrame.xTrueNorthZVertical,
+            to: OperationQueue.current!, withHandler: { (motion, error) -> Void in
                 if( motion == nil ) {
                     return
                 }
@@ -59,12 +59,12 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
         )
         
         locationManager.delegate = self
-        if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.NotDetermined {
+        if CLLocationManager.authorizationStatus() == CLAuthorizationStatus.notDetermined {
             locationManager.requestWhenInUseAuthorization()
         }
     }
     
-    func rotate( quat: CMQuaternion, vec: Vector3) -> Vector3 {
+    func rotate( _ quat: CMQuaternion, vec: Vector3) -> Vector3 {
        let num = quat.x * 2.0;
        let num2 = quat.y * 2.0;
        let num3 = quat.z * 2.0;
@@ -84,7 +84,7 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
        )
     }
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         // test the age of the location measurement to determine if the measurement is cached
         // in most cases you will not want to rely on cached measurements
         let newLocation = locations.last
@@ -105,20 +105,19 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
     }
     
     // this is called when authorization status changes and when locationManager is initialiazed
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        if status == CLAuthorizationStatus.AuthorizedAlways || status == CLAuthorizationStatus.AuthorizedWhenInUse {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+        if status == CLAuthorizationStatus.authorizedAlways || status == CLAuthorizationStatus.authorizedWhenInUse {
             manager.startUpdatingLocation()
         }
     }
 
     
-    func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
-        NSLog("%@",error)
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         locationManager.stopUpdatingLocation()
     }
     
-    @IBAction func doLocate(sender: AnyObject) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doLocate(_ sender: AnyObject) {
+        dismiss(animated: true, completion: nil)
         if( drawingViewController != nil ) {
             let drawingView = drawingViewController!.imageView as! DrawingView
             drawingView.dipMarkerView.pickTool = DipMarkerPickTool(
@@ -127,12 +126,12 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
                 toolMode: drawingView.drawMode.rawValue,
                 prevButton: currentButton
             )
-            drawingView.drawMode = DrawingView.ToolMode.DipMarker
+            drawingView.drawMode = DrawingView.ToolMode.dipMarker
         }
     }
     
-    @IBAction func doStore(sender: AnyObject) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doStore(_ sender: AnyObject) {
+        dismiss(animated: true, completion: nil)
         if( drawingViewController != nil && curLocation != nil ) {
             let drawingView = drawingViewController!.imageView as! DrawingView
             drawingView.dipMarkerView.addPoint(realLocation: curLocation!, normal: curNormal)
@@ -140,8 +139,8 @@ class OrientationController : UIViewController, CLLocationManagerDelegate {
         }
     }
     
-    @IBAction func doCancel(sender: AnyObject) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doCancel(_ sender: AnyObject) {
+        dismiss(animated: true, completion: nil)
     }
 
 }

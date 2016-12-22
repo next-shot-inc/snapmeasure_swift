@@ -60,17 +60,17 @@ class Exporter {
             var maxPoint = MKMapPoint()
             for adpo in object.dipMeterPoints  {
                 let dpo = adpo as! DipMeterPointObject
-                let loc = dpo.locationInImage.CGPointValue
-                if( loc.x != 0 && loc.y != 0 ) {
+                let loc = dpo.locationInImage.cgPointValue
+                if( loc?.x != 0 && loc?.y != 0 ) {
                     let rloc = dpo.realLocation as! CLLocation
                     if( rloc.horizontalAccuracy > 0 ) {
                        let mapPoint = MKMapPointForCoordinate(rloc.coordinate)
-                        if( loc.x < minLoc ) {
-                            minLoc = loc.x
+                        if( (loc?.x)! < minLoc ) {
+                            minLoc = (loc?.x)!
                             minPoint = mapPoint
                         }
-                        if( loc.x > maxLoc ) {
-                            maxLoc = loc.x
+                        if( (loc?.x)! > maxLoc ) {
+                            maxLoc = (loc?.x)!
                             maxPoint = mapPoint
                         }
                     }
@@ -119,7 +119,7 @@ class Exporter {
         pixelToMeterForZ = detailedImage.scale!.doubleValue
     }
     
-    func zpoint(point: CGPoint) -> DPoint3 {
+    func zpoint(_ point: CGPoint) -> DPoint3 {
         // Compute (x,y) via its absicca in the picture space mapped into Map-Space
         let x = Double(point.x)/xLength * (endMapPoint.x - startMapPoint.x) + startMapPoint.x
         let y = Double(point.x)/xLength * (endMapPoint.y - startMapPoint.y) + startMapPoint.y
@@ -132,42 +132,42 @@ class Exporter {
 }
 
 class ExportAsShapeFile : Exporter {
-    func export() -> NSURL {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let url_shp = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent("export.shp")
-        let url_shx = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent("export.shx")
+    func export() -> URL {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let url_shp = appDelegate.applicationDocumentsDirectory.appendingPathComponent("export.shp")
+        let url_shx = appDelegate.applicationDocumentsDirectory.appendingPathComponent("export.shx")
         export(url_shp, url_shx: url_shx)
         return url_shp
     }
     
-    func export(url_shp: NSURL, url_shx: NSURL) {
-        let df = NSFileManager.defaultManager()
-        if( df.fileExistsAtPath(url_shp.path!) ) {
+    func export(_ url_shp: URL, url_shx: URL) {
+        let df = FileManager.default
+        if( df.fileExists(atPath: url_shp.path) ) {
             do {
-               try df.removeItemAtPath(url_shp.path!)
+               try df.removeItem(atPath: url_shp.path)
             } catch {
                 
             }
         }
-        df.createFileAtPath(url_shp.path!, contents: nil, attributes: nil)
+        df.createFile(atPath: url_shp.path, contents: nil, attributes: nil)
         
-        if( df.fileExistsAtPath(url_shx.path!) ) {
+        if( df.fileExists(atPath: url_shx.path) ) {
             do {
-               try df.removeItemAtPath(url_shx.path!)
+               try df.removeItem(atPath: url_shx.path)
             } catch {
                 
             }
         }
-        df.createFileAtPath(url_shx.path!, contents: nil, attributes: nil)
+        df.createFile(atPath: url_shx.path, contents: nil, attributes: nil)
 
-        let filePath = url_shp.fileSystemRepresentation
+        let filePath = (url_shp as NSURL).fileSystemRepresentation
         let fd = open(filePath, O_WRONLY)
         if( fd < 0 ) {
             _ = errno
             return
         }
         
-        let filePathx = url_shx.fileSystemRepresentation
+        let filePathx = (url_shx as NSURL).fileSystemRepresentation
         let fdx = open(filePathx, O_WRONLY)
         if( fdx < 0 ) {
             _ = errno
@@ -176,38 +176,38 @@ class ExportAsShapeFile : Exporter {
         
         // Byte 0 File Code 9994 Integer Big
         var file_code : UInt32 = CFSwapInt32HostToBig(9994)
-        write(fd, &file_code, sizeof(CInt))
-        write(fdx, &file_code, sizeof(CInt))
+        write(fd, &file_code, MemoryLayout<CInt>.size)
+        write(fdx, &file_code, MemoryLayout<CInt>.size)
         // Byte 4 Unused 0 Integer Big
         var zero : CInt = 0 ;
         // Byte 8 Unused 0 Integer Big
-        write(fd, &zero, sizeof(CInt))
-        write(fdx, &zero, sizeof(CInt))
+        write(fd, &zero, MemoryLayout<CInt>.size)
+        write(fdx, &zero, MemoryLayout<CInt>.size)
         // Byte 12 Unused 0 Integer Big
-        write(fd, &zero, sizeof(CInt))
-        write(fdx, &zero, sizeof(CInt))
+        write(fd, &zero, MemoryLayout<CInt>.size)
+        write(fdx, &zero, MemoryLayout<CInt>.size)
         // Byte 16 Unused 0 Integer Big
-        write(fd, &zero, sizeof(CInt))
-        write(fdx, &zero, sizeof(CInt))
+        write(fd, &zero, MemoryLayout<CInt>.size)
+        write(fdx, &zero, MemoryLayout<CInt>.size)
         // Byte 20 Unused 0 Integer Big
-        write(fd, &zero, sizeof(CInt))
-        write(fdx, &zero, sizeof(CInt))
+        write(fd, &zero, MemoryLayout<CInt>.size)
+        write(fdx, &zero, MemoryLayout<CInt>.size)
         
         // Byte 24 File Length File Length Integer Big
         let file_length = computeFileLength()
         var file_length_s = CFSwapInt32HostToBig(file_length)
-        write(fd, &file_length_s, sizeof(CInt))
-        write(fdx, &file_length_s, sizeof(CInt))
+        write(fd, &file_length_s, MemoryLayout<CInt>.size)
+        write(fdx, &file_length_s, MemoryLayout<CInt>.size)
         
         // Byte 28 Version 1000 Integer Little
         var file_version : UInt32 = CFSwapInt32HostToLittle(1000)
-        write(fd, &file_version, sizeof(CInt))
-        write(fdx, &file_version, sizeof(CInt))
+        write(fd, &file_version, MemoryLayout<CInt>.size)
+        write(fdx, &file_version, MemoryLayout<CInt>.size)
         
         // Byte 32 Shape Type Shape Type Integer Little (PolylineZ=13)
         var shape_type : UInt32 = CFSwapInt32HostToLittle(13)
-        write(fd, &shape_type, sizeof(CInt))
-        write(fdx, &shape_type, sizeof(CInt))
+        write(fd, &shape_type, MemoryLayout<CInt>.size)
+        write(fdx, &shape_type, MemoryLayout<CInt>.size)
         
         let rect = computeBBox()
         let bmin = zpoint(rect.origin)
@@ -243,16 +243,16 @@ class ExportAsShapeFile : Exporter {
             let lo = alo as? LineObject
             
             var recordNumber_s = CFSwapInt32HostToBig(recordNumber)
-            write(fd, &recordNumber_s, sizeof(CInt))
+            write(fd, &recordNumber_s, MemoryLayout<CInt>.size)
             let content_length = computeContentLength(lo!)
             var content_length_s = CFSwapInt32HostToBig(file_length)
-            write(fd, &content_length_s, sizeof(CInt))
+            write(fd, &content_length_s, MemoryLayout<CInt>.size)
             
             writePolylineZ(fd, lo: lo!)
             
             var offset_s = CFSwapInt32HostToBig(offset)
-            write(fdx, &offset_s, sizeof(CInt))
-            write(fdx, &content_length_s, sizeof(CInt))
+            write(fdx, &offset_s, MemoryLayout<CInt>.size)
+            write(fdx, &content_length_s, MemoryLayout<CInt>.size)
 
             recordNumber += 1
             offset += content_length + 4
@@ -262,14 +262,14 @@ class ExportAsShapeFile : Exporter {
         close(fdx)
     }
     
-    func writeDouble(fd: CInt, d: Double) {
+    func writeDouble(_ fd: CInt, d: Double) {
         let byteOrder = CFByteOrderGetCurrent()
         if( UInt32(byteOrder) == CFByteOrderLittleEndian.rawValue ) {
             var dd = d
-            write(fd, &dd, sizeof(Double))
+            write(fd, &dd, MemoryLayout<Double>.size)
         } else {
             var swapped = CFConvertDoubleHostToSwapped(d)
-            write(fd, &swapped, sizeof(Double))
+            write(fd, &swapped, MemoryLayout<Double>.size)
         }
     }
     
@@ -278,52 +278,52 @@ class ExportAsShapeFile : Exporter {
         
         // PolylineZ shape
         for alo in object.lines {
-            length += sizeof(Int32)*2 // Record header
-            length += sizeof(Int32) // Shape Type
-            length += sizeof(Double)*4 // BBox
-            length += sizeof(Int32) // Number of parts (1)
-            length += sizeof(Int32) // Total Number of points
-            length += sizeof(Int32) * 1 // Index to First Point in Part
+            length += MemoryLayout<Int32>.size*2 // Record header
+            length += MemoryLayout<Int32>.size // Shape Type
+            length += MemoryLayout<Double>.size*4 // BBox
+            length += MemoryLayout<Int32>.size // Number of parts (1)
+            length += MemoryLayout<Int32>.size // Total Number of points
+            length += MemoryLayout<Int32>.size * 1 // Index to First Point in Part
             
             let lo = alo as? LineObject
             let arrayData = lo!.pointData
-            let len = arrayData.length/sizeof(CGPoint)
-            length += sizeof(Double)*2*len // Points
+            let len = arrayData.count/MemoryLayout<CGPoint>.size
+            length += MemoryLayout<Double>.size*2*len // Points
             
-            length += sizeof(Double)*2 // Bounding Z Range
-            length += sizeof(Double)*len // Z Values for All Points
+            length += MemoryLayout<Double>.size*2 // Bounding Z Range
+            length += MemoryLayout<Double>.size*len // Z Values for All Points
         }
         
         // Return the length in word-16 byte size
         return UInt32(length*8/16) ;
     }
     
-    func computeContentLength(lo: LineObject) -> UInt32 {
+    func computeContentLength(_ lo: LineObject) -> UInt32 {
         var length = 0
         
-        length += sizeof(Int32) // Shape Type
-        length += sizeof(Double)*4 // BBox
-        length += sizeof(Int32) // Number of parts (1)
-        length += sizeof(Int32) // Total Number of points
-        length += sizeof(Int32) * 1 // Index to First Point in Part
+        length += MemoryLayout<Int32>.size // Shape Type
+        length += MemoryLayout<Double>.size*4 // BBox
+        length += MemoryLayout<Int32>.size // Number of parts (1)
+        length += MemoryLayout<Int32>.size // Total Number of points
+        length += MemoryLayout<Int32>.size * 1 // Index to First Point in Part
         
         let arrayData = lo.pointData
-        let len = arrayData.length/sizeof(CGPoint)
-        length += sizeof(Double)*2*len // Points
+        let len = arrayData.count/MemoryLayout<CGPoint>.size
+        length += MemoryLayout<Double>.size*2*len // Points
         
-        length += sizeof(Double)*2 // Bounding Z Range
-        length += sizeof(Double)*len // Z Values for All Points
+        length += MemoryLayout<Double>.size*2 // Bounding Z Range
+        length += MemoryLayout<Double>.size*len // Z Values for All Points
 
         // Return the length in word-16 byte size
         return UInt32(length*8/16) ;
     }
     
-    func computeBBox(lo: LineObject) -> CGRect {
+    func computeBBox(_ lo: LineObject) -> CGRect {
         let arrayData = lo.pointData
         let array = Array(
             UnsafeBufferPointer(
-                start: UnsafePointer<CGPoint>(arrayData.bytes),
-                count: arrayData.length/sizeof(CGPoint)
+                start: (arrayData as NSData).bytes.bindMemory(to: CGPoint.self, capacity: arrayData.count),
+                count: arrayData.count/MemoryLayout<CGPoint>.size
             )
         )
         var minx : CGFloat = 1000000
@@ -337,7 +337,7 @@ class ExportAsShapeFile : Exporter {
             maxy = max(array[i].y, maxy)
         }
 
-        return CGRectMake(minx, miny, (maxx-minx), (maxy-miny))
+        return CGRect(x: minx, y: miny, width: (maxx-minx), height: (maxy-miny))
     }
     
     func computeBBox() -> CGRect {
@@ -358,10 +358,10 @@ class ExportAsShapeFile : Exporter {
     //   Double[2] Z Range // Bounding Z Range
     //   Double[NumPoints] Z Array // Z Values for All Points
     //}
-    func writePolylineZ(fd: CInt, lo: LineObject) {
+    func writePolylineZ(_ fd: CInt, lo: LineObject) {
         
         var shape_type : UInt32 = CFSwapInt32HostToLittle(13)
-        write(fd, &shape_type, sizeof(CInt))
+        write(fd, &shape_type, MemoryLayout<CInt>.size)
         
         let rect = computeBBox(lo)
         let bmin = zpoint(rect.origin)
@@ -376,21 +376,21 @@ class ExportAsShapeFile : Exporter {
         writeDouble(fd, d: bmax.y)
 
         var numPars : UInt32 = CFSwapInt32HostToLittle(1)
-        write(fd, &numPars, sizeof(CInt))
+        write(fd, &numPars, MemoryLayout<CInt>.size)
         
         let arrayData = lo.pointData
         let array = Array(
             UnsafeBufferPointer(
-                start: UnsafePointer<CGPoint>(arrayData.bytes),
-                count: arrayData.length/sizeof(CGPoint)
+                start: (arrayData as NSData).bytes.bindMemory(to: CGPoint.self, capacity: arrayData.count),
+                count: arrayData.count/MemoryLayout<CGPoint>.size
             )
         )
         
         var numPoints : UInt32 = CFSwapInt32HostToLittle(UInt32(array.count))
-        write(fd, &numPoints, sizeof(CInt))
+        write(fd, &numPoints, MemoryLayout<CInt>.size)
         
         var indexPart : UInt32 = CFSwapInt32HostToLittle(0)
-        write(fd, &indexPart, sizeof(CInt))
+        write(fd, &indexPart, MemoryLayout<CInt>.size)
         
         // Array of x,y
         for i in 0 ..< array.count {
@@ -411,18 +411,18 @@ class ExportAsShapeFile : Exporter {
         }
     }
     
-    func export_dbf(url: NSURL) {
-        let df = NSFileManager.defaultManager()
-        if( df.fileExistsAtPath(url.path!) ) {
+    func export_dbf(_ url: URL) {
+        let df = FileManager.default
+        if( df.fileExists(atPath: url.path) ) {
             do {
-                try df.removeItemAtPath(url.path!)
+                try df.removeItem(atPath: url.path)
             } catch {
                 
             }
         }
-        df.createFileAtPath(url.path!, contents: nil, attributes: nil)
+        df.createFile(atPath: url.path, contents: nil, attributes: nil)
 
-        let filePath = url.fileSystemRepresentation
+        let filePath = (url as NSURL).fileSystemRepresentation
         let fd = open(filePath, O_WRONLY)
         if( fd < 0 ) {
             _ = errno
@@ -432,25 +432,25 @@ class ExportAsShapeFile : Exporter {
         var byte : CChar
         // DBF file type - 0
         byte = 0x03
-        write(fd, &byte, sizeof(CChar))
+        write(fd, &byte, MemoryLayout<CChar>.size)
         // Dummy date 1-3
         byte = 95
-        write(fd, &byte, sizeof(CChar))
+        write(fd, &byte, MemoryLayout<CChar>.size)
         byte = 7
-        write(fd, &byte, sizeof(CChar))
+        write(fd, &byte, MemoryLayout<CChar>.size)
         byte = 26
-        write(fd, &byte, sizeof(CChar))
+        write(fd, &byte, MemoryLayout<CChar>.size)
         // Number of records in file 4-7
         var nr : CInt = CInt(object.lines.count)
-        write(fd, &nr, sizeof(CInt))
+        write(fd, &nr, MemoryLayout<CInt>.size)
         // Position of first data record 8-9
         var headerLength : Int16 = 33
         // for each field sub-record add 32 bits
         // headerLength += 32 *
-        write(fd, &headerLength, sizeof(Int16))
+        write(fd, &headerLength, MemoryLayout<Int16>.size)
         // Lenght of one data record 10-11
         var nRecordLength : Int16 = 1
-        write(fd, &nRecordLength, sizeof(Int16))
+        write(fd, &nRecordLength, MemoryLayout<Int16>.size)
         // 12-27 reserved
         lseek(fd, 28*8, SEEK_SET)
         
@@ -459,150 +459,150 @@ class ExportAsShapeFile : Exporter {
 }
 
 class ExportAsGocadFile : Exporter {
-    func export() -> NSURL {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent(
+    func export() -> URL {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
             "export-gocad.txt"
         )
         export(url)
         return url
     }
     
-    func export(url: NSURL) {
-        let df = NSFileManager.defaultManager()
-        if( df.fileExistsAtPath(url.path!) ) {
+    func export(_ url: URL) {
+        let df = FileManager.default
+        if( df.fileExists(atPath: url.path) ) {
             do {
-               try df.removeItemAtPath(url.path!)
+               try df.removeItem(atPath: url.path)
             } catch {
                 
             }
         }
-        df.createFileAtPath(url.path!, contents: nil, attributes: nil)
+        df.createFile(atPath: url.path, contents: nil, attributes: nil)
         
-        var file : NSFileHandle?
+        var file : FileHandle?
         do {
-            try file = NSFileHandle(forWritingToURL: url)
+            try file = FileHandle(forWritingTo: url)
         } catch {
             return
         }
         
-        let space = (" " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        var data = ("# Geometry of picks and image\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        let space = (" " as NSString).data(using: String.Encoding.utf8.rawValue)
+        var data = ("# Geometry of picks and image\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         if( object.latitude != nil && object.longitude != nil ) {
-            data = ("# Coordinate system is epsg:3857. Lat: " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ((object.latitude!).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = (" Long: " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ((object.longitude!).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("# Coordinate system is epsg:3857. Lat: " as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ((object.latitude!).stringValue).data(using: String.Encoding.utf8)
+            file?.write(data!)
+            data = (" Long: " as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ((object.longitude!).stringValue).data(using: String.Encoding.utf8)
+            file?.write(data!)
+            data = ("\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
         }
-        data = ("# GOCAD Project must be setup with Z axis up\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("# GOCAD Project must be setup with Z axis up\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         
         
         // Write lines
         for alo in object.lines {
             let lo = alo as? LineObject
 
-            data = ("GOCAD PLINE 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("name: " + lo!.name as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("\n}\nILINE\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("GOCAD PLINE 1.0\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("HEADER {\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("name: " + lo!.name as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("\n}\nILINE\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             
             let arrayData = lo!.pointData
             let array = Array(
                 UnsafeBufferPointer(
-                    start: UnsafePointer<CGPoint>(arrayData.bytes),
-                    count: arrayData.length/sizeof(CGPoint)
+                    start: (arrayData as NSData).bytes.bindMemory(to: CGPoint.self, capacity: arrayData.count),
+                    count: arrayData.count/MemoryLayout<CGPoint>.size
                 )
             )
             for i in 0 ..< array.count {
                 let p = zpoint(array[i])
-                data = ("VRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                data = ((i as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
+                data = ("VRTX " as NSString).data(using: String.Encoding.utf8.rawValue)
+                file?.write(data!)
+                data = ((i as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
                 writePoint(file, p: p)
             }
 
-            data = ("END\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("END\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
         }
         
         // Write voxet for localizing the image
-        data = ("GOCAD VOXET 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("name: " + object.name as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("\n}\nCLASSIFICATION Image Cultural Image\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("AXIS_O" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("GOCAD VOXET 1.0\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ("HEADER {\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ("name: " + object.name as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ("\n}\nCLASSIFICATION Image Cultural Image\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ("AXIS_O" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         let p0 = zpoint(CGPoint(x: 0,y: 0))
         writePoint(file, p: p0)
         // U is along the vertical axis
-        data = ("AXIS_U" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("AXIS_U" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         let py = zpoint(CGPoint(x: 0, y: yHeight))
         let du = DPoint3(x: py.x - p0.x, y: py.y - p0.y, z: py.z - p0.z)
         writePoint(file, p: du)
         // V is along the horizontal axis
-        data = ("AXIS_V" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("AXIS_V" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         let px = zpoint(CGPoint(x: xLength, y: 0))
         let dv = DPoint3(x: px.x - p0.x, y: px.y - p0.y, z: px.z - p0.z)
         writePoint(file, p: dv)
-        data = ("AXIS_W" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("AXIS_W" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         let dw = DPoint3(x: du.y*dv.z - du.z*dv.y, y: du.z*dv.x - du.x*dv.z, z: du.x*dv.y - du.y*dv.x)
         let dwl = dw.x * dw.x + dw.y * dw.y + dw.z * dw.z
         writePoint(file, p: DPoint3(x: dw.x/dwl, y: dw.y/dwl, z:dw.z/dwl))
-        data = ("AXIS_MIN 0 0 0\nAXIS_MAX 1 1 1\nAXIS_N " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ((Int(yHeight) as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        file?.writeData(space!)
-        data = ((Int(xLength) as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = (" 1\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+        data = ("AXIS_MIN 0 0 0\nAXIS_MAX 1 1 1\nAXIS_N " as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ((Int(yHeight) as NSNumber).stringValue).data(using: String.Encoding.utf8)
+        file?.write(data!)
+        file?.write(space!)
+        data = ((Int(xLength) as NSNumber).stringValue).data(using: String.Encoding.utf8)
+        file?.write(data!)
+        data = (" 1\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         data = ("#GOCAD does not support image properties in ASCII file.\n" +
-                "#Use command to Import Image in an existing Voxet.\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("END\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+                "#Use command to Import Image in an existing Voxet.\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
+        data = ("END\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
         
         // Write dip meter points (organized by feature)
         var writtenFeature = Set<NSString>()
         for adpo in object.dipMeterPoints  {
             let dpo = adpo as! DipMeterPointObject
-            if( writtenFeature.contains(dpo.feature) ) {
+            if( writtenFeature.contains(dpo.feature as NSString) ) {
                 continue
             }
-            writtenFeature.insert(dpo.feature)
+            writtenFeature.insert(dpo.feature as NSString)
 
-            data = ("GOCAD VSet 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("name: " + dpo.feature).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("GOCAD VSet 1.0\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("HEADER {\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("name: " + dpo.feature).data(using: String.Encoding.utf8)
+            file?.write(data!)
             // display normal vectors as dip plane
-            data = ("\n*vectors3d: true\n*vectors3d*mode: npolygon\n*vectors3d*variable: normal\n}" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("\nPROPERTIES normal\nPROPERTY_CLASSES vector3d\nESIZES 3\nSUBVSET\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("\n*vectors3d: true\n*vectors3d*mode: npolygon\n*vectors3d*variable: normal\n}" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("\nPROPERTIES normal\nPROPERTY_CLASSES vector3d\nESIZES 3\nSUBVSET\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             
             var vrtx_id = 0
             for iadpo in object.dipMeterPoints  {
@@ -610,50 +610,50 @@ class ExportAsGocadFile : Exporter {
                 if( idpo.feature != dpo.feature ) {
                     continue;
                 }
-                data = ("PVRTX " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                data = ((vrtx_id as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
+                data = ("PVRTX " as NSString).data(using: String.Encoding.utf8.rawValue)
+                file?.write(data!)
+                data = ((vrtx_id as NSNumber).stringValue).data(using: String.Encoding.utf8)
                 vrtx_id += 1
-                file?.writeData(data!)
-                file?.writeData(space!)
+                file?.write(data!)
+                file?.write(space!)
                 
                 // gather information about the point
-                let loc = idpo.locationInImage.CGPointValue
+                let loc = idpo.locationInImage.cgPointValue
                 let strike = idpo.strike.doubleValue * M_PI/180
                 let dip = idpo.dip.doubleValue * M_PI / 180
                 let normal = Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip))
                 var p : DPoint3
-                if( loc.x != 0 && loc.y != 0 ) {
+                if( loc?.x != 0 && loc?.y != 0 ) {
                     // locate from the picture
-                    p = zpoint(loc)
+                    p = zpoint(loc!)
                 } else {
                     // locate using real location
                     let rloc = idpo.realLocation as! CLLocation
                     let centerMapPoint = MKMapPointForCoordinate(rloc.coordinate)
                     p = DPoint3(x: centerMapPoint.x, y: centerMapPoint.y, z: rloc.altitude)
                 }
-                data = ((p.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
-                data = ((p.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
-                data = ((p.z as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
-                data = ((normal.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
-                data = ((normal.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
-                data = ((normal.z as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
+                data = ((p.x as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
+                data = ((p.y as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
+                data = ((p.z as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
+                data = ((normal.y as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
+                data = ((normal.x as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
+                data = ((normal.z as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                data = ("\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+                file?.write(data!)
             }
-            data = ("END\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("END\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
         }
         
         // Write facies columns 
@@ -661,16 +661,16 @@ class ExportAsGocadFile : Exporter {
         // Get the facies vignettes
         for afvo in object.faciesVignettes {
             let fvo = afvo as? FaciesVignetteObject
-            let rect = fvo!.rect.CGRectValue
-            let fv = FaciesVignette(rect: rect, image: fvo!.imageName)
-            let center = CGPoint(x: (rect.minX+rect.maxX)/2.0, y: (rect.minY+rect.maxY)/2.0)
+            let rect = fvo!.rect.cgRectValue
+            let fv = FaciesVignette(rect: rect!, image: fvo!.imageName)
+            let center = CGPoint(x: ((rect?.minX)!+(rect?.maxX)!)/2.0, y: ((rect?.minY)!+(rect?.maxY)!)/2.0)
             
             var inserted_in_column = false
             for fvc in columns {
                 if( fvc.inside(center) ) {
-                    for (index,cfv) in fvc.faciesVignettes.enumerate() {
+                    for (index,cfv) in fvc.faciesVignettes.enumerated() {
                         if( center.y < cfv.rect.minY ) {
-                            fvc.faciesVignettes.insert(fv, atIndex: index)
+                            fvc.faciesVignettes.insert(fv, at: index)
                             inserted_in_column = true
                             break
                         }
@@ -689,72 +689,72 @@ class ExportAsGocadFile : Exporter {
             }
         }
         for col in columns {
-            data = ("GOCAD Well 1.0\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("HEADER {\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
-            data = ("name: " + object.name).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("GOCAD Well 1.0\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("HEADER {\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
+            data = ("name: " + object.name).data(using: String.Encoding.utf8)
+            file?.write(data!)
             
             // Write first point of path
             let fv0 = col.faciesVignettes[0]
             let top = CGPoint(x: (fv0.rect.minX + fv0.rect.maxX)/2.0, y: fv0.rect.minY)
             let topp = zpoint(top)
-            data = ("\n}\nWREF" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("\n}\nWREF" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             writePoint(file, p: topp)
-            data = ("VRTX" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("VRTX" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             writePoint(file, p: topp)
 
             // Write last point
             let fv1 = col.faciesVignettes[col.faciesVignettes.count-1]
             let bot = CGPoint(x: top.x, y: fv1.rect.maxY)
             let botp = zpoint(bot)
-            data = ("VRTX" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("VRTX" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             writePoint(file, p: botp)
             
-            data = ("\nWELL_CURVE\nPROPERTY facies\nINTERPOLATION Block\nBLOCKED_INTERPOLATION_METHOD Below\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("\nWELL_CURVE\nPROPERTY facies\nINTERPOLATION Block\nBLOCKED_INTERPOLATION_METHOD Below\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
             for fv in col.faciesVignettes {
                 let ftop = CGPoint(x: top.x, y: fv.rect.minY)
                 let ftopp = zpoint(ftop)
                 let zm = topp.z - ftopp.z
-                data = ("REC " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                data = ((zm as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                file?.writeData(space!)
+                data = ("REC " as NSString).data(using: String.Encoding.utf8.rawValue)
+                file?.write(data!)
+                data = ((zm as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                file?.write(space!)
                 var index =  -1
                 if( faciesCatalog != nil ) {
                     index = faciesCatalog!.imageIndex(fv.imageName).index
                 }
-                data = ((index as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
-                data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                file?.writeData(data!)
+                data = ((index as NSNumber).stringValue).data(using: String.Encoding.utf8)
+                file?.write(data!)
+                data = ("\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+                file?.write(data!)
             }
-            data = ("END_CURVE\nEND\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-            file?.writeData(data!)
+            data = ("END_CURVE\nEND\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+            file?.write(data!)
         }
 
         
         file?.closeFile()
     }
     
-    func writePoint(file: NSFileHandle?, p: DPoint3) {
-        let space = (" " as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(space!)
-        var data = ((p.x as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        file?.writeData(space!)
-        data = ((p.y as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        file?.writeData(space!)
-        data = ((p.z as NSNumber).stringValue).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
-        data = ("\n" as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-        file?.writeData(data!)
+    func writePoint(_ file: FileHandle?, p: DPoint3) {
+        let space = (" " as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(space!)
+        var data = ((p.x as NSNumber).stringValue).data(using: String.Encoding.utf8)
+        file?.write(data!)
+        file?.write(space!)
+        data = ((p.y as NSNumber).stringValue).data(using: String.Encoding.utf8)
+        file?.write(data!)
+        file?.write(space!)
+        data = ((p.z as NSNumber).stringValue).data(using: String.Encoding.utf8)
+        file?.write(data!)
+        data = ("\n" as NSString).data(using: String.Encoding.utf8.rawValue)
+        file?.write(data!)
     }
 }

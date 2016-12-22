@@ -14,26 +14,26 @@ class DocumentationPageViewController : UIPageViewController, UIPageViewControll
         dataSource = self
         
         if let firstViewController = orderViewControllers.first {
-            setViewControllers([firstViewController], direction: .Forward, animated: true, completion: nil)
+            setViewControllers([firstViewController], direction: .forward, animated: true, completion: nil)
         }
     }
     
-    private func makeController(page: String) -> UIViewController {
-         let ctrler = UIStoryboard(name: "Main", bundle: nil).instantiateViewControllerWithIdentifier("DocumentationWebPage")
+    fileprivate func makeController(_ page: String) -> UIViewController {
+         let ctrler = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DocumentationWebPage")
          let docCtrler = ctrler as! DocumentationWebViewController
          docCtrler.doc = page
          return docCtrler
     }
     
-    private(set) lazy var orderViewControllers : [UIViewController] = {
+    fileprivate(set) lazy var orderViewControllers : [UIViewController] = {
         return [
             self.makeController("doc1"),
             self.makeController("doc2")
         ]
     }()
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerAfterViewController viewController: UIViewController) -> UIViewController? {
-        let viewControllerIndex = orderViewControllers.indexOf(viewController)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+        let viewControllerIndex = orderViewControllers.index(of: viewController)
         if( viewControllerIndex == nil ) {
             return nil
         }
@@ -45,8 +45,8 @@ class DocumentationPageViewController : UIPageViewController, UIPageViewControll
         }
     }
     
-    func pageViewController(pageViewController: UIPageViewController, viewControllerBeforeViewController viewController: UIViewController) -> UIViewController? {
-        let viewControllerIndex = orderViewControllers.indexOf(viewController)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+        let viewControllerIndex = orderViewControllers.index(of: viewController)
         if( viewControllerIndex == nil ) {
             return nil
         }
@@ -58,13 +58,13 @@ class DocumentationPageViewController : UIPageViewController, UIPageViewControll
         }
     }
     
-    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationCount(for pageViewController: UIPageViewController) -> Int {
         return orderViewControllers.count
     }
     
-    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationIndex(for pageViewController: UIPageViewController) -> Int {
         let firstViewController = orderViewControllers.first
-        return orderViewControllers.indexOf(firstViewController!)!
+        return orderViewControllers.index(of: firstViewController!)!
     }
     
 }
@@ -75,8 +75,8 @@ class DocumentationWebViewController : UIViewController {
     @IBOutlet weak var webView: UIWebView!
     
     override func viewDidLoad() {
-        let localfilePath = NSBundle.mainBundle().URLForResource("help/" + doc, withExtension: "html");
-        let myRequest = NSURLRequest(URL: localfilePath!)
+        let localfilePath = Bundle.main.url(forResource: "help/" + doc, withExtension: "html");
+        let myRequest = URLRequest(url: localfilePath!)
         webView.loadRequest(myRequest)
     }
 }

@@ -15,7 +15,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
     let image : UIImage
     let compassOrientation: CLLocationDirection?
     let name : String
-    let date : NSDate
+    let date : Date
     let length : Double?
     
     /**
@@ -33,7 +33,7 @@ class ImageAnnotation: NSObject, MKAnnotation {
         self.image = detailedImage.image()!
         self.compassOrientation = detailedImage.compassOrientation?.doubleValue
         self.coordinate = CLLocationCoordinate2D(latitude: detailedImage.latitude!.doubleValue, longitude: detailedImage.longitude!.doubleValue)
-        self.date = detailedImage.date
+        self.date = detailedImage.date as Date
         if (detailedImage.scale != nil) {
             self.length = detailedImage.scale!.doubleValue * Double(image.size.width)
             //println(["Annotation.length = %d", self.length!])
@@ -47,6 +47,6 @@ class ImageAnnotation: NSObject, MKAnnotation {
     }
     
     var subtitle: String? {
-        return NSDateFormatter.localizedStringFromDate(date, dateStyle: NSDateFormatterStyle.MediumStyle, timeStyle: NSDateFormatterStyle.ShortStyle)
+        return DateFormatter.localizedString(from: date, dateStyle: DateFormatter.Style.medium, timeStyle: DateFormatter.Style.short)
     }
 }

@@ -13,21 +13,21 @@ import CoreData
 class DetailedImageProxy {
     var name: String
     var project: String
-    var date: NSDate
-    init(name: String, project: String, date: NSDate) {
+    var date: Date
+    init(name: String, project: String, date: Date) {
         self.name = name
         self.project = project
         self.date = date
     }
     
     func getObject() -> DetailedImageObject? {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext!
         
-        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        fetchRequest.predicate = NSPredicate(format: "date == %@", date)
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"DetailedImageObject")
+        fetchRequest.predicate = NSPredicate(format: "date == %@", date as CVarArg)
         do {
-            let objects = try managedContext.executeFetchRequest(fetchRequest)
+            let objects = try managedContext.fetch(fetchRequest)
             if( objects.count == 1 ) {
                 return objects[0] as? DetailedImageObject
             } else {
@@ -60,7 +60,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         // appearance and layout customization
         self.tableView.backgroundView = UIImageView(image:UIImage(named:"loadingBackground"))
         self.tableView.estimatedRowHeight = 280
-        self.tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+        self.tableView.separatorStyle = UITableViewCellSeparatorStyle.none
         self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.alwaysBounceVertical = false
         //self.tableView.allowsSelection = false
@@ -72,7 +72,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             controller.searchBar.showsScopeBar = true
             controller.searchBar.scopeButtonTitles = ["All"]
             var selectedScopeButton = 0
-            for (index,project) in projects.enumerate() {
+            for (index,project) in projects.enumerated() {
                 controller.searchBar.scopeButtonTitles!.append(project.name)
                 if( project == currentProject ) {
                     selectedScopeButton = index+1
@@ -91,7 +91,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         
         loadImages()
         
-        updateSearchResultsForSearchController(searchController)
+        updateSearchResults(for: searchController)
         
         self.tableView.reloadData()
         
@@ -99,10 +99,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         if( searchController != nil ) {
-           searchController.dismissViewControllerAnimated(false, completion: nil)
+           searchController.dismiss(animated: false, completion: nil)
            searchController.searchBar.delegate = nil
            searchController.searchResultsUpdater = nil
            tableView.tableHeaderView = nil
@@ -110,27 +110,27 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
     }
     
     func loadImages() {
         // Get the full detailed object from the selected name
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         managedContext = appDelegate.managedObjectContext!
         
-        let fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"DetailedImageObject")
         fetchRequest.includesSubentities = false
         fetchRequest.propertiesToFetch = [ "name", "project.name", "date"]
-        fetchRequest.resultType = NSFetchRequestResultType.DictionaryResultType
+        fetchRequest.resultType = NSFetchRequestResultType.dictionaryResultType
         
         do {
-            let objects = try managedContext.executeFetchRequest(fetchRequest)
+            let objects = try managedContext.fetch(fetchRequest)
             for obj in objects {
-                let name = obj.valueForKey("name") as? NSString
-                let project = obj.valueForKey("project.name") as? NSString
-                let date = obj.valueForKey("date") as? NSDate
+                let name = (obj as AnyObject).value(forKey: "name") as? NSString
+                let project = (obj as AnyObject).value(forKey: "project.name") as? NSString
+                let date = (obj as AnyObject).value(forKey: "date") as? Date
                 if( name != nil && project != nil ) {
                     detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String, date: date!))
                 }
@@ -147,25 +147,25 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
 
     // Mark: - Table View
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if( (searchController != nil && searchController.active) || scopeSelected ){
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if( (searchController != nil && searchController.isActive) || scopeSelected ){
             return filteredDetailedImages.count
         } else {
             return detailedImages.count
         }
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("Card", forIndexPath: indexPath) as! CardTableViewCell
-        cell.backgroundColor = UIColor.clearColor()
-        cell.selectionStyle = UITableViewCellSelectionStyle.None
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Card", for: indexPath) as! CardTableViewCell
+        cell.backgroundColor = UIColor.clear
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
         
         var detailedImage: DetailedImageProxy
-        if (searchController.active || scopeSelected) {
+        if (searchController.isActive || scopeSelected) {
             detailedImage = filteredDetailedImages[indexPath.row]
         } else {
             detailedImage = detailedImages[indexPath.row]
@@ -175,21 +175,21 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        if (!self.searchController.active) {
-            self.performSegueWithIdentifier("loadingToDrawing", sender: self)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if (!self.searchController.isActive) {
+            self.performSegue(withIdentifier: "loadingToDrawing", sender: self)
         } else {
             // do something that deals with the fact that search controller is active
         }
 
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "loadingToDrawing" {
-            let drawingNC = segue.destinationViewController as! UINavigationController
+            let drawingNC = segue.destination as! UINavigationController
             let drawingVC = drawingNC.topViewController as! DrawingViewController
             var destinationDetailedImageProxy : DetailedImageProxy
-            if (self.searchController.active || scopeSelected ) {
+            if (self.searchController.isActive || scopeSelected ) {
                 let indexPath = self.tableView.indexPathForSelectedRow!
                 destinationDetailedImageProxy = filteredDetailedImages[indexPath.row]
             } else {
@@ -201,7 +201,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
             if( destinationDetailedImage != nil ) {
                 drawingVC.detailedImage = destinationDetailedImage!
                 let imageSize = CGSize(
-                    width: Int(destinationDetailedImage!.imageWidth!.intValue), height: Int(destinationDetailedImage!.imageHeight!.intValue)
+                    width: Int(destinationDetailedImage!.imageWidth!.int32Value), height: Int(destinationDetailedImage!.imageHeight!.int32Value)
                 )
                 
                 //get ImageInfo
@@ -236,29 +236,29 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     // Mark: - Deletion
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if (editingStyle == UITableViewCellEditingStyle.Delete) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if (editingStyle == UITableViewCellEditingStyle.delete) {
             
-            if (self.searchController.active || scopeSelected) {
+            if (self.searchController.isActive || scopeSelected) {
                 let deletedImage = filteredDetailedImages[indexPath.row].getObject()
                 if( deletedImage != nil ) {
                     var fullIndex : Int?
-                    for (index, di) in detailedImages.enumerate() {
-                        if( di.date == deletedImage!.date && di.name == deletedImage!.name ) {
+                    for (index, di) in detailedImages.enumerated() {
+                        if( di.date == deletedImage!.date as Date && di.name == deletedImage!.name ) {
                             fullIndex = index
                             break
                         }
                     }
                     if( fullIndex != nil ) {
-                       managedContext.deleteObject(deletedImage!)
-                       detailedImages.removeAtIndex(fullIndex!)
+                       managedContext.delete(deletedImage!)
+                       detailedImages.remove(at: fullIndex!)
                     
-                       filteredDetailedImages.removeAtIndex(indexPath.row)
-                       tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                       filteredDetailedImages.remove(at: indexPath.row)
+                       tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
                     
                        edited = true
                     }
@@ -269,11 +269,11 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
                 let deletedImage = detailedImages[indexPath.row].getObject()
                 deletedImage?.removeImage()
                 if( deletedImage != nil ) {
-                   managedContext.deleteObject(deletedImage!)
+                   managedContext.delete(deletedImage!)
                 }
                 
-                detailedImages.removeAtIndex(indexPath.row)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+                detailedImages.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
                 
                 edited = true
             }
@@ -281,27 +281,27 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     // Mark: - Filtering
-    func updateSearchResultsForSearchController(searchController: UISearchController) {
+    func updateSearchResults(for searchController: UISearchController) {
         let scopes = self.searchController.searchBar.scopeButtonTitles
         if( scopes != nil ) {
-           filteredDetailedImages.removeAll(keepCapacity: false)
+           filteredDetailedImages.removeAll(keepingCapacity: false)
            let selectedScope = scopes![self.searchController.searchBar.selectedScopeButtonIndex]
            self.filterContentForSearchText(searchController.searchBar.text!, scope: selectedScope)
            self.tableView.reloadData();
         }
     }
     
-    func filterContentForSearchText(searchText: String, scope: String = "All") {
+    func filterContentForSearchText(_ searchText: String, scope: String = "All") {
         // Filter the array using the filter method
         self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageProxy) -> Bool in
             let categoryMatch = (scope == "All") || (detailedImage.project == scope)
-            let stringMatch = detailedImage.name.rangeOfString(searchText)
+            let stringMatch = detailedImage.name.range(of: searchText)
             return categoryMatch && (searchText.isEmpty || stringMatch != nil)
             //return (stringMatch != nil)
         })
     }
     
-    func filterContentForScope(scope: String = "All") {
+    func filterContentForScope(_ scope: String = "All") {
         self.filteredDetailedImages = self.detailedImages.filter({( detailedImage: DetailedImageProxy) -> Bool in
             let categoryMatch = (scope == "All") || (detailedImage.project == scope)
             return categoryMatch
@@ -309,10 +309,10 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
 
-    func searchBar(searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
         print(selectedScope)
-        if self.searchController.active {
-            self.updateSearchResultsForSearchController(self.searchController)
+        if self.searchController.isActive {
+            self.updateSearchResults(for: self.searchController)
         } else {
             let scopes = self.searchController.searchBar.scopeButtonTitles!
             let scope = scopes[selectedScope]
@@ -322,7 +322,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         }
     }
     
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         scopeSelected = false
         //self.tableView.reloadData()
     }
@@ -335,7 +335,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     return true
     } **/
     
-    @IBAction func unwindToLoading (segue: UIStoryboardSegue) {
+    @IBAction func unwindToLoading (_ segue: UIStoryboardSegue) {
         
     }
     

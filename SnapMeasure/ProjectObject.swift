@@ -11,7 +11,7 @@ import CoreData
 
 class ProjectObject : NSManagedObject {
     
-    @NSManaged var date : NSDate
+    @NSManaged var date : Date
     @NSManaged var name : String
     @NSManaged var detailedImages : NSSet
     

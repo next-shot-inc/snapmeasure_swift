@@ -17,13 +17,13 @@ class TilingView : UIView {
         name_ = name
         size_ = size
         
-        super.init(frame: CGRectMake(0,0, size.width, size.height))
+        super.init(frame: CGRect(x: 0,y: 0, width: size.width, height: size.height))
         let tiledLayer = self.layer as? CATiledLayer
         tiledLayer!.levelsOfDetail = 1
         tiledLayer!.tileSize = CGSize(width: 1024,height: 1024)
     }
     
-    override class func layerClass() -> AnyClass {
+    override class var layerClass : AnyClass {
        return CATiledLayer.self
     }
 
@@ -45,13 +45,13 @@ class TilingView : UIView {
         }
     }
     
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         
         // get the scale from the context by getting the current transform matrix, then asking
         // for its "a" component, which is one of the two scale components. We could also ask
         // for "d". This assumes (safely) that the view is being scaled equally in both dimensions.
-        let scale = CGContextGetCTM(context).a
+        let scale = context?.ctm.a
         
         let tiledLayer = self.layer as? CATiledLayer
         var tileSize = tiledLayer!.tileSize
@@ -64,98 +64,96 @@ class TilingView : UIView {
         // At 12.5%, our lowest scale, we are stretching about 6 small tiles to fill the entire
         // original image area. But this is okay, because the big blurry image we're drawing
         // here will be scaled way down before it is displayed.)
-        tileSize.width /= scale;
-        tileSize.height /= scale;
+        tileSize.width /= scale!;
+        tileSize.height /= scale!;
         
         // calculate the rows and columns of tiles that intersect the rect we have been asked to draw
-        let firstCol : Int = Int(floorf(Float(CGRectGetMinX(rect) / tileSize.width)));
-        let lastCol : Int = Int(floorf(Float((CGRectGetMaxX(rect)-1) / tileSize.width)));
-        let firstRow : Int = Int(floorf(Float(CGRectGetMinY(rect) / tileSize.height)));
-        let lastRow : Int = Int(floorf(Float((CGRectGetMaxY(rect)-1) / tileSize.height)));
+        let firstCol : Int = Int(floorf(Float(rect.minX / tileSize.width)));
+        let lastCol : Int = Int(floorf(Float((rect.maxX-1) / tileSize.width)));
+        let firstRow : Int = Int(floorf(Float(rect.minY / tileSize.height)));
+        let lastRow : Int = Int(floorf(Float((rect.maxY-1) / tileSize.height)));
         
         for row in firstRow ... lastRow {
             for col in firstCol ... lastCol {
                 
-                let tile = tileForScale(scale, row:row, col:col)
+                let tile = tileForScale(scale!, row:row, col:col)
                 
-                var tileRect = CGRectMake(
-                    tileSize.width * CGFloat(col),tileSize.height * CGFloat(row),
-                    tileSize.width, tileSize.height
+                var tileRect = CGRect(
+                    x: tileSize.width * CGFloat(col),y: tileSize.height * CGFloat(row),
+                    width: tileSize.width, height: tileSize.height
                 )
                 
                 // if the tile would stick outside of our bounds, we need to truncate it so as
                 // to avoid stretching out the partial tiles at the right and bottom edges
-                tileRect = CGRectIntersection(self.bounds, tileRect);
+                tileRect = self.bounds.intersection(tileRect);
                 
                 if( tile == nil ) {
                     annotateRect(tileRect, ctx: context!)
                 } else {
-                    tile!.drawInRect(tileRect)
+                    tile!.draw(in: tileRect)
                 }
             }
         }
     }
     
-    func tileForScale(scale: CGFloat, row: Int, col: Int) -> UIImage? {
+    func tileForScale(_ scale: CGFloat, row: Int, col: Int) -> UIImage? {
         // we use "imageWithContentsOfFile:" instead of "imageNamed:" here because we don't
         // want UIImage to cache our tiles
         //
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let tileName = NSString(format: "%@_%d_%d", name_, col, row)
-        let tileUrl = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent(
+        let tileUrl = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
             tileName as String
         )
-        if( tileUrl.path != nil ) {
-           let tileImage = UIImage(contentsOfFile: tileUrl.path!)
-           if( tileImage != nil ) {
-               return tileImage
-           }
+        let tileImage = UIImage(contentsOfFile: tileUrl.path)
+        if( tileImage != nil ) {
+            return tileImage
         }
         
-        let url = appDelegate.applicationDocumentsDirectory.URLByAppendingPathComponent(
+        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
             name_
         )
-        let fullImage = UIImage(contentsOfFile: url.path!)
+        let fullImage = UIImage(contentsOfFile: url.path)
         if( fullImage == nil ) {
             return nil
         }
         let rawImage = normalizedImage(fullImage!)
-        let imageArea = CGRectMake(
-            CGFloat(col*1024), CGFloat(row*1024),
-            min(CGFloat(col+1)*1024-1,size_.width-1) - CGFloat(col*1024),
-            min(CGFloat(row+1)*1024-1,size_.height-1) - CGFloat(row*1024)
+        let imageArea = CGRect(
+            x: CGFloat(col*1024), y: CGFloat(row*1024),
+            width: min(CGFloat(col+1)*1024-1,size_.width-1) - CGFloat(col*1024),
+            height: min(CGFloat(row+1)*1024-1,size_.height-1) - CGFloat(row*1024)
         )
-        let subImage = CGImageCreateWithImageInRect(rawImage.CGImage, imageArea)
+        let subImage = rawImage.cgImage?.cropping(to: imageArea)
         if( subImage != nil ) {
-            return UIImage(CGImage: subImage!)
+            return UIImage(cgImage: subImage!)
         } else {
             return nil
         }
     }
     
-    func normalizedImage(image : UIImage) -> UIImage {
-        if (image.imageOrientation == UIImageOrientation.Up) {
+    func normalizedImage(_ image : UIImage) -> UIImage {
+        if (image.imageOrientation == UIImageOrientation.up) {
             return image;
         }
     
        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale);
-       image.drawInRect(CGRectMake(0, 0, image.size.width, image.size.height))
+       image.draw(in: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
        UIGraphicsEndImageContext();
-       return normalizedImage
+       return normalizedImage!
     }
     
-    func annotateRect(rect: CGRect, ctx: CGContextRef) {
-        let scale = CGContextGetCTM(ctx).a
+    func annotateRect(_ rect: CGRect, ctx: CGContext) {
+        let scale = ctx.ctm.a
         let line_width = 2.0/scale
         let font_size = 16.0/scale
-        UIColor.whiteColor().set()
-        NSString(format: "%0.0f", log2(scale)).drawAtPoint(
-            CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect)),
-            withAttributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(font_size)]
+        UIColor.white.set()
+        NSString(format: "%0.0f", log2(scale)).draw(
+            at: CGPoint(x: rect.minX, y: rect.minY),
+            withAttributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: font_size)]
         )
-        UIColor.redColor().set()
-        CGContextSetLineWidth(ctx, line_width)
-        CGContextStrokeRect(ctx, rect)
+        UIColor.red.set()
+        ctx.setLineWidth(line_width)
+        ctx.stroke(rect)
     }
 }

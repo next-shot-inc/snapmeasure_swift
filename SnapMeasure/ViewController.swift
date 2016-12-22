@@ -37,14 +37,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         picker.delegate = self
         
         // Test if there are existing DetailedImageObject
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         managedContext = appDelegate.managedObjectContext!
         
-        var fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        var error: NSError?
-        var fetchedResultsCount = managedContext!.countForFetchRequest(fetchRequest,
-            error: &error)
-        selectExistingButton.enabled = fetchedResultsCount > 0
+        var fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"DetailedImageObject")
+        var fetchedResultsCount = 0
+        do {
+            try fetchedResultsCount = managedContext!.count(for: fetchRequest)
+        } catch {
+        }
+        selectExistingButton.isEnabled = fetchedResultsCount > 0
         
         if projects.count == 0 { //just opened app
             //get the most recent project worked on
@@ -52,12 +54,16 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             //sort so most recent is first
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
             
-            fetchedResultsCount = managedContext!.countForFetchRequest(fetchRequest,
-                error: &error)
+            var fetchedResultsCount = 0
+            do {
+               try fetchedResultsCount = managedContext!.count(for: fetchRequest)
+            } catch {
+                
+            }
         
             if fetchedResultsCount > 0 {
                 //println("Project already exists in context")
-                let fprojects = try? managedContext!.executeFetchRequest(fetchRequest)
+                let fprojects = try? managedContext!.fetch(fetchRequest)
                 if( fprojects != nil ) {
                    projects = fprojects as! [ProjectObject]
                    currentProject = projects[0] as ProjectObject
@@ -65,12 +71,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
             } else {
                 //println("Creating a new default project")
-                let project = NSEntityDescription.insertNewObjectForEntityForName(
-                    "ProjectObject",
-                    inManagedObjectContext: managedContext!
+                let project = NSEntityDescription.insertNewObject(
+                    forEntityName: "ProjectObject",
+                    into: managedContext!
                 ) as! ProjectObject
                 project.name = "Project 1"
-                project.date = NSDate()
+                project.date = Date()
                 currentProject = project
                 projects.append(project)
                 do {
@@ -116,37 +122,31 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     func imagePickerController(
-        picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]
+        _ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]
     ) {
         let chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
-        image = chosenImage
-        imageInfo.xDimension = Int(image!.size.width)
-        imageInfo.yDimension = Int(image!.size.height)
-        let cimage = image!.CIImage
-        if( cimage != nil ) {
-            cimage?.properties
-        }
-        dismissViewControllerAnimated(true, completion: nil)
+        
+        dismiss(animated: true, completion: nil)
         
         askForPictureSize(chosenImage)
     }
     
     // Ask to lower potentially the resolution of the image
     // And perform segue
-    func askForPictureSize(image: UIImage) {
+    func askForPictureSize(_ image: UIImage) {
         if( image.size.width < 1024 || image.size.height < 1024 ) {
-            self.performSegueWithIdentifier("toDrawingView", sender: nil)
+            self.performSegue(withIdentifier: "toDrawingView", sender: nil)
         }
         
-        let nf = NSNumberFormatter()
+        let nf = NumberFormatter()
         let message = "The resolution of the image is " +
-            nf.stringFromNumber(image.size.width)! + "x" +
-            nf.stringFromNumber(image.size.height)! + ". You can lower the resolution to simplify digitizing."
+            nf.string(from: NSNumber(value: Float(image.size.width)))! + "x" +
+            nf.string(from: NSNumber(value: Float(image.size.height)))! + ". You can lower the resolution to simplify digitizing."
         let alert = UIAlertController(
-            title: "Image Resolution", message: message, preferredStyle: .Alert
+            title: "Image Resolution", message: message, preferredStyle: .alert
         )
-        let cancelAction: UIAlertAction = UIAlertAction(title: "Actual Size", style: .Cancel) { action -> Void in
-            self.performSegueWithIdentifier("toDrawingView", sender: nil)
+        let cancelAction: UIAlertAction = UIAlertAction(title: "Actual Size", style: .cancel) { action -> Void in
+            self.performSegue(withIdentifier: "toDrawingView", sender: nil)
         }
         alert.addAction(cancelAction)
         
@@ -157,39 +157,39 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         for inc in 0 ..< Int(scale) {
             let scaled_width = ceil(image.size.width/(scale - CGFloat(inc)))
             let scaled_height = ceil(image.size.height/(scale - CGFloat(inc)))
-            let title = nf.stringFromNumber(scaled_width)! + "x" +
-                nf.stringFromNumber(scaled_height)!
-            let nextAction: UIAlertAction = UIAlertAction(title: title, style: .Default) { action -> Void in
+            let title = nf.string(from: NSNumber(value: Float(scaled_width)))! + "x" +
+                nf.string(from: NSNumber(value: Float(scaled_height)))!
+            let nextAction: UIAlertAction = UIAlertAction(title: title, style: .default) { action -> Void in
                 // Resize image
                 self.image = DetailedImageObject.resizeImage(image, newSize: CGSize(width: scaled_width, height: scaled_height))
                 self.imageInfo.xDimension = Int(scaled_width)
                 self.imageInfo.yDimension = Int(scaled_height)
-                self.performSegueWithIdentifier("toDrawingView", sender: nil)
+                self.performSegue(withIdentifier: "toDrawingView", sender: nil)
             }
             alert.addAction(nextAction)
         }
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
 
     
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        dismissViewControllerAnimated(true, completion: nil)
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
     }
 
-    @IBAction func selectPhotoFromLibrary(sender: AnyObject) {
+    @IBAction func selectPhotoFromLibrary(_ sender: AnyObject) {
         picker.allowsEditing = false
-        picker.sourceType = .PhotoLibrary
-        presentViewController(picker, animated: true, completion: nil)
+        picker.sourceType = .photoLibrary
+        present(picker, animated: true, completion: nil)
     }
 
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if( segue.identifier == "toDrawingView" ) {
-            let destinationVC = segue.destinationViewController as? DrawingViewController
+            let destinationVC = segue.destination as? DrawingViewController
             if( destinationVC != nil ) {
                 destinationVC!.image = image
                 destinationVC!.imageInfo = imageInfo
             } else {
-                let navigationVC = segue.destinationViewController as? UINavigationController
+                let navigationVC = segue.destination as? UINavigationController
                 if( navigationVC != nil ) {
                     for vc in navigationVC!.viewControllers {
                         let dvc = vc as? DrawingViewController
@@ -201,31 +201,37 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 }
             }
         } else if( segue.identifier == "toLoadingView" || segue.identifier == "toMapView" ) {
-            activityView = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
-            activityView!.color = UIColor.blueColor()
+            activityView = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+            activityView!.color = UIColor.blue
             activityView!.center = self.view.center
             activityView!.startAnimating()
             self.view.addSubview(activityView!)
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    override func viewDidAppear(_ animated: Bool) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext!
         
-        var fetchRequest = NSFetchRequest(entityName:"DetailedImageObject")
-        var error: NSError?
-        var fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
-            error: &error)
+        var fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"DetailedImageObject")
+        var fetchedResultsCount = 0
+        do {
+            try fetchedResultsCount = managedContext.count(for: fetchRequest)
+        } catch {
+            
+        }
         
-        selectExistingButton.enabled = fetchedResultsCount > 0
+        selectExistingButton.isEnabled = fetchedResultsCount > 0
         
         fetchRequest = NSFetchRequest(entityName:"FeatureObject") //default fetch request is for all Features
         fetchRequest.predicate = NSPredicate(format: "image.project.name==%@", currentProject.name)
-        fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
-            error: &error)
+        do {
+           try fetchedResultsCount = managedContext.count(for: fetchRequest)
+        } catch {
+            
+        }
         
-        showHistogram.enabled = fetchedResultsCount > 1
+        showHistogram.isEnabled = fetchedResultsCount > 1
         
         if projects.count == 0 {
             //get the most recent project worked on
@@ -233,12 +239,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             //sort so most recent is first
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
             
-            fetchedResultsCount = managedContext.countForFetchRequest(fetchRequest,
-                error: &error)
+            do {
+               try fetchedResultsCount = managedContext.count(for: fetchRequest)
+            } catch {
+            }
             
             if fetchedResultsCount > 0 {
                 //println("Project already exists in context")
-                let fprojects = try? managedContext.executeFetchRequest(fetchRequest)
+                let fprojects = try? managedContext.fetch(fetchRequest)
                 if( fprojects != nil ) {
                     projects = fprojects as! [ProjectObject]
                     currentProject = projects[0] as ProjectObject
@@ -248,7 +256,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         if( activityView != nil ) {
             activityView!.stopAnimating()
             activityView!.removeFromSuperview()
@@ -256,19 +264,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
-    @IBAction func selectFromExisting(sender: AnyObject) {
+    @IBAction func selectFromExisting(_ sender: AnyObject) {
         //self.performSegueWithIdentifier("toSelectExisting", sender: nil)
     }
     
-    @IBAction func newProjectButtonTapped(sender: UIButton) {
-        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .Alert)
-        alertController.addTextFieldWithConfigurationHandler { (textField: UITextField) -> Void in
+    @IBAction func newProjectButtonTapped(_ sender: UIButton) {
+        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .alert)
+        alertController.addTextField { (textField: UITextField) -> Void in
             textField.placeholder = "New Project"
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default, handler: {
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.default, handler: {
             (action : UIAlertAction!) -> Void in
         })
-        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: {
+        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {
             alert -> Void in
             
             let firstTextField = alertController.textFields![0] as UITextField
@@ -277,19 +285,19 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         alertController.addAction(saveAction)
         alertController.addAction(cancelAction)
-        self.presentViewController(alertController, animated: false, completion: nil)
+        self.present(alertController, animated: false, completion: nil)
     }
     
     // Perform the creation of the new project 
-    func setNewProject(textField: UITextField) {
-        let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
-            inManagedObjectContext: managedContext!) as! ProjectObject
+    func setNewProject(_ textField: UITextField) {
+        let project = NSEntityDescription.insertNewObject(forEntityName: "ProjectObject",
+            into: managedContext!) as! ProjectObject
         if textField.text == "" {
-            project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
+            project.name = "Project " + NumberFormatter().string(from: NSNumber(value: projects.count+1))!
         } else {
             project.name = textField.text!
         }
-        project.date = NSDate()
+        project.date = Date()
         currentProject = project
         projects.append(project)
         
@@ -302,50 +310,50 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         projectNameLabel.text = currentProject.name
     }
     
-    @IBAction func loadProjectButtonTapped(sender: UIButton) {
+    @IBAction func loadProjectButtonTapped(_ sender: UIButton) {
         menuController = PopupMenuController()
         menuController!.initCellContents(projects.count, cols: 1)
         
         let width : CGFloat = sender.frame.width+20
         let height : CGFloat = 45
         for i in 0..<projects.count {
-            let button = UIButton(type: UIButtonType.System)
-            button.setTitle(projects[i].name, forState: UIControlState.Normal)
+            let button = UIButton(type: UIButtonType.system)
+            button.setTitle(projects[i].name, for: UIControlState())
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
-            button.addTarget(self, action: #selector(ViewController.loadProject(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(ViewController.loadProject(_:)), for: UIControlEvents.touchUpInside)
             menuController!.cellContents[i][0] = button
 
         }
         
         //set up menu Controller
-        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.popover
         //menuController!.preferredContentSize.width = width
         menuController!.tableView.rowHeight = height
         //menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Left
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.left
         
-        self.presentViewController(menuController!, animated: true, completion: nil)
+        self.present(menuController!, animated: true, completion: nil)
 
     }
     
     // Callback linked to each button of the PopupMenuController initialized in the loadProjectButtonTapped
-    func loadProject(sender: UIButton) {
+    func loadProject(_ sender: UIButton) {
         currentProject = projects[sender.tag]
         projectNameLabel.text = currentProject.name
-        menuController!.dismissViewControllerAnimated(true, completion: nil)
+        menuController!.dismiss(animated: true, completion: nil)
     }
        
-    @IBAction func deleteProject(sender: AnyObject) {
+    @IBAction func deleteProject(_ sender: AnyObject) {
         let alertController = UIAlertController(
-            title: "Do you really want to delete project", message: currentProject.name + "?", preferredStyle: .Alert
+            title: "Do you really want to delete project", message: currentProject.name + "?", preferredStyle: .alert
         )
-        let cancelAction = UIAlertAction(title: "No", style: UIAlertActionStyle.Default, handler: {
+        let cancelAction = UIAlertAction(title: "No", style: UIAlertActionStyle.default, handler: {
             (action : UIAlertAction!) -> Void in
         })
-        let saveAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default, handler: {
+        let saveAction = UIAlertAction(title: "Yes", style: UIAlertActionStyle.default, handler: {
             alert -> Void in
             
             self.doDeleteCurrentProject()
@@ -353,23 +361,23 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         
         alertController.addAction(saveAction)
         alertController.addAction(cancelAction)
-        self.presentViewController(alertController, animated: false, completion: nil)
+        self.present(alertController, animated: false, completion: nil)
     }
     
     // Perform the deletion of the curent project
     func doDeleteCurrentProject() {
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext!
-        for (i,p) in projects.enumerate(){
+        for (i,p) in projects.enumerated(){
             if( p === currentProject ) {
-                projects.removeAtIndex(i)
+                projects.remove(at: i)
                 for imageobj in currentProject.detailedImages {
                     let io = imageobj as? DetailedImageObject
                     if( io != nil ) {
                         io!.removeImage()
                     }
                 }
-                managedContext.deleteObject(currentProject)
+                managedContext.delete(currentProject)
                 
                 // Reset current project
                 currentProject = projects[0]
@@ -386,12 +394,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
     }
     
-    @IBAction func unwindToMainMenu (segue: UIStoryboardSegue) {
+    @IBAction func unwindToMainMenu (_ segue: UIStoryboardSegue) {
     
     }
     
     // Send support/enhancement request
-    @IBAction func sendMail(sender: UIButton) {
+    @IBAction func sendMail(_ sender: UIButton) {
         if( !MFMailComposeViewController.canSendMail() ) {
             print("Mail service unavailable")
             return
@@ -402,14 +410,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         mailComposer.setToRecipients(["support@next-shot-inc.com"])
         mailComposer.setMessageBody("Thank you for your feedback - from the development team @next-shot", isHTML: true)
         mailComposer.mailComposeDelegate = self
-        presentViewController(mailComposer, animated: true, completion: nil)
+        present(mailComposer, animated: true, completion: nil)
     }
     
     func mailComposeController(
-        controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?
+        _ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?
     ) {
         print(result)
-        controller.dismissViewControllerAnimated(true, completion: nil)
+        controller.dismiss(animated: true, completion: nil)
     }
 }
 

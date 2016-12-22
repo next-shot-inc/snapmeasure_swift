@@ -20,47 +20,47 @@ class FaciesCatalog {
     ]
     var faciesImages = [FaciesImageObject]()
     
-    enum ImageType : Int { case Facies = 0, SedimentationStyle, UserDefined }
+    enum ImageType : Int { case facies = 0, sedimentationStyle, userDefined }
     
-    func count(type: ImageType) -> Int {
-        if( type == ImageType.Facies ) {
+    func count(_ type: ImageType) -> Int {
+        if( type == ImageType.facies ) {
             return faciesTypes.count
-        } else if( type == ImageType.SedimentationStyle ) {
+        } else if( type == ImageType.sedimentationStyle ) {
             return sedimentationStyles.count;
         } else {
           return faciesImages.count
         }
     }
     
-    func element(index: (type: ImageType, index: Int)) -> (name: String, image: UIImage) {
+    func element(_ index: (type: ImageType, index: Int)) -> (name: String, image: UIImage) {
         var name : String
         var image: UIImage
-        if( index.type == ImageType.Facies ) {
+        if( index.type == ImageType.facies ) {
             image = UIImage(named: faciesTypes[index.index])!
             name = faciesTypes[index.index]
 
-        } else if( index.type == ImageType.SedimentationStyle ) {
+        } else if( index.type == ImageType.sedimentationStyle ) {
             image = UIImage(named: sedimentationStyles[index.index])!
             name = sedimentationStyles[index.index]
 
         } else {
-            image = UIImage(data: faciesImages[index.index].imageData)!
+            image = UIImage(data: faciesImages[index.index].imageData as Data)!
             name = faciesImages[index.index].name
         }
         return (name, image)
     }
     
-    func name(index: (type: ImageType, index: Int)) -> String {
-        if( index.type == ImageType.Facies ) {
+    func name(_ index: (type: ImageType, index: Int)) -> String {
+        if( index.type == ImageType.facies ) {
              return faciesTypes[index.index]
-        } else if( index.type == ImageType.SedimentationStyle ) {
+        } else if( index.type == ImageType.sedimentationStyle ) {
             return sedimentationStyles[index.index]
         } else {
             return faciesImages[index.index].name
         }
     }
     
-    func image(name: String) -> (image: UIImage?, tile: Bool) {
+    func image(_ name: String) -> (image: UIImage?, tile: Bool) {
         for n in faciesTypes {
             if( n == name ) {
                 return (UIImage(named: name), true)
@@ -73,45 +73,45 @@ class FaciesCatalog {
         }
         for fio in faciesImages {
             if( name == fio.name ) {
-                return (UIImage(data: fio.imageData), fio.tilePixmap.boolValue)
+                return (UIImage(data: fio.imageData as Data), fio.tilePixmap.boolValue)
             }
         }
         return (nil,false)
     }
     
-    func imageIndex(name: String) -> (type: ImageType, index:Int) {
-        for (i,n) in faciesTypes.enumerate() {
+    func imageIndex(_ name: String) -> (type: ImageType, index:Int) {
+        for (i,n) in faciesTypes.enumerated() {
             if( n == name ) {
-                return (ImageType.Facies, i)
+                return (ImageType.facies, i)
             }
         }
-        for (i,n) in sedimentationStyles.enumerate() {
+        for (i,n) in sedimentationStyles.enumerated() {
             if( n == name ) {
-                return (ImageType.SedimentationStyle, i)
+                return (ImageType.sedimentationStyle, i)
             }
         }
-        for (i,fio) in faciesImages.enumerate() {
+        for (i,fio) in faciesImages.enumerated() {
             if( name == fio.name ) {
-                return (ImageType.SedimentationStyle, i)
+                return (ImageType.sedimentationStyle, i)
             }
         }
-        return (ImageType.Facies, -1)
+        return (ImageType.facies, -1)
     }
     
-    func remove(type: ImageType, index: Int) {
-        if( type == ImageType.UserDefined ) {
-           faciesImages.removeAtIndex(index)
+    func remove(_ type: ImageType, index: Int) {
+        if( type == ImageType.userDefined ) {
+           faciesImages.remove(at: index)
         }
     }
     
     func loadImages() {
         // Get the full detailed object from the selected name
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let managedContext = appDelegate.managedObjectContext!
         
-        let fetchRequest = NSFetchRequest(entityName:"FaciesImageObject")
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"FaciesImageObject")
         do  {
-           let images = try managedContext.executeFetchRequest(fetchRequest)
+           let images = try managedContext.fetch(fetchRequest)
            self.faciesImages = images as! [FaciesImageObject]
         }  catch {
             
@@ -124,16 +124,16 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
     var typeButton : UIButton?
     var drawingView: DrawingView?
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 3
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return faciesCatalog!.count(FaciesCatalog.ImageType(rawValue: section)!)
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("PixmapCell", forIndexPath: indexPath)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PixmapCell", for: indexPath)
         let imageInfo = faciesCatalog!.element((FaciesCatalog.ImageType(rawValue: indexPath.section)!, indexPath.row))
         cell.imageView!.image = imageInfo.image
         cell.textLabel!.text = imageInfo.name
@@ -141,37 +141,37 @@ class FaciesTypeTablePickerController : UIViewController, UITableViewDelegate, U
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let name = faciesCatalog!.name((FaciesCatalog.ImageType(rawValue: indexPath.section)!, indexPath.row))
-        typeButton?.setTitle(name, forState: UIControlState.Normal)
+        typeButton?.setTitle(name, for: UIControlState())
         drawingView?.faciesView.curImageName = name
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         let section = FaciesCatalog.ImageType(rawValue: section)!
-        if( section == FaciesCatalog.ImageType.Facies ) {
+        if( section == FaciesCatalog.ImageType.facies ) {
             return "Facies"
-        } else if( section == FaciesCatalog.ImageType.SedimentationStyle ) {
+        } else if( section == FaciesCatalog.ImageType.sedimentationStyle ) {
             return "Sedimentation Structure"
         } else {
             return "User Defined"
         }
     }
     
-    func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
+    func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
         let section = FaciesCatalog.ImageType(rawValue: indexPath.section)!
-        if( section != FaciesCatalog.ImageType.UserDefined ) {
-            return UITableViewCellEditingStyle.None
+        if( section != FaciesCatalog.ImageType.userDefined ) {
+            return UITableViewCellEditingStyle.none
         } else {
-            return UITableViewCellEditingStyle.Delete
+            return UITableViewCellEditingStyle.delete
         }
     }
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         let row = indexPath.row
-        if( editingStyle == UITableViewCellEditingStyle.Delete ) {
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.None)
-            faciesCatalog!.remove(FaciesCatalog.ImageType.UserDefined, index: row)
+        if( editingStyle == UITableViewCellEditingStyle.delete ) {
+            tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.none)
+            faciesCatalog!.remove(FaciesCatalog.ImageType.userDefined, index: row)
         }
     }
     
@@ -199,65 +199,65 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         picker.delegate = self
     }
     
-    override func viewDidDisappear(animated: Bool) {
+    override func viewDidDisappear(_ animated: Bool) {
         if( drawingController != nil ) {
             //drawingController!.imageView.center = drawingController!.center
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         if( drawingView != nil && faciesCatalog != nil ) {
             let index = faciesCatalog!.imageIndex(drawingView!.faciesView.curImageName)
-            tableView.selectRowAtIndexPath(
-                NSIndexPath(
-                    forRow: index.index, inSection: index.type.rawValue
+            tableView.selectRow(
+                at: IndexPath(
+                    row: index.index, section: index.type.rawValue
                 ),
-                animated: true, scrollPosition: UITableViewScrollPosition.Middle
+                animated: true, scrollPosition: UITableViewScrollPosition.middle
             )
         }
     }
     
-    @IBAction func AddPixmap(sender: AnyObject) {
+    @IBAction func AddPixmap(_ sender: AnyObject) {
         picker.allowsEditing = false
-        picker.sourceType = .PhotoLibrary
-        presentViewController(picker, animated: true, completion: nil)
+        picker.sourceType = .photoLibrary
+        present(picker, animated: true, completion: nil)
     }
     
     func imagePickerController(
-        picker: UIImagePickerController,
-        didFinishPickingMediaWithInfo info: [String : AnyObject]
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [String : Any]
     ) {
         let chosenImage = info[UIImagePickerControllerOriginalImage] as! UIImage
-        dismissViewControllerAnimated(true, completion: nil)
+        dismiss(animated: true, completion: nil)
         askImageName(chosenImage)
     }
     
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        dismissViewControllerAnimated(true, completion: nil)
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        dismiss(animated: true, completion: nil)
     }
 
-    func askImageName(image: UIImage) {
+    func askImageName(_ image: UIImage) {
         var inputTextField : UITextField?
-        let alert = UIAlertController(title: "Please give image a name", message: "And choose import method", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textField) in
+        let alert = UIAlertController(title: "Please give image a name", message: "And choose import method", preferredStyle: .alert)
+        alert.addTextField { (textField) in
             textField.placeholder = "Name"
             inputTextField = textField
         }
-        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .default) { action -> Void in
         }
         alert.addAction(noAction)
-        let yesScaleAction: UIAlertAction = UIAlertAction(title: "Ok & Scale", style: .Default) { action -> Void in
+        let yesScaleAction: UIAlertAction = UIAlertAction(title: "Ok & Scale", style: .default) { action -> Void in
             // scale to 128 pixels.
             let scale = 128.0/max(image.size.width, image.size.height)
             let size = CGSize(width: image.size.width*scale, height: image.size.height*scale)
             let nimage = self.resizeImage(image, newSize: size)
             
             // Create ImageObject
-            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext!
             
-            let detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
-                inManagedObjectContext: managedContext) as? FaciesImageObject
+            let detailedImage = NSEntityDescription.insertNewObject(forEntityName: "FaciesImageObject",
+                into: managedContext) as? FaciesImageObject
             
             detailedImage!.imageData = UIImageJPEGRepresentation(nimage, 1.0)!
             detailedImage!.name = inputTextField!.text!
@@ -268,13 +268,13 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         }
         alert.addAction(yesScaleAction)
         
-        let yesNoScaleAction: UIAlertAction = UIAlertAction(title: "Ok & Use as is", style: .Default) { action -> Void in
+        let yesNoScaleAction: UIAlertAction = UIAlertAction(title: "Ok & Use as is", style: .default) { action -> Void in
             // Create ImageObject
-            let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            let appDelegate = UIApplication.shared.delegate as! AppDelegate
             let managedContext = appDelegate.managedObjectContext!
             
-            let detailedImage = NSEntityDescription.insertNewObjectForEntityForName("FaciesImageObject",
-                inManagedObjectContext: managedContext) as? FaciesImageObject
+            let detailedImage = NSEntityDescription.insertNewObject(forEntityName: "FaciesImageObject",
+                into: managedContext) as? FaciesImageObject
             
             detailedImage!.imageData = UIImageJPEGRepresentation(image, 1.0)!
             detailedImage!.name = inputTextField!.text!
@@ -285,26 +285,26 @@ class FaciesPixmapViewController : UIViewController, UINavigationControllerDeleg
         }
         alert.addAction(yesNoScaleAction)
         
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     
-    func resizeImage(image: UIImage, newSize: CGSize) -> (UIImage) {
-        let newRect = CGRectIntegral(CGRectMake(0,0, newSize.width, newSize.height))
-        let imageRef = image.CGImage
+    func resizeImage(_ image: UIImage, newSize: CGSize) -> (UIImage) {
+        let newRect = CGRect(x: 0,y: 0, width: newSize.width, height: newSize.height).integral
+        let imageRef = image.cgImage
         
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
         let context = UIGraphicsGetCurrentContext()
         
         // Set the quality level to use when rescaling
-        CGContextSetInterpolationQuality(context, CGInterpolationQuality.High)
-        let flipVertical = CGAffineTransformMake(1, 0, 0, -1, 0, newSize.height)
+        context!.interpolationQuality = CGInterpolationQuality.high
+        let flipVertical = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: newSize.height)
         
-        CGContextConcatCTM(context, flipVertical)
+        context?.concatenate(flipVertical)
         // Draw into the context; this scales the image
-        CGContextDrawImage(context, newRect, imageRef)
+        context?.draw(imageRef!, in: newRect)
         
-        let newImageRef = CGBitmapContextCreateImage(context)
-        let newImage = UIImage(CGImage: newImageRef!)
+        let newImageRef = context?.makeImage()
+        let newImage = UIImage(cgImage: newImageRef!)
         
         // Get the resized image from the context and a UIImage
         UIGraphicsEndImageContext()

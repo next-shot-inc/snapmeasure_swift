@@ -26,27 +26,27 @@ class HistogramSplitViewController : UISplitViewController {
         masterHistogramController = masterVC
         detailedHistogramController = detailVC
         
-        let orientation = UIApplication.sharedApplication().statusBarOrientation
-        if orientation == UIInterfaceOrientation.Portrait || orientation == UIInterfaceOrientation.PortraitUpsideDown {
-            self.preferredDisplayMode = UISplitViewControllerDisplayMode.PrimaryOverlay
+        let orientation = UIApplication.shared.statusBarOrientation
+        if orientation == UIInterfaceOrientation.portrait || orientation == UIInterfaceOrientation.portraitUpsideDown {
+            self.preferredDisplayMode = UISplitViewControllerDisplayMode.primaryOverlay
         }
         
     }
     
-    override func viewWillTransitionToSize(size: CGSize,
-        withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+    override func viewWillTransition(to size: CGSize,
+        with coordinator: UIViewControllerTransitionCoordinator) {
             // willRotateToInterfaceOrientation code goes here
-            coordinator.animateAlongsideTransition({ (UIViewControllerTransitionCoordinatorContext) -> Void in
+            coordinator.animate(alongsideTransition: { (UIViewControllerTransitionCoordinatorContext) -> Void in
                 // willAnimateRotationToInterfaceOrientation code goes here
-                super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+                super.viewWillTransition(to: size, with: coordinator)
                 
                 }, completion: { (UIViewControllerTransitionCoordinatorContext) -> Void in
                     // didRotateFromInterfaceOrientation goes here
-                    self.preferredDisplayMode = UISplitViewControllerDisplayMode.Automatic
+                    self.preferredDisplayMode = UISplitViewControllerDisplayMode.automatic
             })
     }
     
-    override func unwindForSegue(unwindSegue: UIStoryboardSegue, towardsViewController subsequentVC: UIViewController) {
+    override func unwind(for unwindSegue: UIStoryboardSegue, towardsViewController subsequentVC: UIViewController) {
         if( unwindSegue.identifier == "unwindFromHistogramToMain" ) {
         }
     }

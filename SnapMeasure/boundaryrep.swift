@@ -19,7 +19,7 @@ class RadialNode {
         self.loc = loc
     }
     
-    func add(line: OrientedLine) {
+    func add(_ line: OrientedLine) {
         let c = line.endSegment()
         
         if( lines.count < 2 ) {
@@ -35,7 +35,7 @@ class RadialNode {
                 // compute angle of segment i with segment 0,
                 let iangle = angle(loc, b: b, c: ci)
                 if( nangle < iangle ) {
-                    lines.insert(line, atIndex: i)
+                    lines.insert(line, at: i)
                     return
                 }
             }
@@ -43,9 +43,9 @@ class RadialNode {
         }
     }
     
-    func next(line: OrientedLine) -> OrientedLine? {
+    func next(_ line: OrientedLine) -> OrientedLine? {
         // Return the next line in the array of lines
-        for (index, iline) in lines.enumerate() {
+        for (index, iline) in lines.enumerated() {
             if( iline == line ) {
                 if( index == lines.count-1 ) {
                     // Circular list
@@ -58,15 +58,15 @@ class RadialNode {
         return nil
     }
     
-    func cross(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
+    func cross(_ a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
         return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x)
     }
     
-    func dot(a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
+    func dot(_ a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
         return (b.x - a.x)*(c.x - a.x) + (b.y - a.y)*(c.y - a.y)
     }
    
-    func angle(a: CGPoint, b: CGPoint, c: CGPoint) ->  Double {
+    func angle(_ a: CGPoint, b: CGPoint, c: CGPoint) ->  Double {
         var a = atan2(Double(cross(a, b: b, c: c)), Double(dot(a,b: b,c: c)))
         if( a < 0.0 ) {
             // All angles need to be measured along the same direction.
@@ -122,7 +122,7 @@ class OrientedPolygon {
         var ymin : CGFloat = 1e+30
         var lmin : Line?
         for l in lines {
-            if( l.line.role == Line.Role.Horizon || l.line.role == Line.Role.Border ) {
+            if( l.line.role == Line.Role.horizon || l.line.role == Line.Role.border ) {
                 for i in 0 ..< l.line.points.count-1 {
                     let y = (l.line.points[i].y + l.line.points[i+1].y)*0.5
                     if( y < ymin  ) {
@@ -132,7 +132,7 @@ class OrientedPolygon {
                 }
             }
         }
-        if( lmin != nil && lmin!.role == Line.Role.Horizon ) {
+        if( lmin != nil && lmin!.role == Line.Role.horizon ) {
             color = lmin!.color
         }
     }
@@ -155,11 +155,11 @@ class SplitLine {
         self.line = line
     }
     
-    func add(seg: SplitSegment) {
+    func add(_ seg: SplitSegment) {
         // Add the split of the line in order along the line
         for i in 0 ..< splits.count {
             if( seg.index < splits[i].index ) {
-                splits.insert(seg, atIndex: i)
+                splits.insert(seg, at: i)
                 return
             } else if( seg.index == splits[i].index ) {
                 // Same segment is splitted. Find the order.
@@ -170,7 +170,7 @@ class SplitLine {
                     line.points[seg.index], b: line.points[seg.index+1], c: splits[i].loc
                 )
                 if( s < si ) {
-                    splits.insert(seg, atIndex: i)
+                    splits.insert(seg, at: i)
                     return
                 } else if( s == si ) {
                     return
@@ -272,7 +272,7 @@ class Polygons {
             }
         }
         
-        extremities.sortInPlace()
+        extremities.sort()
         
         // Construct the radial nodes 
         // after the sorting the extremities at the same location are next to each others
@@ -314,7 +314,7 @@ class Polygons {
         
     }
     
-    func intersect(lines: [Line], iline0: Int, iline1: Int) {
+    func intersect(_ lines: [Line], iline0: Int, iline1: Int) {
         let line0 = lines[iline0]
         let line1 = lines[iline1]
         for i in 0 ..< line0.points.count-1 {

@@ -35,9 +35,9 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         //get scale for the image
         let scale = drawingView.getScale()
         if(!scale.defined) {
-            warningLabel.hidden = false
+            warningLabel.isHidden = false
             warningLabel.text = "WARNING:\nNo scale defined for this image"
-            warningLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
+            warningLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
             warningLabel.numberOfLines = 0
         }
         
@@ -52,15 +52,15 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         
     }
     
-    @IBAction func newProjectButtonPressed(sender: UIButton) {
-        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .Alert)
-        alertController.addTextFieldWithConfigurationHandler { (textField: UITextField) -> Void in
+    @IBAction func newProjectButtonPressed(_ sender: UIButton) {
+        let alertController = UIAlertController(title: "Enter project name", message: "", preferredStyle: .alert)
+        alertController.addTextField { (textField: UITextField) -> Void in
             textField.placeholder = "New Project"
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Default, handler: {
+        let cancelAction = UIAlertAction(title: "Cancel", style: UIAlertActionStyle.default, handler: {
             (action : UIAlertAction!) -> Void in
         })
-        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Default, handler: {
+        let saveAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: {
             alert -> Void in
             
             let firstTextField = alertController.textFields![0] as UITextField
@@ -69,18 +69,18 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
 
         alertController.addAction(saveAction)
         alertController.addAction(cancelAction)
-        self.presentViewController(alertController, animated: false, completion: nil)
+        self.present(alertController, animated: false, completion: nil)
     }
     
-    func setNewProject(textField: UITextField) {
-        let project = NSEntityDescription.insertNewObjectForEntityForName("ProjectObject",
-            inManagedObjectContext: drawingVC!.managedContext!) as! ProjectObject
+    func setNewProject(_ textField: UITextField) {
+        let project = NSEntityDescription.insertNewObject(forEntityName: "ProjectObject",
+            into: drawingVC!.managedContext!) as! ProjectObject
         if textField.text == "" {
-            project.name = "Project " + NSNumberFormatter().stringFromNumber(projects.count+1)!
+            project.name = "Project " + NumberFormatter().string(from: NSNumber(value: projects.count+1))!
         } else {
             project.name = textField.text!
         }
-        project.date = NSDate()
+        project.date = Date()
         currentProject = project
         projects.append(project)
         
@@ -94,73 +94,73 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         
     }
     
-    @IBAction func loadProjectButtonPressed(sender: UIButton) {
+    @IBAction func loadProjectButtonPressed(_ sender: UIButton) {
         menuController = PopupMenuController()
         menuController!.initCellContents(projects.count, cols: 1)
         
         var labelWidth : CGFloat = 0
         for i in 0..<projects.count {
            let t = projects[i].name as NSString
-           let size = t.sizeWithAttributes([NSFontAttributeName: UIFont.systemFontOfSize(UIFont.buttonFontSize())])
+           let size = t.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: UIFont.buttonFontSize)])
            labelWidth = max(labelWidth, size.width)
         }
         
         let width : CGFloat = max(sender.frame.width+40, labelWidth+40)
         let height : CGFloat = 45
         for i in 0..<projects.count {
-            let button = UIButton(type: UIButtonType.System)
-            button.setTitle(projects[i].name, forState: UIControlState.Normal)
+            let button = UIButton(type: UIButtonType.system)
+            button.setTitle(projects[i].name, for: UIControlState())
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
-            button.addTarget(self, action: #selector(SavePopoverViewController.loadProject(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(SavePopoverViewController.loadProject(_:)), for: UIControlEvents.touchUpInside)
             menuController!.cellContents[i][0] = button
             
         }
         
         //set up menu Controller
-        menuController!.modalPresentationStyle = UIModalPresentationStyle.Popover
+        menuController!.modalPresentationStyle = UIModalPresentationStyle.popover
         //menuController!.preferredContentSize.width = width
         menuController!.tableView.rowHeight = height
         //menuController!.preferredContentSize.height = menuController!.preferredHeight()
         menuController!.popoverPresentationController?.sourceRect = sender.bounds
         menuController!.popoverPresentationController?.sourceView = sender as UIView
-        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Up
+        menuController!.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.up
         
-        self.presentViewController(menuController!, animated: true, completion: nil)
+        self.present(menuController!, animated: true, completion: nil)
     }
     
-    func loadProject(sender: UIButton) {
+    func loadProject(_ sender: UIButton) {
         currentProject = projects[sender.tag]
         projectNameLabel.text = currentProject.name
-        menuController!.dismissViewControllerAnimated(true, completion: nil)
+        menuController!.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func cancelButtonPressed(sender: AnyObject) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func cancelButtonPressed(_ sender: AnyObject) {
+        self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func saveAsNewButtonPressed(sender: AnyObject) {
+    @IBAction func saveAsNewButtonPressed(_ sender: AnyObject) {
         let managedContext = drawingVC!.managedContext
         //create a new detailedImageObject in the contect
-        let newImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
-            inManagedObjectContext: drawingVC!.managedContext) as! DetailedImageObject
+        let newImage = NSEntityDescription.insertNewObject(forEntityName: "DetailedImageObject",
+            into: drawingVC!.managedContext) as! DetailedImageObject
         
         let drawingView = drawingVC!.imageView as! DrawingView
         //get scale for the image
         let scale = drawingView.getScale()
         if(scale.defined) {
-            newImage.scale = scale.scale
+            newImage.scale = scale.scale as NSNumber?
         } else {
             
         }
         
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
-        newImage.longitude = drawingVC!.imageInfo.longitude
-        newImage.latitude = drawingVC!.imageInfo.latitude
-        newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
-        newImage.altitude = drawingVC!.imageInfo.altitude
-        newImage.date = NSDate()
+        newImage.longitude = drawingVC!.imageInfo.longitude as NSNumber?
+        newImage.latitude = drawingVC!.imageInfo.latitude as NSNumber?
+        newImage.compassOrientation = drawingVC!.imageInfo.compassOrienation as NSNumber?
+        newImage.altitude = drawingVC!.imageInfo.altitude as NSNumber?
+        newImage.date = Date()
         newImage.project = currentProject
         newImage.features = drawingVC!.detailedImage!.features.copy() as! NSSet
         if (nameTextField.text != "") {
@@ -170,9 +170,9 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         }
         
         // Update project date
-        currentProject.date = NSDate()
+        currentProject.date = Date()
         
-        saveDrawingView(drawingView, image: newImage, managedContext: managedContext)
+        saveDrawingView(drawingView, image: newImage, managedContext: managedContext!)
         
         //save the managedObjectContext
         do {
@@ -184,11 +184,11 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
 
         drawingVC!.hasChanges = false
 
-        self.dismissViewControllerAnimated(true, completion: nil)
-        drawingVC!.performSegueWithIdentifier("unwindFromDrawingToMain", sender: drawingVC!)
+        self.dismiss(animated: true, completion: nil)
+        drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
     }
     
-    @IBAction func saveButtonPressed(sender: AnyObject) {
+    @IBAction func saveButtonPressed(_ sender: AnyObject) {
         let managedContext = drawingVC!.managedContext
         //create a new detailedImageObject in the contect
         let currentImage = drawingVC!.detailedImage!
@@ -197,7 +197,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         //get scale for the image
         let scale = drawingView.getScale()
         if(scale.defined) {
-            currentImage.scale = scale.scale
+            currentImage.scale = scale.scale as NSNumber?
         } else {
 
         }
@@ -205,10 +205,10 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         //update detailedImage and lines
         //detailedImage!.name = outcropName.text!
         currentImage.project = currentProject
-        currentImage.longitude = drawingVC!.imageInfo.longitude
-        currentImage.latitude = drawingVC!.imageInfo.latitude
-        currentImage.compassOrientation = drawingVC!.imageInfo.compassOrienation
-        currentImage.altitude = drawingVC!.imageInfo.altitude
+        currentImage.longitude = drawingVC!.imageInfo.longitude as NSNumber?
+        currentImage.latitude = drawingVC!.imageInfo.latitude as NSNumber?
+        currentImage.compassOrientation = drawingVC!.imageInfo.compassOrienation as NSNumber?
+        currentImage.altitude = drawingVC!.imageInfo.altitude as NSNumber?
         currentImage.date = drawingVC!.imageInfo.date
         if (nameTextField.text != "") {
             currentImage.name = nameTextField.text!
@@ -217,44 +217,46 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         }
         
         // Update project date
-        currentProject.date = NSDate()
+        currentProject.date = Date()
    
-        saveDrawingView(drawingView, image: currentImage, managedContext: managedContext)
+        saveDrawingView(drawingView, image: currentImage, managedContext: managedContext!)
         
         //save the managedObjectContext
         do {
-            try managedContext.save()
+            try managedContext?.save()
         } catch let error as NSError {
             print("Could not save in DrawingViewController \(error), \(error.userInfo)")
         }
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
         
         drawingVC!.hasChanges = false
-        drawingVC!.performSegueWithIdentifier("unwindFromDrawingToMain", sender: drawingVC!)
+        drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
     }
     
-    func saveDrawingView(drawingView: DrawingView, image: DetailedImageObject, managedContext: NSManagedObjectContext) {
+    func saveDrawingView(_ drawingView: DrawingView, image: DetailedImageObject, managedContext: NSManagedObjectContext) {
         let linesSet = NSMutableSet()
         
         // Always store the coordinates in image coordinates (reverse any viewing transform due to scaling)
-        let affineTransform = CGAffineTransformInvert(drawingView.affineTransform)
+        let affineTransform = drawingView.affineTransform.inverted()
         for line in drawingView.lineView.lines  {
-            let lineObject = NSEntityDescription.insertNewObjectForEntityForName("LineObject",
-                inManagedObjectContext: managedContext) as? LineObject
+            let lineObject = NSEntityDescription.insertNewObject(forEntityName: "LineObject",
+                into: managedContext) as? LineObject
             
             lineObject!.name = line.name
-            lineObject!.colorData = NSKeyedArchiver.archivedDataWithRootObject(
-                UIColor(CGColor: line.color)
+            lineObject!.colorData = NSKeyedArchiver.archivedData(
+                withRootObject: UIColor(cgColor: line.color)
             )
             lineObject!.type = LineViewTool.typeName(line.role)
             
-            var points : [CGPoint] = Array<CGPoint>(count: line.points.count, repeatedValue: CGPoint(x: 0, y:0))
+            var points : [CGPoint] = Array<CGPoint>(repeating: CGPoint(x: 0, y:0), count: line.points.count)
             for i in 0 ..< line.points.count {
-                points[i] = CGPointApplyAffineTransform(line.points[i], affineTransform)
+                points[i] = line.points[i].applying(affineTransform)
             }
-            lineObject!.pointData = NSData(bytes: points, length: points.count * sizeof(CGPoint))
+            
+            lineObject!.pointData = Data(bytes: points, count: points.count * MemoryLayout<CGPoint>.size)
+            
             lineObject!.image = image
-            linesSet.addObject(lineObject!)
+            linesSet.add(lineObject!)
             print("Added a line")
         }
         image.lines = linesSet
@@ -264,13 +266,13 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         
         for fc in drawingView.faciesView.faciesColumns {
             for fv in fc.faciesVignettes {
-                let faciesVignetteObject = NSEntityDescription.insertNewObjectForEntityForName(
-                    "FaciesVignetteObject", inManagedObjectContext: managedContext) as? FaciesVignetteObject
+                let faciesVignetteObject = NSEntityDescription.insertNewObject(
+                    forEntityName: "FaciesVignetteObject", into: managedContext) as? FaciesVignetteObject
                 
                 faciesVignetteObject!.imageName = fv.imageName
-                let scaledRect = CGRectApplyAffineTransform(fv.rect, affineTransform)
-                faciesVignetteObject!.rect = NSValue(CGRect: scaledRect)
-                faciesVignetteSet.addObject(faciesVignetteObject!)
+                let scaledRect = fv.rect.applying(affineTransform)
+                faciesVignetteObject!.rect = NSValue(cgRect: scaledRect)
+                faciesVignetteSet.add(faciesVignetteObject!)
             }
         }
         image.faciesVignettes = faciesVignetteSet
@@ -279,38 +281,38 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         for tv in drawingView.textView.subviews {
             let label = tv as? UILabel
             if( label != nil ) {
-                let textObject = NSEntityDescription.insertNewObjectForEntityForName(
-                    "TextObject", inManagedObjectContext: managedContext) as? TextObject
+                let textObject = NSEntityDescription.insertNewObject(
+                    forEntityName: "TextObject", into: managedContext) as? TextObject
                 
-                let scaledRect = CGRectApplyAffineTransform(tv.frame, affineTransform)
-                textObject!.rect = NSValue(CGRect: scaledRect)
+                let scaledRect = tv.frame.applying(affineTransform)
+                textObject!.rect = NSValue(cgRect: scaledRect)
                 
                 textObject!.string = label!.text!
                 
-                textSet.addObject(textObject!)
+                textSet.add(textObject!)
             }
         }
         image.texts = textSet
         
         let dipMeterPoints = NSMutableSet()
         for dmp in drawingView.dipMarkerView.points {
-            let dmpo = NSEntityDescription.insertNewObjectForEntityForName(
-                "DipMeterPointObject", inManagedObjectContext: managedContext) as? DipMeterPointObject
+            let dmpo = NSEntityDescription.insertNewObject(
+                forEntityName: "DipMeterPointObject", into: managedContext) as? DipMeterPointObject
             var tpoint = dmp.loc
             if( dmp.loc.x != 0 && dmp.loc.y != 0 ) {
-                tpoint = CGPointApplyAffineTransform(dmp.loc, affineTransform)
+                tpoint = dmp.loc.applying(affineTransform)
             }
-            dmpo!.locationInImage = NSValue(CGPoint: tpoint)
+            dmpo!.locationInImage = NSValue(cgPoint: tpoint)
             dmpo!.realLocation = dmp.realLocation
             let sad = dmp.normal.strikeAndDip()
-            dmpo!.strike = sad.strike
-            dmpo!.dip = sad.dip
+            dmpo!.strike = NSNumber(value: sad.strike)
+            dmpo!.dip = NSNumber(value: sad.dip)
             if( dmp.snappedLine != nil ) {
                 dmpo!.feature = dmp.snappedLine!.name
             } else {
                 dmpo!.feature = "unassigned"
             }
-            dipMeterPoints.addObject(dmpo!)
+            dipMeterPoints.add(dmpo!)
         }
         image.dipMeterPoints = dipMeterPoints
         
@@ -318,23 +320,23 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
     
     //Mark: UITableView Data Source Methods for table of Features
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Features"
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return features.count == 0 ? 1 : features.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if( features.count == 0 ) {
-            return tableView.dequeueReusableCellWithIdentifier("NoFeaturesCell", forIndexPath: indexPath)
+            return tableView.dequeueReusableCell(withIdentifier: "NoFeaturesCell", for: indexPath)
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("featureCell", forIndexPath: indexPath) as! FeatureCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "featureCell", for: indexPath) as! FeatureCell
             cell.useFeature(features[indexPath.row])
             cell.tag = indexPath.row
             cell.delegate = self
@@ -344,23 +346,23 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
     
     //Mark : FeatureCellDelegate Methods
     
-    func deleteFeature(cell: FeatureCell) {
+    func deleteFeature(_ cell: FeatureCell) {
         //delete from data store
-        drawingVC!.managedContext.deleteObject(cell.feature!)
+        drawingVC!.managedContext.delete(cell.feature!)
         
         //delete from table view
         
-        features.removeAtIndex(cell.tag)
-        let indexPath = featureTable.indexPathForCell(cell)!
+        features.remove(at: cell.tag)
+        let indexPath = featureTable.indexPath(for: cell)!
         
-        featureTable.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
+        featureTable.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
         //featureTable.reloadData()
     }
     
 }
 
 protocol FeatureCellDelegate: class {
-    func deleteFeature(cell : FeatureCell)
+    func deleteFeature(_ cell : FeatureCell)
 }
 
 class FeatureCell: UITableViewCell {
@@ -371,19 +373,19 @@ class FeatureCell: UITableViewCell {
     var feature : FeatureObject?
     var delegate : FeatureCellDelegate?
     
-    func useFeature(feat : FeatureObject) {
+    func useFeature(_ feat : FeatureObject) {
         self.feature = feat
         typeLabel.text = feat.type
         
-        let numFormatter = NSNumberFormatter()
-        numFormatter.numberStyle = NSNumberFormatterStyle.DecimalStyle
+        let numFormatter = NumberFormatter()
+        numFormatter.numberStyle = NumberFormatter.Style.decimal
         numFormatter.usesSignificantDigits = true
         numFormatter.maximumSignificantDigits = 3
         numFormatter.minimumSignificantDigits = 0
-        sizeLabel.text = "Height: " + numFormatter.stringFromNumber(feat.height)! + " Width: " + numFormatter.stringFromNumber(feat.width)!
+        sizeLabel.text = "Height: " + numFormatter.string(from: feat.height)! + " Width: " + numFormatter.string(from: feat.width)!
     }
     
-    @IBAction func deleteButtonPressed(sender: UIButton) {
+    @IBAction func deleteButtonPressed(_ sender: UIButton) {
         self.delegate?.deleteFeature(self)
     }
     

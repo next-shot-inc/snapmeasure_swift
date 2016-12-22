@@ -21,7 +21,7 @@ class CardTableViewCell: UITableViewCell {
         myImageView.image = nil
     }
     
-    func useImage(detailedImage : DetailedImageProxy) {
+    func useImage(_ detailedImage : DetailedImageProxy) {
         self.detailedImageProxy = detailedImage
         
         // Round those corners

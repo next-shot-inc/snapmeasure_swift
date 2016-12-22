@@ -11,7 +11,7 @@ import CoreData
 
 class FaciesImageObject: NSManagedObject {
     
-    @NSManaged var imageData: NSData
+    @NSManaged var imageData: Data
     @NSManaged var name: String
     @NSManaged var tilePixmap: NSNumber
     

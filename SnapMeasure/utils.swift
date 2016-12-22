@@ -11,9 +11,9 @@ import UIKit
 
 class Utility {
     // Display Angle with a direction name and a degree symbol.
-    static func formatAngle(angle: Double, orient: Bool) -> NSAttributedString {
-        let nf = NSNumberFormatter()
-        let number = nf.stringFromNumber(angle)
+    static func formatAngle(_ angle: Double, orient: Bool) -> NSAttributedString {
+        let nf = NumberFormatter()
+        let number = nf.string(from: NSNumber(value: angle))
         var string = number! + "o "
         if( orient ) {
             string += {
@@ -40,14 +40,14 @@ class Utility {
         
         let astring = NSMutableAttributedString(
             string: string,
-            attributes: [NSFontAttributeName: UIFont.systemFontOfSize(20.0)]
+            attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 20.0)]
         )
         
-        let range = (string as NSString).rangeOfString("o")
+        let range = (string as NSString).range(of: "o")
         let superAttributes = [
-            NSFontAttributeName: UIFont.systemFontOfSize(10.0),
+            NSFontAttributeName: UIFont.systemFont(ofSize: 10.0),
             NSBaselineOffsetAttributeName: 10.0
-        ]
+        ] as [String : Any]
         astring.addAttributes(superAttributes, range: range)
         return astring
     }

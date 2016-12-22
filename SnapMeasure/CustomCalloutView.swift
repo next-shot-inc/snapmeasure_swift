@@ -12,11 +12,11 @@ import UIKit
 import QuartzCore
 
 enum CalloutAnimation : Int {
-    case Bounce = 0, Fade = 1
+    case bounce = 0, fade = 1
 }
 
 enum CalloutArrowDirection : Int {
-    case Down = 0, Up = 1, Any = 2
+    case down = 0, up = 1, any = 2
 }
 
 let CALLOUT_DEFAULT_CONTAINER_HEIGHT : CGFloat = 44 // height of just the main portion without arrow
@@ -35,18 +35,18 @@ let COMFORTABLE_MARGIN : CGFloat = 10 // when we try to reposition content to be
 
 
 @objc protocol CustomCalloutViewDelegate : NSObjectProtocol{
-    optional func calloutViewClicked(calloutView: CustomCalloutView)
+    @objc optional func calloutViewClicked(_ calloutView: CustomCalloutView)
     
-    optional func calloutView(calloutView: CustomCalloutView, delayForRepositionWithSize offset: CGSize) -> NSTimeInterval
+    @objc optional func calloutView(_ calloutView: CustomCalloutView, delayForRepositionWithSize offset: CGSize) -> TimeInterval
     
-    optional func calloutViewWillAppear(calloutView : CustomCalloutView)
-    optional func calloutViewDidAppear(calloutView : CustomCalloutView)
-    optional func calloutViewWillDisappear(calloutView : CustomCalloutView)
-    optional func calloutViewDidDisappear(calloutView : CustomCalloutView)
+    @objc optional func calloutViewWillAppear(_ calloutView : CustomCalloutView)
+    @objc optional func calloutViewDidAppear(_ calloutView : CustomCalloutView)
+    @objc optional func calloutViewWillDisappear(_ calloutView : CustomCalloutView)
+    @objc optional func calloutViewDidDisappear(_ calloutView : CustomCalloutView)
 
 }
 
-class CustomCalloutView: UIView {
+class CustomCalloutView: UIView, CAAnimationDelegate {
     var delegate : CustomCalloutViewDelegate?
     var permittedArrowDirection: CalloutArrowDirection
     var currentArrowDirection: CalloutArrowDirection?
@@ -67,9 +67,9 @@ class CustomCalloutView: UIView {
     var popupCancelled : Bool?
 
     override init(frame: CGRect) {
-        self.permittedArrowDirection = CalloutArrowDirection.Down;
-        self.presentAnimation = CalloutAnimation.Bounce;
-        self.dismissAnimation = CalloutAnimation.Fade;
+        self.permittedArrowDirection = CalloutArrowDirection.down;
+        self.presentAnimation = CalloutAnimation.bounce;
+        self.dismissAnimation = CalloutAnimation.fade;
         self.containerView = UIButton()
         self.containerView.isAccessibilityElement = false;
         self.contentViewInset = UIEdgeInsetsMake(12, 12, 12, 12);
@@ -80,18 +80,18 @@ class CustomCalloutView: UIView {
         
         super.init(frame: frame)
         
-        self.backgroundColor = UIColor.clearColor()
+        self.backgroundColor = UIColor.clear
         self.isAccessibilityElement = false;
-        self.containerView.addTarget(self, action: #selector(CustomCalloutView.calloutClicked(_:)) ,forControlEvents: UIControlEvents.TouchUpInside)
+        self.containerView.addTarget(self, action: #selector(CustomCalloutView.calloutClicked(_:)) ,for: UIControlEvents.touchUpInside)
     }
 
     required init(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func calloutClicked(sender: UIButton) {
+    func calloutClicked(_ sender: UIButton) {
         if (self.delegate != nil) {
-            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewClicked(_:)))) {
+            if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewClicked(_:)))) {
                 self.delegate!.calloutViewClicked!(self)
             }
         }
@@ -106,10 +106,10 @@ class CustomCalloutView: UIView {
             } else {
                 self.subtitleLabel = UILabel();
                 self.subtitleLabel!.setFrameHeight(SUBTITLE_HEIGHT)
-                self.subtitleLabel!.opaque = false
-                self.subtitleLabel!.backgroundColor = UIColor.clearColor()
-                self.subtitleLabel!.font = UIFont.systemFontOfSize(12)
-                self.subtitleLabel!.textColor = UIColor.blackColor()
+                self.subtitleLabel!.isOpaque = false
+                self.subtitleLabel!.backgroundColor = UIColor.clear
+                self.subtitleLabel!.font = UIFont.systemFont(ofSize: 12)
+                self.subtitleLabel!.textColor = UIColor.black
                 
                 return subtitleLabel!
             }
@@ -125,10 +125,10 @@ class CustomCalloutView: UIView {
             } else {
                 self.titleLabel = UILabel();
                 self.titleLabel!.setFrameHeight(TITLE_HEIGHT)
-                self.titleLabel!.opaque = false
-                self.titleLabel!.backgroundColor = UIColor.clearColor()
-                self.titleLabel!.font = UIFont.systemFontOfSize(17)
-                self.titleLabel!.textColor = UIColor.blackColor()
+                self.titleLabel!.isOpaque = false
+                self.titleLabel!.backgroundColor = UIColor.clear
+                self.titleLabel!.font = UIFont.systemFont(ofSize: 17)
+                self.titleLabel!.textColor = UIColor.black
                 
                 return titleLabel!
             }
@@ -187,16 +187,16 @@ class CustomCalloutView: UIView {
         if (self.contentView != nil) {
             height += self.contentView!.frameHeight + self.contentViewInset.bottom + self.contentViewInset.top;
         }
-        if (self.subtitleView != nil || self.subtitle?.length > 0) {
+        if (self.subtitleView != nil || (self.subtitle != nil && self.subtitle!.length > 0) ) {
             height +=  SUBTITLE_HEIGHT
         }
-        if (self.titleView != nil || self.subtitle?.length > 0){
+        if (self.titleView != nil || (self.subtitle != nil && self.subtitle!.length > 0) ) {
             height += TITLE_HEIGHT
         }
         return height
     }
     
-    override func sizeThatFits(size: CGSize) -> CGSize {
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
         // calculate how much non-negotiable space we need to reserve for margin and accessories
         let margin : CGFloat = self.innerContentMarginLeft + self.innerContentMarginRight;
         
@@ -208,8 +208,8 @@ class CustomCalloutView: UIView {
             availableWidthForText = 0;
         }
         
-        let preferredTitleSize : CGSize = self.titleViewOrDefault().sizeThatFits(CGSizeMake(availableWidthForText, TITLE_HEIGHT))
-        let preferredSubtitleSize : CGSize = self.subtitleViewOrDefault().sizeThatFits(CGSizeMake(availableWidthForText, SUBTITLE_HEIGHT))
+        let preferredTitleSize : CGSize = self.titleViewOrDefault().sizeThatFits(CGSize(width: availableWidthForText, height: TITLE_HEIGHT))
+        let preferredSubtitleSize : CGSize = self.subtitleViewOrDefault().sizeThatFits(CGSize(width: availableWidthForText, height: SUBTITLE_HEIGHT))
         
         // total width we'd like
         var preferredWidth : CGFloat
@@ -241,15 +241,15 @@ class CustomCalloutView: UIView {
         preferredWidth = max(preferredWidth, CALLOUT_MIN_WIDTH);
         
         // ask to be smaller if we have space, otherwise we'll fit into what we have by truncating the title/subtitle.
-        return CGSizeMake(min(preferredWidth, size.width), self.calloutHeight);
+        return CGSize(width: min(preferredWidth, size.width), height: self.calloutHeight);
 
     }
     
-    func offsetToContainRect(innerRect: CGRect, inRect outerRect: CGRect) -> CGSize {
-        let nudgeRight = max(0, CGRectGetMinX(outerRect) - CGRectGetMinX(innerRect));
-        let nudgeLeft = min(0, CGRectGetMaxX(outerRect) - CGRectGetMaxX(innerRect));
-        let nudgeTop = max(0, CGRectGetMinY(outerRect) - CGRectGetMinY(innerRect));
-        let nudgeBottom = min(0, CGRectGetMaxY(outerRect) - CGRectGetMaxY(innerRect));
+    func offsetToContainRect(_ innerRect: CGRect, inRect outerRect: CGRect) -> CGSize {
+        let nudgeRight = max(0, outerRect.minX - innerRect.minX);
+        let nudgeLeft = min(0, outerRect.maxX - innerRect.maxX);
+        let nudgeTop = max(0, outerRect.minY - innerRect.minY);
+        let nudgeBottom = min(0, outerRect.maxY - innerRect.maxY);
         
         var returnX : CGFloat
         if (nudgeLeft > 0) {
@@ -263,17 +263,17 @@ class CustomCalloutView: UIView {
         } else {
             returnY = nudgeBottom
         }
-        return CGSizeMake(returnX, returnY)
+        return CGSize(width: returnX, height: returnY)
     }
     
     // Presents a callout view by adding it to "inView" and pointing at the given rect of inView's bounds.
     // Constrains the callout to the bounds of the given view. Optionally scrolls the given rect into view (plus margins)
     // if -delegate is set and responds to -delayForRepositionWithSize.
-    func presentCalloutFromRect(rect: CGRect, inView view: UIView, constrainedToView constrainedView: UIView, animated: Bool) {
+    func presentCalloutFromRect(_ rect: CGRect, inView view: UIView, constrainedToView constrainedView: UIView, animated: Bool) {
         self.presentCalloutFromRect(rect, inLayer: view.layer, ofView: view, constrainedToLayer: constrainedView.layer, animated: animated)
     }
     
-    private func presentCalloutFromRect(rect: CGRect, inLayer layer: CALayer, ofView view: UIView, constrainedToLayer constrainedLayer: CALayer, animated: Bool) {
+    fileprivate func presentCalloutFromRect(_ rect: CGRect, inLayer layer: CALayer, ofView view: UIView, constrainedToLayer constrainedLayer: CALayer, animated: Bool) {
         
         // Sanity check: dismiss this callout immediately if it's displayed somewhere
         if (self.layer.superlayer != nil) {
@@ -282,17 +282,17 @@ class CustomCalloutView: UIView {
         }
         
         // cancel any presenting animation that may be in progress
-        self.layer.removeAnimationForKey("present")
+        self.layer.removeAnimation(forKey: "present")
         
         // figure out the constrained view's rect in our popup view's coordinate system
-        var constrainedRect : CGRect = constrainedLayer.convertRect(constrainedLayer.bounds, toLayer:layer)
+        var constrainedRect : CGRect = constrainedLayer.convert(constrainedLayer.bounds, to:layer)
         
         // apply our edge constraints
         if (self.constrainedInsets != nil) {
             constrainedRect = UIEdgeInsetsInsetRect(constrainedRect, self.constrainedInsets!)
         }
         
-        constrainedRect = CGRectInset(constrainedRect, COMFORTABLE_MARGIN, COMFORTABLE_MARGIN);
+        constrainedRect = constrainedRect.insetBy(dx: COMFORTABLE_MARGIN, dy: COMFORTABLE_MARGIN);
         
         // form our subviews based on our content set so far
         self.rebuildSubviews()
@@ -306,36 +306,36 @@ class CustomCalloutView: UIView {
         }
         
         // size the callout to fit the width constraint as best as possible
-        self.setFrameSize(self.sizeThatFits(CGSizeMake(constrainedRect.size.width, self.calloutHeight)))
+        self.setFrameSize(self.sizeThatFits(CGSize(width: constrainedRect.size.width, height: self.calloutHeight)))
         
         // how much room do we have in the constraint box, both above and below our target rect?
-        let topSpace = CGRectGetMinY(rect) - CGRectGetMinY(constrainedRect);
-        let bottomSpace = CGRectGetMaxY(constrainedRect) - CGRectGetMaxY(rect);
+        let topSpace = rect.minY - constrainedRect.minY;
+        let bottomSpace = constrainedRect.maxY - rect.maxY;
         
         // we prefer to point our arrow down.
-        var bestDirection = CalloutArrowDirection.Down;
+        var bestDirection = CalloutArrowDirection.down;
         
         // we'll point it up though if that's the only option you gave us.
-        if (self.permittedArrowDirection == CalloutArrowDirection.Up) {
-            bestDirection = CalloutArrowDirection.Up;
+        if (self.permittedArrowDirection == CalloutArrowDirection.up) {
+            bestDirection = CalloutArrowDirection.up;
         }
         
         // or, if we don't have enough space on the top and have more space on the bottom, and you
         // gave us a choice, then pointing up is the better option.
-        if (self.permittedArrowDirection == CalloutArrowDirection.Any && topSpace < self.calloutHeight && bottomSpace > topSpace) {
-            bestDirection = CalloutArrowDirection.Up;
+        if (self.permittedArrowDirection == CalloutArrowDirection.any && topSpace < self.calloutHeight && bottomSpace > topSpace) {
+            bestDirection = CalloutArrowDirection.up;
         }
         
         self.currentArrowDirection = bestDirection;
         
         // we want to point directly at the horizontal center of the given rect. calculate our "anchor point" in terms of our
         // target view's coordinate system. make sure to offset the anchor point as requested if necessary.
-        let anchorX = self.calloutOffset.x + CGRectGetMidX(rect);
+        let anchorX = self.calloutOffset.x + rect.midX;
         let anchorY : CGFloat
-        if (bestDirection == CalloutArrowDirection.Down) {
-            anchorY = self.calloutOffset.y + CGRectGetMinY(rect)
+        if (bestDirection == CalloutArrowDirection.down) {
+            anchorY = self.calloutOffset.y + rect.minY
         } else {
-            anchorY = self.calloutOffset.y + CGRectGetMaxY(rect)
+            anchorY = self.calloutOffset.y + rect.maxY
         }
         
         // we prefer to sit centered directly above our anchor
@@ -368,7 +368,7 @@ class CustomCalloutView: UIView {
         
         var calloutOrigin = CGPoint()
         calloutOrigin.x = calloutX + adjustX
-        if (bestDirection == CalloutArrowDirection.Down) {
+        if (bestDirection == CalloutArrowDirection.down) {
             calloutOrigin.y = anchorY - self.calloutHeight
         } else {
             calloutOrigin.y = anchorY
@@ -377,7 +377,7 @@ class CustomCalloutView: UIView {
         self.setFrameOrigin(calloutOrigin)
         
         // now set the *actual* anchor point for our layer so that our "popup" animation starts from this point.
-        var anchorPoint = layer.convertPoint(CGPointMake(anchorX, anchorY), toLayer:self.layer)
+        var anchorPoint = layer.convert(CGPoint(x: anchorX, y: anchorY), to:self.layer)
         
         // pass on the anchor point to our background view so it knows where to draw the arrow
         self.backgroundView!.arrowPoint = anchorPoint;
@@ -391,7 +391,7 @@ class CustomCalloutView: UIView {
         self.setFrameOrigin(calloutOrigin)
         
         // make sure our frame is not on half-pixels or else we may be blurry!
-        let scale = UIScreen.mainScreen().scale;
+        let scale = UIScreen.main.scale;
         self.setFrameX(floor(self.frameX*scale)/scale)
         self.setFrameY(floor(self.frameY*scale)/scale)
         
@@ -401,13 +401,13 @@ class CustomCalloutView: UIView {
         
         // if we're outside the bounds of our constraint rect, we'll give our delegate an opportunity to shift us into position.
         // consider both our size and the size of our target rect (which we'll assume to be the size of the content you want to scroll into view.
-        let contentRect = CGRectUnion(self.frame, rect);
+        let contentRect = self.frame.union(rect);
         let offset = self.offsetToContainRect(contentRect, inRect:constrainedRect)
         
-        var delay: NSTimeInterval = 0;
+        var delay: TimeInterval = 0;
         self.popupCancelled = false // reset this before calling our delegate below
         
-        if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutView(_:delayForRepositionWithSize:))) && !CGSizeEqualToSize(offset, CGSizeZero)) {
+        if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutView(_:delayForRepositionWithSize:))) && !offset.equalTo(CGSize.zero)) {
             delay = self.delegate!.calloutView!(self, delayForRepositionWithSize:offset)
         }
         
@@ -420,7 +420,7 @@ class CustomCalloutView: UIView {
         self.containerView.layer.mask = self.backgroundView!.contentMask;
         
         // if we need to delay, we don't want to be visible while we're delaying, so hide us in preparation for our popup
-        self.hidden = true;
+        self.isHidden = true;
         
         // create the appropriate animation, even if we're not animated
         let animation = self.animationWithType(self.presentAnimation, presenting:true)
@@ -433,57 +433,57 @@ class CustomCalloutView: UIView {
         animation.beginTime = CACurrentMediaTime() + delay;
         animation.delegate = self;
         
-        self.layer.addAnimation(animation, forKey:"present")
+        self.layer.add(animation, forKey:"present")
     }
     
     
-    override func animationDidStart(anim : CAAnimation) {
-        let presenting : Bool = anim.valueForKey("presenting")!.boolValue
+    func animationDidStart(_ anim : CAAnimation) {
+        let presenting : Bool = (anim.value(forKey: "presenting")! as AnyObject).boolValue
     
         if (presenting) {
-            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewWillAppear(_:)))) {
+            if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewWillAppear(_:)))) {
                 self.delegate!.calloutViewWillAppear!(self)
             }
     
             // ok, animation is on, let's make ourselves visible!
-            self.hidden = false;
+            self.isHidden = false;
         }
         else if (!presenting) {
-            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewWillDisappear(_:)))) {
+            if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewWillDisappear(_:)))) {
                 self.delegate!.calloutViewWillDisappear!(self)
             }
         }
     }
     
-    override func animationDidStop(anim : CAAnimation, finished: Bool) {
-        let presenting : Bool = anim.valueForKey("presenting")!.boolValue
+    func animationDidStop(_ anim : CAAnimation, finished: Bool) {
+        let presenting : Bool = (anim.value(forKey: "presenting")! as AnyObject).boolValue
     
         if (presenting && finished) {
-            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewDidAppear(_:)))) {
+            if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewDidAppear(_:)))) {
                 self.delegate!.calloutViewDidAppear!(self)
             }
         } else if (!presenting && finished) {
             self.removeFromParent()
-            self.layer.removeAnimationForKey("dismiss")
+            self.layer.removeAnimation(forKey: "dismiss")
     
-            if (self.delegate!.respondsToSelector(#selector(CustomCalloutViewDelegate.calloutViewDidDisappear(_:)))) {
+            if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewDidDisappear(_:)))) {
                 self.delegate!.calloutViewDidDisappear!(self)
             }
         }
     }
     
-    func dismissCalloutAnimated(animated: Bool) {
+    func dismissCalloutAnimated(_ animated: Bool) {
     
         // cancel all animations that may be in progress
-        self.layer.removeAnimationForKey("present")
-        self.layer.removeAnimationForKey("dismiss")
+        self.layer.removeAnimation(forKey: "present")
+        self.layer.removeAnimation(forKey: "dismiss")
     
         self.popupCancelled = true;
     
         if (animated) {
             let animation = self.animationWithType(self.dismissAnimation, presenting: false)
             animation.delegate = self;
-            self.layer.addAnimation(animation, forKey: "dismiss")
+            self.layer.add(animation, forKey: "dismiss")
         }
         else {
             self.removeFromParent()
@@ -503,10 +503,10 @@ class CustomCalloutView: UIView {
         }
     }
     
-    func animationWithType(type : CalloutAnimation, presenting:Bool) -> CAAnimation {
+    func animationWithType(_ type : CalloutAnimation, presenting:Bool) -> CAAnimation {
         var animation : CAAnimation
     
-        if (type == CalloutAnimation.Bounce) {
+        if (type == CalloutAnimation.bounce) {
     
             let fade = CABasicAnimation(keyPath: "opacity")
             fade.duration = 0.23;
@@ -553,7 +553,7 @@ class CustomCalloutView: UIView {
         animation.setValue(presenting, forKey: "presenting")
     
         animation.fillMode = kCAFillModeForwards;
-        animation.removedOnCompletion = false;
+        animation.isRemovedOnCompletion = false;
         return animation;
     }
     
@@ -564,7 +564,7 @@ class CustomCalloutView: UIView {
     
         // if we're pointing up, we'll need to push almost everything down a bit
         let dy : CGFloat
-        if (self.currentArrowDirection == CalloutArrowDirection.Up) {
+        if (self.currentArrowDirection == CalloutArrowDirection.up) {
             dy = TOP_ANCHOR_MARGIN
         } else {
             dy = 0
@@ -638,22 +638,22 @@ class CalloutBackgroundView: UIView {
     var anchorHeight : CGFloat
     var anchorMargin : CGFloat
     
-    private var containerView, containerBorderView, arrowView : UIView
-    private var arrowImageView, arrowBorderView : UIImageView
-    private var blackArrowImage : UIImage? = nil
-    private var whiteArrowImage : UIImage? = nil
+    fileprivate var containerView, containerBorderView, arrowView : UIView
+    fileprivate var arrowImageView, arrowBorderView : UIImageView
+    fileprivate var blackArrowImage : UIImage? = nil
+    fileprivate var whiteArrowImage : UIImage? = nil
     
     override init(frame: CGRect) {
         
         self.containerView = UIView()
-        self.containerView.backgroundColor = UIColor.whiteColor();
+        self.containerView.backgroundColor = UIColor.white;
         self.containerView.alpha = 0.96;
         self.containerView.layer.cornerRadius = 8;
         self.containerView.layer.shadowRadius = 30;
         self.containerView.layer.shadowOpacity = 0.1;
         
         self.containerBorderView = UIView()
-        self.containerBorderView.layer.borderColor = UIColor(white: 0, alpha: 0.1).CGColor
+        self.containerBorderView.layer.borderColor = UIColor(white: 0, alpha: 0.1).cgColor
         self.containerBorderView.layer.borderWidth = 0.5;
         self.containerBorderView.layer.cornerRadius = 8.5;
 
@@ -686,12 +686,12 @@ class CalloutBackgroundView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setArrowPoint(arrowPoint : CGPoint) {
+    func setArrowPoint(_ arrowPoint : CGPoint) {
         self.arrowPoint = arrowPoint
     }
     
     override func layoutSubviews() {
-        let pointingUp : Bool = self.arrowPoint?.y < self.frameHeight/2
+        let pointingUp : Bool = self.arrowPoint!.y < self.frameHeight/2
         let dy : CGFloat?
         if pointingUp {
             dy = CGFloat(TOP_ANCHOR_MARGIN)
@@ -700,31 +700,31 @@ class CalloutBackgroundView: UIView {
         }
         
         self.containerView.frame = CGRect(x: 0, y: dy!, width: self.frameWidth, height: self.frameHeight - self.arrowView.frameHeight + 0.5);
-        self.containerBorderView.frame = CGRectInset(self.containerView.bounds, -0.5, -0.5)
+        self.containerBorderView.frame = self.containerView.bounds.insetBy(dx: -0.5, dy: -0.5)
         
         self.arrowView.setFrameX(round(self.arrowPoint!.x - self.arrowView.frameWidth / 2))
         
         if (pointingUp) {
             self.arrowView.setFrameY(1)
-            self.arrowView.transform = CGAffineTransformMakeRotation(CGFloat(M_PI));
+            self.arrowView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI));
         }
         else {
             self.arrowView.setFrameY(self.containerView.frameHeight - 0.5)
-            self.arrowView.transform = CGAffineTransformIdentity;
+            self.arrowView.transform = CGAffineTransform.identity;
         }
     }
     
     var contentMask : CALayer {
         UIGraphicsBeginImageContextWithOptions(self.bounds.size, false, 0);
         
-        self.layer.renderInContext(UIGraphicsGetCurrentContext()!);
+        self.layer.render(in: UIGraphicsGetCurrentContext()!);
         
         let maskImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
         
         let layer = CALayer()
         layer.frame = self.bounds;
-        layer.contents = maskImage.CGImage;
+        layer.contents = maskImage?.cgImage;
         return layer;
     }
 }
@@ -732,33 +732,33 @@ class CalloutBackgroundView: UIView {
 extension UIView {
     
     var frameOrigin : CGPoint { return self.frame.origin }
-    func setFrameOrigin(origin : CGPoint) { self.frame = CGRect(origin: origin, size: self.frame.size) }
+    func setFrameOrigin(_ origin : CGPoint) { self.frame = CGRect(origin: origin, size: self.frame.size) }
     
     var frameX : CGFloat { return self.frame.origin.x }
-    func setFrameX (x : CGFloat) { self.frame = CGRect(x: x, y: self.frame.origin.y, width: self.frame.size.width, height: self.frame.size.height) }
+    func setFrameX (_ x : CGFloat) { self.frame = CGRect(x: x, y: self.frame.origin.y, width: self.frame.size.width, height: self.frame.size.height) }
     
     var frameY : CGFloat { return self.frame.origin.y }
-    func setFrameY (y : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: y, width: self.frame.size.width, height: self.frame.size.height) }
+    func setFrameY (_ y : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: y, width: self.frame.size.width, height: self.frame.size.height) }
     
     var frameSize : CGSize { return self.frame.size }
-    func setFrameSize (size : CGSize) { self.frame = CGRect(origin: self.frame.origin, size: size) }
+    func setFrameSize (_ size : CGSize) { self.frame = CGRect(origin: self.frame.origin, size: size) }
     
     var frameWidth : CGFloat { return self.frame.width }
-    func setFrameWidth (width : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: width, height: self.frame.size.height) }
+    func setFrameWidth (_ width : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: width, height: self.frame.size.height) }
     
     var frameHeight : CGFloat { return self.frame.height }
-    func setFrameHeight (height : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: self.frame.size.width, height: height) }
+    func setFrameHeight (_ height : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: self.frame.size.width, height: height) }
     
     var frameLeft : CGFloat { return self.frame.origin.x }
-    func setFrameLeft (left : CGFloat) { self.frame = CGRect(x: left, y: self.frame.origin.y, width: max(self.frame.origin.x+self.frame.size.width-left, 0), height: self.frame.size.height) }
+    func setFrameLeft (_ left : CGFloat) { self.frame = CGRect(x: left, y: self.frame.origin.y, width: max(self.frame.origin.x+self.frame.size.width-left, 0), height: self.frame.size.height) }
     
     var frameTop : CGFloat { return self.frame.origin.y }
-    func setFrameTop (top : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: top, width: self.frame.size.width, height: max(self.frame.origin.y+self.frame.size.height - top, 0)) }
+    func setFrameTop (_ top : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: top, width: self.frame.size.width, height: max(self.frame.origin.y+self.frame.size.height - top, 0)) }
     
     var frameRight : CGFloat { return self.frame.origin.x + self.frame.size.height }
-    func setFrameRight (right : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: max(right - self.frame.origin.x, 0), height: self.frame.size.height) }
+    func setFrameRight (_ right : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: max(right - self.frame.origin.x, 0), height: self.frame.size.height) }
     
     var frameBottom : CGFloat { return self.frame.origin.y + self.frame.size.height }
-    func setFrameBottom (bottom : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: self.frame.size.width, height: max(bottom - self.frame.origin.y,0)) }
+    func setFrameBottom (_ bottom : CGFloat) { self.frame = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: self.frame.size.width, height: max(bottom - self.frame.origin.y,0)) }
 
 }

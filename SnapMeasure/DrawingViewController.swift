@@ -20,22 +20,22 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
     var colorButton : UIButton?
     var drawingView: DrawingView?
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
         let hue = CGFloat(row)/CGFloat(count)
         colorButton!.backgroundColor =
             UIColor(hue: hue, saturation: 1.0, brightness: 1.0, alpha: 1.0)
-        drawingView?.curColor = (colorButton!.backgroundColor?.CGColor)!
+        drawingView?.curColor = (colorButton!.backgroundColor?.cgColor)!
         
         // Change current line (per Value)
-        for (index, line) in drawingView!.lineView.lines.enumerate() {
+        for (index, line) in drawingView!.lineView.lines.enumerated() {
             if( line.name == drawingView?.lineView.tool.lineName ) {
                 var changedLine = line
                 changedLine.color = (drawingView?.curColor)!
-                drawingView!.lineView.lines.removeAtIndex(index)
-                drawingView!.lineView.lines.insert(changedLine, atIndex: index)
+                drawingView!.lineView.lines.remove(at: index)
+                drawingView!.lineView.lines.insert(changedLine, at: index)
                 drawingView?.lineView.setNeedsDisplay()
                 drawingView?.controller?.hasChanges = true
                 break
@@ -43,18 +43,18 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         }
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return count
     }
     
-    func pickerView(pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
         return 36
     }
-    func pickerView(pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
+    func pickerView(_ pickerView: UIPickerView, widthForComponent component: Int) -> CGFloat {
         return 36
     }
     
-    func pickerView(pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusingView view: UIView?) -> UIView {
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
         var pickerLabel = view as? UILabel
         if pickerLabel == nil {  //if no label there yet
             pickerLabel = UILabel()
@@ -66,8 +66,8 @@ class ColorPickerController : UIViewController, UIPickerViewDelegate, UIPickerVi
         return pickerLabel!
     }
     
-    func selectNextColor(pickerView: UIPickerView) -> UIColor {
-        var curColor = pickerView.selectedRowInComponent(0)
+    func selectNextColor(_ pickerView: UIPickerView) -> UIColor {
+        var curColor = pickerView.selectedRow(inComponent: 0)
         curColor += 1
         if( curColor >= count ) {
             // cycle through
@@ -84,20 +84,20 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
     var typeButton : UIButton?
     var drawingView: DrawingView?
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
-    func pickerView(pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
-        typeButton?.setTitle(horizonTypes[row], forState: UIControlState.Normal)
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int){
+        typeButton?.setTitle(horizonTypes[row], for: UIControlState())
         drawingView?.lineView.tool.lineType = horizonTypes[row]
         
         // Change current line (per Value)
-        for (index, line) in drawingView!.lineView.lines.enumerate() {
+        for (index, line) in drawingView!.lineView.lines.enumerated() {
             if( line.name == drawingView?.lineView.tool.lineName ) {
                 var changedLine = line
                 changedLine.role = LineViewTool.role(horizonTypes[row])
-                drawingView!.lineView.lines.removeAtIndex(index)
-                drawingView!.lineView.lines.insert(changedLine, atIndex: index)
+                drawingView!.lineView.lines.remove(at: index)
+                drawingView!.lineView.lines.insert(changedLine, at: index)
                 drawingView?.lineView.setNeedsDisplay()
                 drawingView?.controller?.hasChanges = true
                 break
@@ -105,11 +105,11 @@ class HorizonTypePickerController : UIViewController, UIPickerViewDelegate, UIPi
         }
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return horizonTypes.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return horizonTypes[row]
     }
 }
@@ -157,7 +157,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
 
     var faciesCatalog = FaciesCatalog()
     
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     var managedContext : NSManagedObjectContext!
     var feature : FeatureObject?
     var detailedImage : DetailedImageObject?
@@ -173,16 +173,16 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         // Do any additional setup after loading the view, typically from a nib.
         
         // Let the one tap wait for the double-tap to fail before firing
-        oneTapGestureRecognizer.requireGestureRecognizerToFail(twoTapsGestureRecognizer)
+        oneTapGestureRecognizer.require(toFail: twoTapsGestureRecognizer)
         
         // Initialize widgets at the top
         // 1. Text field
-        lineNameTextField.keyboardType = UIKeyboardType.Default
+        lineNameTextField.keyboardType = UIKeyboardType.default
         //lineNameTextField.placeholder = "Name"
         lineNameTextField.text = "H1"
         lineNameTextField.delegate = self
         
-        referenceSizeTextField.keyboardType = UIKeyboardType.DecimalPad
+        referenceSizeTextField.keyboardType = UIKeyboardType.decimalPad
         referenceSizeTextField.placeholder = "Size"
         referenceSizeTextField.delegate = self
         
@@ -192,7 +192,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let color = colorPickerCtrler.selectNextColor(colorPickerView)
         
         // 3. Color button
-        colButton.setTitle(" ", forState: UIControlState.Normal)
+        colButton.setTitle(" ", for: UIControlState())
         colButton.backgroundColor = color
         colorPickerCtrler.colorButton = colButton
         
@@ -200,7 +200,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         horizonTypePickerView.delegate = horizonTypePickerCtrler
         horizonTypePickerView.dataSource = horizonTypePickerCtrler
         horizonTypePickerCtrler.typeButton = horizonTypeButton
-        horizonTypeButton.setTitle("Top", forState: UIControlState.Normal)
+        horizonTypeButton.setTitle("Top", for: UIControlState())
         
         //5. ImageView
         imageView = DrawingView(frame: CGRect(x: 0,y: 0,width: imageInfo.xDimension, height: imageInfo.yDimension))
@@ -208,7 +208,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         //imageView.image = image
         drawingView.imageSize = CGSize(width: imageInfo.xDimension, height: imageInfo.yDimension)
         scrollView.addSubview(imageView)
-        imageView.userInteractionEnabled = true
+        imageView.isUserInteractionEnabled = true
         
         //6. ScrollView
         scrollView.delegate = self
@@ -234,20 +234,20 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.faciesView.faciesCatalog = faciesCatalog
         drawingView.lineView.zoomScale = scaleToFit
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
 
         //make sure all buttons are in the right state
-        self.colButton.enabled = true
-        self.newLineButton.enabled = true
+        self.colButton.isEnabled = true
+        self.newLineButton.isEnabled = true
         //self.toolbarSegmentedControl.enabled = true
 
-        self.defineFeatureButton.enabled = true
-        self.defineFeatureButton.hidden = false
-        self.setWidthButton.enabled = false
-        self.setWidthButton.hidden = true
-        self.setHeightButton.enabled = false
-        self.setHeightButton.hidden = true
+        self.defineFeatureButton.isEnabled = true
+        self.defineFeatureButton.isHidden = false
+        self.setWidthButton.isEnabled = false
+        self.setWidthButton.isHidden = true
+        self.setHeightButton.isEnabled = false
+        self.setHeightButton.isHidden = true
         
         initButton(drawButton)
         initButton(eraseButton)
@@ -261,17 +261,17 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         initButton(setHeightButton)
         
         solidFillButton.setBackgroundImage(
-            UIImage(named: "solidfill"), forState: UIControlState.Selected
+            UIImage(named: "solidfill"), for: UIControlState.selected
         )
         
-        drawButton.selected = true
+        drawButton.isSelected = true
         curButton = drawButton
 
         managedContext = appDelegate.managedObjectContext!
         
         if (detailedImage == nil) {
-            detailedImage = NSEntityDescription.insertNewObjectForEntityForName("DetailedImageObject",
-                inManagedObjectContext: managedContext) as? DetailedImageObject
+            detailedImage = NSEntityDescription.insertNewObject(forEntityName: "DetailedImageObject",
+                into: managedContext) as? DetailedImageObject
             newDetailedImage = true
             detailedImage!.project = currentProject
             detailedImage!.saveImage(image!)
@@ -289,14 +289,14 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         } else {
             tilingView = TilingView(name: (detailedImage?.imageFile)!, size: drawingView.imageSize)
         }
-        imageView.insertSubview(tilingView!, atIndex: 0)
+        imageView.insertSubview(tilingView!, at: 0)
         
         faciesCatalog.loadImages()
         
-        NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: #selector(DrawingViewController.keyboardWasShown(_:)), name: UIKeyboardDidShowNotification, object:nil)
-        NSNotificationCenter.defaultCenter().addObserver(
-            self, selector: #selector(DrawingViewController.keyboardWillBeHidden(_:)), name: UIKeyboardDidHideNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(DrawingViewController.keyboardWasShown(_:)), name: NSNotification.Name.UIKeyboardDidShow, object:nil)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(DrawingViewController.keyboardWillBeHidden(_:)), name: NSNotification.Name.UIKeyboardDidHide, object: nil)
     }
     
     override func didReceiveMemoryWarning() {
@@ -304,41 +304,41 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         let drawingView = imageView as! DrawingView
         drawingView.lineView.tool.lineName = lineNameTextField.text!
-        drawingView.curColor = (colButton.backgroundColor?.CGColor)!
-        drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
+        drawingView.curColor = (colButton.backgroundColor?.cgColor)!
+        drawingView.lineView.tool.lineType = horizonTypeButton.title(for: UIControlState())!
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
     }
     
     deinit  {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
         image = nil
     }
     
-    func initButton(button: UIButton) {
-        let buttonImage = button.imageForState(UIControlState.Normal)
+    func initButton(_ button: UIButton) {
+        let buttonImage = button.image(for: UIControlState())
         if( buttonImage != nil ) {
            let buttonCGIImage = CIImage(image:buttonImage!)
            let filter = CIFilter(name:  "CIColorInvert", withInputParameters: [kCIInputImageKey: buttonCGIImage!])
-           let invertedButtonImage = UIImage(CIImage: filter!.outputImage!)
-           button.setImage(invertedButtonImage, forState: UIControlState.Selected)
+           let invertedButtonImage = UIImage(ciImage: filter!.outputImage!)
+           button.setImage(invertedButtonImage, for: UIControlState.selected)
         }
     }
     
-    func highlightButton(sender: UIButton) {
+    func highlightButton(_ sender: UIButton) {
         if( curButton != sender ) {
-            sender.selected = true
-            curButton?.selected = false
+            sender.isSelected = true
+            curButton?.isSelected = false
             curButton = sender
         }
     }
@@ -374,56 +374,56 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     } **/
     
     // Mark: Bottom Toolbar methods
-    @IBAction func newLineButtonPressed(sender: UIButton) {
+    @IBAction func newLineButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Draw
+        drawingView.drawMode = DrawingView.ToolMode.draw
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
         
-        lineContainerView.hidden = false
+        lineContainerView.isHidden = false
         
         highlightButton(sender)
     }
     
-    @IBAction func eraseButtonPressed(sender: UIButton) {
+    @IBAction func eraseButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Erase
+        drawingView.drawMode = DrawingView.ToolMode.erase
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         
         highlightButton(sender)
     }
     
-    @IBAction func measureButtonPressed(sender: UIButton) {
+    @IBAction func measureButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Measure
+        drawingView.drawMode = DrawingView.ToolMode.measure
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         
         highlightButton(sender)
     }
     
-    @IBAction func drawReferenceButtonPressed(sender: UIButton) {
+    @IBAction func drawReferenceButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Reference
+        drawingView.drawMode = DrawingView.ToolMode.reference
         
-        let alert = UIAlertController(title: "", message: "Please specify reference value (m)", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textField) in
-            let nf = NSNumberFormatter()
+        let alert = UIAlertController(title: "", message: "Please specify reference value (m)", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            let nf = NumberFormatter()
             textField.text =
-                nf.stringFromNumber(drawingView.lineView.refMeasureValue == 0 ? 1 : drawingView.lineView.refMeasureValue)
+                nf.string(from: NSNumber(value: drawingView.lineView.refMeasureValue == 0 ? Float(1.0) : drawingView.lineView.refMeasureValue))
             textField.placeholder = "Size"
-            textField.keyboardType = UIKeyboardType.DecimalPad
+            textField.keyboardType = UIKeyboardType.decimalPad
         }
-        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .default) { action -> Void in
         }
         alert.addAction(noAction)
-        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Default) { action -> Void in
+        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .default) { action -> Void in
             let drawingView = self.imageView as! DrawingView
             drawingView.textView.setNeedsDisplay()
             
@@ -432,82 +432,82 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         }
         alert.addAction(yesAction)
         
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
 
         //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         highlightButton(sender)
     }
     
-    @IBAction func faciesButtonPressed(sender: UIButton) {
+    @IBAction func faciesButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Facies
+        drawingView.drawMode = DrawingView.ToolMode.facies
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = false
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         
         highlightButton(sender)
     }
     
-    @IBAction func textboxButtonPressed(sender: UIButton) {
+    @IBAction func textboxButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.Text
+        drawingView.drawMode = DrawingView.ToolMode.text
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         
         highlightButton(sender)
     }
     
-    @IBAction func dipMeterButtonPressed(sender: UIButton) {
+    @IBAction func dipMeterButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.DipMarker
+        drawingView.drawMode = DrawingView.ToolMode.dipMarker
         
-        referenceSizeContainerView.hidden = true
+        referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
+        lineContainerView.isHidden = true
         
         highlightButton(sender)
     }
     
     var keyboardHeight : CGFloat = 0.0
     
-    func keyboardWasShown(notification: NSNotification) {
-        let tmp : [NSObject : AnyObject] = notification.userInfo!
+    func keyboardWasShown(_ notification: Notification) {
+        let tmp : [AnyHashable: Any] = notification.userInfo!
         let rectV = tmp[UIKeyboardFrameBeginUserInfoKey]
-        let rect = rectV?.CGRectValue
+        let rect = (rectV as AnyObject).cgRectValue
         keyboardHeight = rect!.height
         
-        UIView.animateWithDuration(0.25, animations: { ()-> Void in
+        UIView.animate(withDuration: 0.25, animations: { ()-> Void in
             self.view.center.y -= self.keyboardHeight
         })
     }
     
-    func keyboardWillBeHidden(notification: NSNotification) {
-        UIView.animateWithDuration(0.25, animations: { ()-> Void in
+    func keyboardWillBeHidden(_ notification: Notification) {
+        UIView.animate(withDuration: 0.25, animations: { ()-> Void in
             self.view.center.y += self.keyboardHeight
         })
     }
     
     //Mark: UITextFieldDelegate Methods
-    func textFieldDidBeginEditing(textField: UITextField) {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
     }
     
-    func textFieldDidEndEditing(textField: UITextField) {
+    func textFieldDidEndEditing(_ textField: UITextField) {
         if( textField === lineNameTextField ) {
             let drawingView = imageView as! DrawingView
             let oldName = drawingView.lineView.tool.lineName
             drawingView.lineView.tool.lineName = lineNameTextField.text!
             
             // Change current line (per Value)
-            for (index, line) in drawingView.lineView.lines.enumerate() {
+            for (index, line) in drawingView.lineView.lines.enumerated() {
                 if( line.name == oldName ) {
                     var changedLine = line
                     changedLine.name = lineNameTextField.text!
-                    drawingView.lineView.lines.removeAtIndex(index)
-                    drawingView.lineView.lines.insert(changedLine, atIndex: index)
+                    drawingView.lineView.lines.remove(at: index)
+                    drawingView.lineView.lines.insert(changedLine, at: index)
                     drawingView.lineView.setNeedsDisplay()
                     hasChanges = true
                     break
@@ -517,11 +517,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     }
     
     //Mark: UIScrollViewDelegate Methods
-    func viewForZoomingInScrollView(scrollView: UIScrollView) -> UIView? {
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
     
-    func scrollViewDidEndZooming(scrollView: UIScrollView, withView view: UIView?, atScale scale: CGFloat) {
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         // Recenter the image view when it is smaller than the scrollView
         //self.centerScrollViewContents()
         let drawingView = imageView as! DrawingView
@@ -550,34 +550,34 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         //self.tilingView!.frame = contentsFrame
     }
     
-    @IBAction func handlePinch(sender: AnyObject) {
+    @IBAction func handlePinch(_ sender: AnyObject) {
         // Scrollview implements it now
     }
     
-    @IBAction func handlePan(sender: AnyObject) {
+    @IBAction func handlePan(_ sender: AnyObject) {
         // Scrollview implements it now
     }
     
-    @IBAction func handleTap(sender: AnyObject) {
+    @IBAction func handleTap(_ sender: AnyObject) {
         // Dismiss UI elements (end editing)
         referenceSizeTextField.resignFirstResponder()
         lineNameTextField.resignFirstResponder()
-        colorPickerView.hidden = true
-        horizonTypePickerView.hidden = true
+        colorPickerView.isHidden = true
+        horizonTypePickerView.isHidden = true
         //self.imageView.center = center
         
         // Initialize drawing information
         let drawingView = imageView as! DrawingView
         
-        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
+        if( drawingView.drawMode == DrawingView.ToolMode.reference ) {
             
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
+        } else if( drawingView.drawMode == DrawingView.ToolMode.draw ) {
             drawingView.lineView.tool.lineName = lineNameTextField.text!
                     
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
+        } else if( drawingView.drawMode == DrawingView.ToolMode.facies ) {
             //drawingView.faciesView.curImageName = faciesTypeButton.titleForState(UIControlState.Normal)!
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Select ) {
-            let point = sender.locationInView(drawingView)
+        } else if( drawingView.drawMode == DrawingView.ToolMode.select ) {
+            let point = sender.location(in: drawingView)
             
             // Find if an object is selected
             let line = drawingView.select(point)
@@ -585,18 +585,18 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             if( line != nil ) {
                 // Initialize UI with selected object
                 lineNameTextField.text = line!.name
-                colButton.backgroundColor = UIColor(CGColor: line!.color)
+                colButton.backgroundColor = UIColor(cgColor: line!.color)
                 
                 // Initialize drawing information
                 drawingView.lineView.tool.lineName = line!.name
                 drawingView.curColor = line!.color
                 drawingView.lineView.tool.lineType = LineViewTool.typeName(line!.role)
-                horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, forState: UIControlState.Normal)
+                horizonTypeButton.setTitle(drawingView.lineView.tool.lineType, for: UIControlState())
             }
         }
     }
     
-    @IBAction func handleDoubleTap(sender: AnyObject) {
+    @IBAction func handleDoubleTap(_ sender: AnyObject) {
         // Center view and reset zoom
         let scrollViewSize = self.scrollView.bounds.size;
         let zoomViewSize = self.imageView.bounds.size;
@@ -614,33 +614,33 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.lineView.setNeedsDisplay()
     }
     
-    func askText(label: UILabel) {
+    func askText(_ label: UILabel) {
         var inputTextField : UITextField?
-        let alert = UIAlertController(title: "", message: "Please specify text", preferredStyle: .Alert)
-        alert.addTextFieldWithConfigurationHandler { (textField) in
+        let alert = UIAlertController(title: "", message: "Please specify text", preferredStyle: .alert)
+        alert.addTextField { (textField) in
             textField.placeholder = "Label"
             inputTextField = textField
         }
-        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Default) { action -> Void in
+        let noAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .default) { action -> Void in
         }
         alert.addAction(noAction)
-        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Default) { action -> Void in
+        let yesAction: UIAlertAction = UIAlertAction(title: "Ok", style: .default) { action -> Void in
             label.text = inputTextField!.text
             let drawingView = self.imageView as! DrawingView
             drawingView.textView.setNeedsDisplay()
         }
         alert.addAction(yesAction)
         
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     
-    @IBAction func pushColButton(sender: AnyObject) {
-        colorPickerView.hidden = !colorPickerView.hidden
+    @IBAction func pushColButton(_ sender: AnyObject) {
+        colorPickerView.isHidden = !colorPickerView.isHidden
         let drawingView = imageView as! DrawingView
-        drawingView.curColor = (colButton.backgroundColor?.CGColor)!
+        drawingView.curColor = (colButton.backgroundColor?.cgColor)!
     }
     
-    @IBAction func pushNewLine(sender: AnyObject) {
+    @IBAction func pushNewLine(_ sender: AnyObject) {
         DrawingViewController.lineCount += 1
         lineNameTextField.text = String("H") + String(DrawingViewController.lineCount)
         
@@ -649,8 +649,8 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         
         colButton.backgroundColor = color
         drawingView.lineView.tool.lineName = lineNameTextField.text!
-        drawingView.lineView.tool.lineType = horizonTypeButton.titleForState(UIControlState.Normal)!
-        drawingView.curColor = color.CGColor
+        drawingView.lineView.tool.lineType = horizonTypeButton.title(for: UIControlState())!
+        drawingView.curColor = color.cgColor
     }
     
     /**
@@ -674,13 +674,13 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         self.presentViewController(ctrler, animated: true, completion: nil)
     } **/
 
-    @IBAction func pushLineTypeButton(sender: AnyObject) {
-        horizonTypePickerView.hidden = !horizonTypePickerView.hidden
+    @IBAction func pushLineTypeButton(_ sender: AnyObject) {
+        horizonTypePickerView.isHidden = !horizonTypePickerView.isHidden
     }
     
-    @IBAction func closeWindow(sender: AnyObject) {
+    @IBAction func closeWindow(_ sender: AnyObject) {
         if hasChanges || managedContext.hasChanges {
-            let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .Alert)
+            let alert = UIAlertController(title: "", message: "Save before closing?", preferredStyle: .alert)
             //let drawingView = self.imageView as! DrawingView
             //get scale for the image
             /**
@@ -691,35 +691,35 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                 alert.title = "Save before closing?"
                 alert.message = "WARNING: No scale for this image. Draw a reference line to define a scale."
             } **/
-            let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .Default) { action -> Void in
+            let noAction: UIAlertAction = UIAlertAction(title: "NO", style: .default) { action -> Void in
                 self.managedContext.rollback()
-                self.performSegueWithIdentifier("unwindFromDrawingToMain", sender: self)
+                self.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: self)
                 //self.dismissViewControllerAnimated(true, completion: nil)
             }
             alert.addAction(noAction)
         
-            let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .Default) { action -> Void in
-                self.performSegueWithIdentifier("showSavePopover", sender: self)
+            let yesAction: UIAlertAction = UIAlertAction(title: "YES", style: .default) { action -> Void in
+                self.performSegue(withIdentifier: "showSavePopover", sender: self)
             }
             alert.addAction(yesAction)
         
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
         } else {
-            self.performSegueWithIdentifier("unwindFromDrawingToMain", sender: self)
+            self.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: self)
         }
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "showSavePopover" {
-            let savePopover = segue.destinationViewController as! SavePopoverViewController
+            let savePopover = segue.destination as! SavePopoverViewController
             savePopover.drawingVC = self
             savePopover.preferredContentSize.height = CGFloat(295 + (51*self.detailedImage!.features.count))
             print(self.detailedImage!.features.count)
             savePopover.preferredContentSize.width = 500
             
         } else if segue.identifier == "showFaciesPixmap" {
-            let faciesPopover = segue.destinationViewController as! FaciesPixmapViewController
+            let faciesPopover = segue.destination as! FaciesPixmapViewController
             faciesPopover.drawingView = (imageView as! DrawingView)
             faciesPopover.faciesCatalog = faciesCatalog
             faciesPopover.drawingController = self
@@ -736,54 +736,54 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         }
     }
     
-    @IBAction func pushDefineFeatureButton(sender : UIButton) {
+    @IBAction func pushDefineFeatureButton(_ sender : UIButton) {
         //disable all other buttons until Feature definition is complete
         //self.toolbarSegmentedControl.enabled = false
-        self.addDipMeterPointButton.enabled = false
+        self.addDipMeterPointButton.isEnabled = false
         
         //create a new Feature
-        feature = NSEntityDescription.insertNewObjectForEntityForName("FeatureObject",
-            inManagedObjectContext: managedContext) as? FeatureObject
+        feature = NSEntityDescription.insertNewObject(forEntityName: "FeatureObject",
+            into: managedContext) as? FeatureObject
         feature!.image = detailedImage!
         
         let drawingView = imageView as! DrawingView
         if (drawingView.lineView.refMeasureValue.isZero || drawingView.lineView.refMeasureValue.isNaN) {
-            let alert = UIAlertController(title: "", message: "Need to establish a reference before defining a Feature", preferredStyle: .Alert)
-            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .Cancel) { action -> Void in
+            let alert = UIAlertController(title: "", message: "Need to establish a reference before defining a Feature", preferredStyle: .alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .cancel) { action -> Void in
                 //Do some stuff
             }
             alert.addAction(cancelAction)
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
             
             //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
-            drawingView.drawMode = DrawingView.ToolMode.Reference
+            drawingView.drawMode = DrawingView.ToolMode.reference
             
         } else {
             //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
-            drawingView.drawMode = DrawingView.ToolMode.Measure
-            self.defineFeatureButton.hidden = true
-            self.setHeightButton.enabled = true
-            self.setHeightButton.hidden = false
+            drawingView.drawMode = DrawingView.ToolMode.measure
+            self.defineFeatureButton.isHidden = true
+            self.setHeightButton.isEnabled = true
+            self.setHeightButton.isHidden = false
         }
         
         highlightButton(sender)
     }
     
     
-    @IBAction func pushSetHeightButton(sender : UIButton) {
+    @IBAction func pushSetHeightButton(_ sender : UIButton) {
         let drawingView = imageView as! DrawingView
         let height = drawingView.lineView.currentMeasure as NSNumber
-        if (height.isEqualToNumber(0.0)) {
-            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .Alert)
-            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+        if (height.isEqual(to: 0.0)) {
+            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .cancel) { action -> Void in
                 //Do some stuff
             }
             alert.addAction(cancelAction)
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
             //just in case
-            if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
+            if (drawingView.drawMode != DrawingView.ToolMode.measure) {
                 //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
-                drawingView.drawMode = DrawingView.ToolMode.Measure
+                drawingView.drawMode = DrawingView.ToolMode.measure
             }
         } else {
             //set Feature.height = height
@@ -793,13 +793,13 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                 feature!.height = height
             }
             print("height: ", height.floatValue)
-            self.setHeightButton.enabled = false
-            self.setHeightButton.hidden = true
-            self.setWidthButton.enabled = true
-            self.setWidthButton.hidden = false
+            self.setHeightButton.isEnabled = false
+            self.setHeightButton.isHidden = true
+            self.setWidthButton.isEnabled = true
+            self.setWidthButton.isHidden = false
             
             //Remove measurement line to force user to draw a new line to define the width
-            drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.measure.removeAll(keepingCapacity: true)
             drawingView.lineView.currentMeasure = 0.0
             drawingView.lineView.setNeedsDisplay()
         }
@@ -807,20 +807,20 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         highlightButton(sender)
     }
     
-    @IBAction func pushSetWdithButton(sender : UIButton) {
+    @IBAction func pushSetWdithButton(_ sender : UIButton) {
         let drawingView = imageView as! DrawingView
         let width = drawingView.lineView.currentMeasure as NSNumber
-        if (width.isEqualToNumber(0.0)) {
-            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .Alert)
-            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+        if (width.isEqual(to: 0.0)) {
+            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .cancel) { action -> Void in
                 //Do some stuff
             }
             alert.addAction(cancelAction)
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
             //just in case
-            if (drawingView.drawMode != DrawingView.ToolMode.Measure) {
+            if (drawingView.drawMode != DrawingView.ToolMode.measure) {
                 //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
-                drawingView.drawMode = DrawingView.ToolMode.Measure
+                drawingView.drawMode = DrawingView.ToolMode.measure
             }
         } else {
             //set Feature.width = width
@@ -830,32 +830,32 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                 feature!.width = width
             }
             print("width: ",width.floatValue)
-            self.setWidthButton.enabled = false
-            self.setWidthButton.hidden = true
+            self.setWidthButton.isEnabled = false
+            self.setWidthButton.isHidden = true
             
-            let nf = NSNumberFormatter()
-            nf.numberStyle = NSNumberFormatterStyle.DecimalStyle
+            let nf = NumberFormatter()
+            nf.numberStyle = NumberFormatter.Style.decimal
             let message = "Select a feature type for this feature of width: " +
-                nf.stringFromNumber(feature!.width)! + " and height " +
-                nf.stringFromNumber(feature!.height)!
+                nf.string(from: feature!.width)! + " and height " +
+                nf.string(from: feature!.height)!
             
             let alert = UIAlertController(
-                title: "Define Feature type", message: message, preferredStyle: .Alert
+                title: "Define Feature type", message: message, preferredStyle: .alert
             )
-            let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .Cancel) { action -> Void in
-                self.managedContext.deleteObject(self.feature!)
-                let alert2 = UIAlertController(title: "", message: "Feature was deleted", preferredStyle: .Alert)
-                let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .Cancel) { action -> Void in
+            let cancelAction: UIAlertAction = UIAlertAction(title: "Cancel", style: .cancel) { action -> Void in
+                self.managedContext.delete(self.feature!)
+                let alert2 = UIAlertController(title: "", message: "Feature was deleted", preferredStyle: .alert)
+                let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .cancel) { action -> Void in
                     //Do some stuff
                 }
                 alert2.addAction(cancelAction)
-                self.presentViewController(alert2, animated: true, completion: nil)
+                self.present(alert2, animated: true, completion: nil)
             }
             alert.addAction(cancelAction)
             
             // Add buttons the alert action
             for type in possibleFeatureTypes {
-                let nextAction: UIAlertAction = UIAlertAction(title: type, style: .Default) { action -> Void in
+                let nextAction: UIAlertAction = UIAlertAction(title: type, style: .default) { action -> Void in
                     //save Feature.type as type
                     if self.feature == nil {
                         print("Feature is nil when attempting to set type")
@@ -865,54 +865,54 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
                 }
                 alert.addAction(nextAction)
             }
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
             
             // Manage UI components
-            self.defineFeatureButton.enabled = true
-            self.defineFeatureButton.hidden = false
+            self.defineFeatureButton.isEnabled = true
+            self.defineFeatureButton.isHidden = false
             
             //Re-enable all other buttons until Feature definition is complete
             //self.toolbarSegmentedControl.enabled = true
-            self.addDipMeterPointButton.enabled = true
+            self.addDipMeterPointButton.isEnabled = true
             
             // Remove measurement line
-            drawingView.lineView.measure.removeAll(keepCapacity: true)
+            drawingView.lineView.measure.removeAll(keepingCapacity: true)
             drawingView.lineView.currentMeasure = 0.0
             drawingView.lineView.setNeedsDisplay()
         }
         highlightButton(sender)
     }
     
-    @IBAction func unwindToDrawing (segue: UIStoryboardSegue) {
+    @IBAction func unwindToDrawing (_ segue: UIStoryboardSegue) {
         
     }
     
-    @IBAction func doMeasureDipAndStrike(sender: UIButton) {
-        let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("OrientationController") as! OrientationController
+    @IBAction func doMeasureDipAndStrike(_ sender: UIButton) {
+        let ctrler = self.storyboard?.instantiateViewController(withIdentifier: "OrientationController") as! OrientationController
         
-        ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
-        ctrler.popoverPresentationController?.sourceView = sender.viewForFirstBaselineLayout
+        ctrler.modalPresentationStyle = UIModalPresentationStyle.popover
+        ctrler.popoverPresentationController?.sourceView = sender.forFirstBaselineLayout
         ctrler.popoverPresentationController?.sourceRect = sender.bounds
-        ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
-        let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
+        ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.any
+        let size = ctrler.view.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
         ctrler.preferredContentSize = size
         
         ctrler.drawingViewController = self
         ctrler.currentButton = curButton
         
-        self.presentViewController(ctrler, animated: true, completion: nil)
+        self.present(ctrler, animated: true, completion: nil)
         
         highlightButton(sender)
     }
     
-    @IBAction func doSendMail(sender: AnyObject) {
-        var filename: NSURL
+    @IBAction func doSendMail(_ sender: AnyObject) {
+        var filename: URL
         var formatUserName : String
         
         let drawingView = imageView as! DrawingView
         let scale = drawingView.getScale()
         if(scale.defined) {
-            detailedImage!.scale = scale.scale
+            detailedImage!.scale = scale.scale as NSNumber?
         }
         
         //UIImageWriteToSavedPhotosAlbum(imageView.image!, nil, nil, nil)
@@ -920,12 +920,12 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         if( detailedImage!.scale == nil || detailedImage!.scale! == 0 ||
             !MFMailComposeViewController.canSendMail()
         ){
-            let alert = UIAlertController(title: "", message: "Need to establish a reference before sending it in 3D", preferredStyle: .Alert)
-            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .Cancel) { action -> Void in
+            let alert = UIAlertController(title: "", message: "Need to establish a reference before sending it in 3D", preferredStyle: .alert)
+            let cancelAction: UIAlertAction = UIAlertAction(title: "OK", style: .cancel) { action -> Void in
                 //Do some stuff
             }
             alert.addAction(cancelAction)
-            self.presentViewController(alert, animated: true, completion: nil)
+            self.present(alert, animated: true, completion: nil)
         } else {
         
             /*if( format == 0 ) {
@@ -934,13 +934,13 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             formatUserName = "Shape"
             } else {*/
             let exporter = ExportAsGocadFile(detailedImage: detailedImage!, faciesCatalog: faciesCatalog)
-            filename = exporter.export()
+            filename = exporter.export() as URL
             formatUserName = "Gocad"
             //}
             
-            var fileData = NSData()
+            var fileData = Data()
             do {
-                try fileData = NSData(contentsOfFile: filename.path!, options: NSDataReadingOptions.DataReadingMappedIfSafe)
+                try fileData = Data(contentsOf: URL(fileURLWithPath: filename.path), options: NSData.ReadingOptions.mappedIfSafe)
             } catch {
                 print("Could not read data to send")
                 return
@@ -959,36 +959,36 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             )
             //}
             mailComposer.addAttachmentData(
-                detailedImage!.imageData()!, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
+                detailedImage!.imageData()! as Data, mimeType: "impage/jpeg", fileName: detailedImage!.name + ".jpg"
             )
             
             mailComposer.setToRecipients([String]())
             mailComposer.mailComposeDelegate = self
             
-            presentViewController(mailComposer, animated: true, completion: nil)
+            present(mailComposer, animated: true, completion: nil)
         }
     }
     
-    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?) {
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         print(result)
-        controller.dismissViewControllerAnimated(true, completion: nil)
+        controller.dismiss(animated: true, completion: nil)
     }
 
-    @IBAction func solidFillButtonPressed(sender: UIButton) {
-        sender.selected = !sender.selected
+    @IBAction func solidFillButtonPressed(_ sender: UIButton) {
+        sender.isSelected = !sender.isSelected
         let drawingView = imageView as! DrawingView
-        drawingView.lineView.drawPolygon = sender.selected
+        drawingView.lineView.drawPolygon = sender.isSelected
         drawingView.lineView.computePolygon()
         drawingView.lineView.setNeedsDisplay()
     }
     
-    @IBAction func editSelectSegmentedControllerChanged(sender: UISegmentedControl) {
+    @IBAction func editSelectSegmentedControllerChanged(_ sender: UISegmentedControl) {
         
         let drawingView = imageView as! DrawingView
         if( sender.selectedSegmentIndex == 1 ) {
-            drawingView.drawMode = DrawingView.ToolMode.Select
+            drawingView.drawMode = DrawingView.ToolMode.select
         } else {
-            drawingView.drawMode = DrawingView.ToolMode.Draw
+            drawingView.drawMode = DrawingView.ToolMode.draw
         }
     }
 }

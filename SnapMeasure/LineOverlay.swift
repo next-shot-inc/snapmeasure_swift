@@ -61,7 +61,7 @@ class MapLineOverlay: NSObject, MKOverlay {
 
 class MapLineOverlayView: MKOverlayRenderer {
     
-    override func drawMapRect(mapRect: MKMapRect, zoomScale: MKZoomScale, inContext context: CGContext) {
+    override func draw(_ mapRect: MKMapRect, zoomScale: MKZoomScale, in context: CGContext) {
         if let lineOverlay = overlay as? MapLineOverlay {
             //let overlayMapRect = overlay.boundingMapRect
             //let cgRect = rectForMapRect(overlayMapRect)
@@ -69,7 +69,7 @@ class MapLineOverlayView: MKOverlayRenderer {
             
             let objectMapPoint = lineOverlay.objectCoordinate
 
-            CGContextSetLineWidth(context, 50.0)
+            context.setLineWidth(50.0)
         
             //draw line representing length (in Blue)
             //first get map points
@@ -83,29 +83,29 @@ class MapLineOverlayView: MKOverlayRenderer {
             )
             //let deltaY = lineOverlay.mapLength*sin(lineOverlay.angle)/2
             //get CGpoints for MapPoints
-            let startPoint = pointForMapPoint(startMapPoint)
-            var endPoint = pointForMapPoint(endMapPoint)
+            let startPoint = point(for: startMapPoint)
+            var endPoint = point(for: endMapPoint)
 
-            CGContextSetStrokeColorWithColor(context, UIColor.blueColor().CGColor)
+            context.setStrokeColor(UIColor.blue.cgColor)
 
-            CGContextMoveToPoint (context, startPoint.x, startPoint.y)
-            CGContextAddLineToPoint (context, endPoint.x, endPoint.y)
-            CGContextStrokePath(context)
+            context.move (to: CGPoint(x: startPoint.x, y: startPoint.y))
+            context.addLine (to: CGPoint(x: endPoint.x, y: endPoint.y))
+            context.strokePath()
             
             //draw T line (position of the camera)
             //first get map point
             let coordinateMapPoint = MKMapPointForCoordinate(overlay.coordinate)
             
             //get CGpoints for MapPoints
-            let coordinatePoint = pointForMapPoint(coordinateMapPoint)
-            endPoint = pointForMapPoint(objectMapPoint)
+            let coordinatePoint = point(for: coordinateMapPoint)
+            endPoint = point(for: objectMapPoint)
             
-            CGContextSetStrokeColorWithColor(context, UIColor.redColor().CGColor)
-            CGContextSetLineWidth(context, 2.0)
+            context.setStrokeColor(UIColor.red.cgColor)
+            context.setLineWidth(2.0)
             
-            CGContextMoveToPoint (context, coordinatePoint.x, coordinatePoint.y)
-            CGContextAddLineToPoint (context, endPoint.x, endPoint.y)
-            CGContextStrokePath(context)
+            context.move (to: CGPoint(x: coordinatePoint.x, y: coordinatePoint.y))
+            context.addLine (to: CGPoint(x: endPoint.x, y: endPoint.y))
+            context.strokePath()
 
         }
     }
