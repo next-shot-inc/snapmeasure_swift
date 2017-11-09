@@ -21,9 +21,9 @@ class MapLineOverlay: NSObject, MKOverlay {
     init(length: Double, compassOrientation: CLLocationDirection, coordinate: CLLocationCoordinate2D, object_scale: Double) {
         let orientation : Double
         if (compassOrientation < 0) {
-            orientation = 2*M_PI+compassOrientation * M_PI/180
+            orientation = 2*Double.pi+compassOrientation * Double.pi/180
         } else {
-            orientation = compassOrientation * M_PI/180
+            orientation = compassOrientation * .pi/180
         }
     
         let scale = MKMetersPerMapPointAtLatitude(coordinate.latitude)

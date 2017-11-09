@@ -12,15 +12,22 @@ import UIKit
 class TilingView : UIView {
     var name_ : String
     var size_ : CGSize
+    var cachePath : String
+    let sideLength : CGFloat = 1024
     
     init(name: String, size: CGSize) {
         name_ = name
         size_ = size
         
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        cachePath = appDelegate.applicationDocumentsDirectory.path
+        
         super.init(frame: CGRect(x: 0,y: 0, width: size.width, height: size.height))
         let tiledLayer = self.layer as? CATiledLayer
         tiledLayer!.levelsOfDetail = 1
-        tiledLayer!.tileSize = CGSize(width: 1024,height: 1024)
+        tiledLayer!.tileSize = CGSize(width: sideLength,height: sideLength)
+        
+        
     }
     
     override class var layerClass : AnyClass {
@@ -53,8 +60,8 @@ class TilingView : UIView {
         // for "d". This assumes (safely) that the view is being scaled equally in both dimensions.
         let scale = context?.ctm.a
         
-        let tiledLayer = self.layer as? CATiledLayer
-        var tileSize = tiledLayer!.tileSize
+        //let tiledLayer = self.layer as? CATiledLayer
+        //var tileSize = tiledLayer!.tileSize
         
         // Even at scales lower than 100%, we are drawing into a rect in the coordinate system
         // of the full image. One tile at 50% covers the width (in original image coordinates)
@@ -64,28 +71,28 @@ class TilingView : UIView {
         // At 12.5%, our lowest scale, we are stretching about 6 small tiles to fill the entire
         // original image area. But this is okay, because the big blurry image we're drawing
         // here will be scaled way down before it is displayed.)
-        tileSize.width /= scale!;
-        tileSize.height /= scale!;
+        //tileSize.width /= scale!;
+        //tileSize.height /= scale!;
         
         // calculate the rows and columns of tiles that intersect the rect we have been asked to draw
-        let firstCol : Int = Int(floorf(Float(rect.minX / tileSize.width)));
-        let lastCol : Int = Int(floorf(Float((rect.maxX-1) / tileSize.width)));
-        let firstRow : Int = Int(floorf(Float(rect.minY / tileSize.height)));
-        let lastRow : Int = Int(floorf(Float((rect.maxY-1) / tileSize.height)));
+        let firstCol : Int = Int(floorf(Float(rect.minX / sideLength)));
+        let lastCol : Int = Int(floorf(Float((rect.maxX-1) / sideLength)));
+        let firstRow : Int = Int(floorf(Float(rect.minY / sideLength)));
+        let lastRow : Int = Int(floorf(Float((rect.maxY-1) / sideLength)));
         
         for row in firstRow ... lastRow {
             for col in firstCol ... lastCol {
                 
                 let tile = tileForScale(scale!, row:row, col:col)
                 
-                var tileRect = CGRect(
-                    x: tileSize.width * CGFloat(col),y: tileSize.height * CGFloat(row),
-                    width: tileSize.width, height: tileSize.height
+                let tileRect = CGRect(
+                    x: sideLength * CGFloat(col),y: sideLength * CGFloat(row),
+                    width: sideLength, height: sideLength
                 )
                 
                 // if the tile would stick outside of our bounds, we need to truncate it so as
                 // to avoid stretching out the partial tiles at the right and bottom edges
-                tileRect = self.bounds.intersection(tileRect);
+                //tileRect = bounds.intersection(tileRect) // Thread problem access
                 
                 if( tile == nil ) {
                     annotateRect(tileRect, ctx: context!)
@@ -100,20 +107,15 @@ class TilingView : UIView {
         // we use "imageWithContentsOfFile:" instead of "imageNamed:" here because we don't
         // want UIImage to cache our tiles
         //
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let tileName = NSString(format: "%@_%d_%d", name_, col, row)
-        let tileUrl = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
-            tileName as String
-        )
-        let tileImage = UIImage(contentsOfFile: tileUrl.path)
+        //let tileName = NSString(format: "%@_%d_%d", name_, col, row)
+        let filePath = "\(cachePath)/\(name_)_\(col)_\(row)"
+        let tileImage = UIImage(contentsOfFile: filePath)
         if( tileImage != nil ) {
             return tileImage
         }
         
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
-            name_
-        )
-        let fullImage = UIImage(contentsOfFile: url.path)
+        let fullImagePath = "\(cachePath)/\(name_)"
+        let fullImage = UIImage(contentsOfFile: fullImagePath)
         if( fullImage == nil ) {
             return nil
         }
@@ -150,7 +152,7 @@ class TilingView : UIView {
         UIColor.white.set()
         NSString(format: "%0.0f", log2(scale)).draw(
             at: CGPoint(x: rect.minX, y: rect.minY),
-            withAttributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: font_size)]
+            withAttributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: font_size)]
         )
         UIColor.red.set()
         ctx.setLineWidth(line_width)

@@ -70,10 +70,10 @@ class RadialNode {
         var a = atan2(Double(cross(a, b: b, c: c)), Double(dot(a,b: b,c: c)))
         if( a < 0.0 ) {
             // All angles need to be measured along the same direction.
-            a += 2*M_PI
+            a += 2 * Double.pi
         }
         // Return angle between 0 and 360.
-        return a * 180/M_PI
+        return a * 180/Double.pi
     }
 }
 

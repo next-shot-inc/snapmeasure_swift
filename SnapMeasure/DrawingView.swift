@@ -237,7 +237,7 @@ class LineView : UIView {
     // Handle thread safety for currentLine
     fileprivate var _currentLine = Line()
     fileprivate let queue = DispatchQueue(label: "...", attributes: [])
-    func with(_ queue: DispatchQueue, f: (Void)->Void) {
+    func with(_ queue: DispatchQueue, f: ()->Void) {
         queue.sync(execute: f)
     }
     
@@ -275,7 +275,7 @@ class LineView : UIView {
             
             NSString(string: line.name).draw(
                 at: CGPoint(x: line.points[0].x, y: line.points[0].y),
-                withAttributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: font_size)]
+                withAttributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: font_size)]
             )
         }
         
@@ -341,7 +341,7 @@ class LineView : UIView {
             )
             NSString(format: "%g", refMeasureValue).draw(
                 at: loc,
-                withAttributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: font_size)]
+                withAttributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: font_size)]
             )
             
             context?.move (to: CGPoint(x: refMeasurePoints[0].x, y: refMeasurePoints[0].y));
@@ -377,7 +377,7 @@ class LineView : UIView {
             let loc = CGPoint(x: (measure[1].x+measure[0].x)/2.0, y: (measure[1].y+measure[0].y)/2.0)
             NSString(format: "%g", currentMeasure).draw(
                 at: loc,
-                withAttributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: font_size)]
+                withAttributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: font_size)]
             )
             
             context?.move (to: CGPoint(x: measure[0].x, y: measure[0].y));
@@ -992,7 +992,7 @@ class DrawingView : UIImageView {
             let to = ato as? TextObject
             let orect = to!.rect.cgRectValue!
             let rect = orect.applying(affineTransform)
-            textView.addText(to!.string, rect: rect)
+            _ = textView.addText(to!.string, rect: rect)
             textView.setNeedsDisplay()
         }
         
@@ -1003,8 +1003,8 @@ class DrawingView : UIImageView {
             if( loc.x != 0 && loc.y != 0 ) {
                 loc = loc.applying(affineTransform)
             }
-            let strike = dmpo!.strike.doubleValue * M_PI/180
-            let dip = dmpo!.dip.doubleValue * M_PI / 180
+            let strike = dmpo!.strike.doubleValue * .pi/180
+            let dip = dmpo!.dip.doubleValue * .pi / 180
             var line : Line?
             if( dmpo?.feature != "unassigned" ) {
                 for l in lineView.lines {

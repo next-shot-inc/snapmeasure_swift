@@ -89,7 +89,7 @@ class CustomCalloutView: UIView, CAAnimationDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func calloutClicked(_ sender: UIButton) {
+    @objc func calloutClicked(_ sender: UIButton) {
         if (self.delegate != nil) {
             if (self.delegate!.responds(to: #selector(CustomCalloutViewDelegate.calloutViewClicked(_:)))) {
                 self.delegate!.calloutViewClicked!(self)
@@ -706,7 +706,7 @@ class CalloutBackgroundView: UIView {
         
         if (pointingUp) {
             self.arrowView.setFrameY(1)
-            self.arrowView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI));
+            self.arrowView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi));
         }
         else {
             self.arrowView.setFrameY(self.containerView.frameHeight - 0.5)

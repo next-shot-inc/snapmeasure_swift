@@ -20,8 +20,8 @@ struct Vector3 {
         var strike = acos(x/sqrt(x*x+y*y))
         var dip = asin(sqrt(x*x+y*y)/sqrt(x*x+y*y+z*z))
         
-        dip = 180/M_PI * dip
-        strike = 180/M_PI * strike
+        dip = 180/Double.pi * dip
+        strike = 180/Double.pi * strike
         return (strike, dip)
     }
 }

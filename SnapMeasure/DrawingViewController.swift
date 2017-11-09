@@ -474,7 +474,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     var keyboardHeight : CGFloat = 0.0
     
-    func keyboardWasShown(_ notification: Notification) {
+    @objc func keyboardWasShown(_ notification: Notification) {
         let tmp : [AnyHashable: Any] = notification.userInfo!
         let rectV = tmp[UIKeyboardFrameBeginUserInfoKey]
         let rect = (rectV as AnyObject).cgRectValue
@@ -485,7 +485,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         })
     }
     
-    func keyboardWillBeHidden(_ notification: Notification) {
+    @objc func keyboardWillBeHidden(_ notification: Notification) {
         UIView.animate(withDuration: 0.25, animations: { ()-> Void in
             self.view.center.y += self.keyboardHeight
         })

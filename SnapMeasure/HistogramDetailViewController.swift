@@ -39,7 +39,7 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         drawHistogram(possibleFeatureTypes.count, features: histogramData!.getFeatures(), sortedBy: "Type")
     }
     
-    func doubleTappedLabel(_ sender: AnyObject) { // sender is doubleTap
+    @objc func doubleTappedLabel(_ sender: AnyObject) { // sender is doubleTap
         let label = (sender as! UITapGestureRecognizer).view as! UILabel
         let textField = UITextField(frame: label.bounds)
         textField.text = label.text
@@ -103,12 +103,12 @@ class HistogramDetailViewController: UIViewController, HistogramCreationDelegate
         rotatedYLabel.text = "# of Features"
         rotatedYLabel.font = UIFont.systemFont(ofSize: yLabel.frame.height*4/5)
         let t = rotatedYLabel.text! as NSString
-        let size = t.size(attributes: [NSFontAttributeName: rotatedYLabel.font])
+        let size = t.size(withAttributes: [NSAttributedStringKey.font: rotatedYLabel.font])
         rotatedYLabel.bounds = CGRect(x: 0, y: 0, width: size.width, height: size.height);
         rotatedYLabel.center = CGPoint(x: 0, y: 0)
         //rotatedYLabel.layer.anchorPoint = CGPointMake(size.width/2, size.height/2)
         rotatedYLabel.transform =
-            CGAffineTransform(rotationAngle: CGFloat(-M_PI_2)).concatenating(CGAffineTransform(translationX: yLabel.frame.origin.x, y: yLabel.frame.origin.y)
+            CGAffineTransform(rotationAngle: CGFloat(-Double.pi/2)).concatenating(CGAffineTransform(translationX: yLabel.frame.origin.x, y: yLabel.frame.origin.y)
         )
         yLabel.isHidden = true
         
@@ -316,9 +316,9 @@ class HistogramView : UIView {
         
         let font = UIFont.systemFont(ofSize: 20)
         
-        let labelAttributes = [ NSFontAttributeName: font,
-            NSForegroundColorAttributeName: UIColor.darkGray,
-            NSParagraphStyleAttributeName: paragraphStyle
+        let labelAttributes = [ NSAttributedStringKey.font: font,
+            NSAttributedStringKey.foregroundColor: UIColor.darkGray,
+            NSAttributedStringKey.paragraphStyle: paragraphStyle
         ]
         
         var ticksSkipped : CGFloat = 0
@@ -393,9 +393,9 @@ class HistogramView : UIView {
             for object in xScaleLables! {
                 let label = object as! String
                 
-                let labelAttributes = [ NSFontAttributeName: font,
-                    NSForegroundColorAttributeName: UIColor.darkGray,
-                    NSParagraphStyleAttributeName: paragraphStyle
+                let labelAttributes = [ NSAttributedStringKey.font: font,
+                    NSAttributedStringKey.foregroundColor: UIColor.darkGray,
+                    NSAttributedStringKey.paragraphStyle: paragraphStyle
                 ]
                 
                 let attributedLabel = NSMutableAttributedString(string: label, attributes: labelAttributes)
@@ -403,8 +403,8 @@ class HistogramView : UIView {
                 var labelSize = attributedLabel.size()
                 while labelSize.width > dx { //need the tick label width to be less than the distance between two ticks
                     font = UIFont.systemFont(ofSize: font.pointSize - 2)
-                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
-                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    attributedLabel.removeAttribute(NSAttributedStringKey.font, range: range)
+                    attributedLabel.addAttribute(NSAttributedStringKey.font, value: font, range: range)
                     labelSize = attributedLabel.size()
                 }
                 
@@ -426,9 +426,9 @@ class HistogramView : UIView {
                 let labelNum = object as! NSNumber
                 let label = numFormatter.string(from: labelNum)!
                 
-                let labelAttributes = [ NSFontAttributeName: font,
-                    NSForegroundColorAttributeName: UIColor.darkGray,
-                    NSParagraphStyleAttributeName: paragraphStyle
+                let labelAttributes = [ NSAttributedStringKey.font: font,
+                    NSAttributedStringKey.foregroundColor: UIColor.darkGray,
+                    NSAttributedStringKey.paragraphStyle: paragraphStyle
                 ]
                 
                 let attributedLabel = NSMutableAttributedString(string: label, attributes: labelAttributes)
@@ -436,8 +436,8 @@ class HistogramView : UIView {
                 let range = NSRange(location: 0,length: attributedLabel.length)
                 while labelSize.width > dx { //need the tick label width to be less than the distance between two ticks
                     font = UIFont.systemFont(ofSize: font.pointSize - 2)
-                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
-                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    attributedLabel.removeAttribute(NSAttributedStringKey.font, range: range)
+                    attributedLabel.addAttribute(NSAttributedStringKey.font, value: font, range: range)
                     labelSize = attributedLabel.size()
                 }
                 
@@ -460,8 +460,8 @@ class HistogramView : UIView {
                 if StringsNotNumbers  {
                     let attributedLabel = attributedLabels[i]
                     let range = NSRange(location: 0,length: attributedLabel.length)
-                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
-                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    attributedLabel.removeAttribute(NSAttributedStringKey.font, range: range)
+                    attributedLabel.addAttribute(NSAttributedStringKey.font, value: font, range: range)
                     
                     let labelSize = attributedLabel.size()
                     let textRect = CGRect(origin: CGPoint(x: xPos+dx/2-labelSize.width/2, y: y+tickLength+5), size: labelSize)
@@ -469,8 +469,8 @@ class HistogramView : UIView {
                 } else  {
                     let attributedLabel = attributedLabels[i]
                     let range = NSRange(location: 0,length: attributedLabel.length)
-                    attributedLabel.removeAttribute(NSFontAttributeName, range: range)
-                    attributedLabel.addAttribute(NSFontAttributeName, value: font, range: range)
+                    attributedLabel.removeAttribute(NSAttributedStringKey.font, range: range)
+                    attributedLabel.addAttribute(NSAttributedStringKey.font, value: font, range: range)
                     
                     let labelSize = attributedLabel.size()
                     let textRect = CGRect(origin: CGPoint(x: xPos-labelSize.width/2, y: y+tickLength+5), size: labelSize)

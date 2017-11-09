@@ -40,14 +40,14 @@ class Utility {
         
         let astring = NSMutableAttributedString(
             string: string,
-            attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 20.0)]
+            attributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: 20.0)]
         )
         
         let range = (string as NSString).range(of: "o")
-        let superAttributes = [
-            NSFontAttributeName: UIFont.systemFont(ofSize: 10.0),
-            NSBaselineOffsetAttributeName: 10.0
-        ] as [String : Any]
+        let superAttributes : [NSAttributedStringKey: Any] = [
+            NSAttributedStringKey.font: UIFont.systemFont(ofSize: 10.0),
+            NSAttributedStringKey.baselineOffset: 10.0
+        ]
         astring.addAttributes(superAttributes, range: range)
         return astring
     }

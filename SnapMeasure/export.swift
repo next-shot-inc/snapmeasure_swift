@@ -46,7 +46,7 @@ class Exporter {
             let compassOrientation = detailedImage.compassOrientation?.doubleValue
             
             let orientation = compassOrientation! < 0 ?
-                2*M_PI+compassOrientation! * M_PI/180 : compassOrientation! * M_PI/180
+                2*Double.pi+compassOrientation! * Double.pi/180 : compassOrientation! * Double.pi/180
             
             let scale = MKMetersPerMapPointAtLatitude(coordinate.latitude)
             print(scale)
@@ -619,8 +619,8 @@ class ExportAsGocadFile : Exporter {
                 
                 // gather information about the point
                 let loc = idpo.locationInImage.cgPointValue
-                let strike = idpo.strike.doubleValue * M_PI/180
-                let dip = idpo.dip.doubleValue * M_PI / 180
+                let strike = idpo.strike.doubleValue * .pi/180
+                let dip = idpo.dip.doubleValue * .pi / 180
                 let normal = Vector3(x: cos(strike)*sin(dip), y: sin(strike)*sin(dip), z: cos(dip))
                 var p : DPoint3
                 if( loc?.x != 0 && loc?.y != 0 ) {

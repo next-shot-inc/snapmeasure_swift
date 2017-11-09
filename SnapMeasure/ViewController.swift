@@ -135,6 +135,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     // And perform segue
     func askForPictureSize(_ image: UIImage) {
         if( image.size.width < 1024 || image.size.height < 1024 ) {
+            self.image = image
+            self.imageInfo.xDimension = Int(image.size.width)
+            self.imageInfo.yDimension = Int(image.size.height)
             self.performSegue(withIdentifier: "toDrawingView", sender: nil)
         }
         
@@ -146,6 +149,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             title: "Image Resolution", message: message, preferredStyle: .alert
         )
         let cancelAction: UIAlertAction = UIAlertAction(title: "Actual Size", style: .cancel) { action -> Void in
+            self.image = image
+            self.imageInfo.xDimension = Int(image.size.width)
+            self.imageInfo.yDimension = Int(image.size.height)
             self.performSegue(withIdentifier: "toDrawingView", sender: nil)
         }
         alert.addAction(cancelAction)
@@ -314,11 +320,18 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         menuController = PopupMenuController()
         menuController!.initCellContents(projects.count, cols: 1)
         
-        let width : CGFloat = sender.frame.width+20
+        let longDateFormatter = DateFormatter()
+        longDateFormatter.locale = Locale.current
+        longDateFormatter.setLocalizedDateFormatFromTemplate("MMM d YY")
+        longDateFormatter.timeZone = TimeZone.current
+        
+        let width : CGFloat = self.view.frame.width
         let height : CGFloat = 45
         for i in 0..<projects.count {
             let button = UIButton(type: UIButtonType.system)
-            button.setTitle(projects[i].name, for: UIControlState())
+            let longDate = longDateFormatter.string(from: projects[i].date)
+            // Display some information about the project (name, number of images, date of last modification)
+            button.setTitle("\(projects[i].name) (\(projects[i].detailedImages.count)) - \(longDate)", for: UIControlState())
             button.tag = i
             button.frame = CGRect(x: 0, y: 0, width: width, height: height)
             button.addTarget(self, action: #selector(ViewController.loadProject(_:)), for: UIControlEvents.touchUpInside)
@@ -340,7 +353,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
     
     // Callback linked to each button of the PopupMenuController initialized in the loadProjectButtonTapped
-    func loadProject(_ sender: UIButton) {
+    @objc func loadProject(_ sender: UIButton) {
         currentProject = projects[sender.tag]
         projectNameLabel.text = currentProject.name
         menuController!.dismiss(animated: true, completion: nil)
@@ -418,6 +431,99 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     ) {
         print(result)
         controller.dismiss(animated: true, completion: nil)
+    }
+    
+    // Clean orphans image files linked to old bugs.
+    @IBAction func cleanImages(_ sender: Any) {
+        var imageNames = [String]()
+        for p in projects {
+            for imageobj in p.detailedImages {
+                let io = imageobj as? DetailedImageObject
+                if( io != nil ) {
+                    imageNames.append(io!.imageFile)
+                    imageNames.append(io!.thumbImageFile)
+                }
+            }
+        }
+        
+        let fileMngr = FileManager.default;
+        
+        // Full path to documents directory
+        let docs = fileMngr.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+        
+        // List all contents of directory and test if the file is an orphan image File
+        do {
+            let files = try fileMngr.contentsOfDirectory(atPath:docs)
+            for f in files {
+                var found = false
+                for imf in imageNames {
+                    // Tile image files have suffix _I_J
+                    if( f.endIndex >= imf.endIndex && f[..<imf.endIndex] == imf ) {
+                        found = true
+                        break
+                    }
+                }
+                if( !found ) {
+                    // It is not an existing image File
+                    let testUUid = UUID()
+                    let uidString = testUUid.uuidString
+                    if( f.endIndex >= uidString.endIndex ) {
+                        // Test if can be an image File (loading its name into a UUID)
+                        let substring = f[..<uidString.endIndex]
+                        let uuidTest = UUID(uuidString: String(substring))
+                        if( uuidTest != nil ) {
+                            // It is an orphan image file or tile image file, remove it
+                            print(f)
+                            let filePath = "\(docs)/\(f)"
+                            if( fileMngr.fileExists(atPath: filePath) ) {
+                                do {
+                                    try fileMngr.removeItem(atPath: filePath)
+                                } catch {
+                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {
+            
+        }
+    
+        // Redo lost thumbImage files (due to a intermediary version bug)
+        for p in projects {
+            for imageobj in p.detailedImages {
+                let io = imageobj as? DetailedImageObject
+                if( io != nil ) {
+                    let thumbfilePath = "\(docs)/\(io!.thumbImageFile)"
+                    if( !fileMngr.fileExists(atPath: thumbfilePath) ) {
+                        let filePath = "\(docs)/\(io!.imageFile)"
+                        let image = UIImage(contentsOfFile:filePath)
+                        if( image == nil ) {
+                            continue
+                        }
+                        
+                        // Create thumbNail version of it - Around 100x100 pixels
+                        let scalex = image!.size.width/128.0
+                        let scaley = image!.size.height/128.0
+                        let scale = min(scalex, scaley)
+                        let small_image = DetailedImageObject.resizeImage(
+                            image!,
+                            newSize: CGSize(width: ceil(image!.size.width/scale), height: ceil(image!.size.height/scale))
+                        )
+                        
+                        let small_data = UIImageJPEGRepresentation(small_image, 1.0)
+                        if( small_data == nil ) {
+                            print("Could not generate JPEG representation of small image")
+                        }
+                        
+                        if( ((try? small_data!.write(to: URL(fileURLWithPath: thumbfilePath), options: [.atomic])) != nil) == false ) {
+                            print("Could not save thumb image file")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -206,7 +206,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         mapView.removeOverlays(mapView.overlays)
     }
     
-    func showAll() {
+    @objc func showAll() {
         self.removeAll()
         for detailedImage in detailedImages {
             let annotation = ImageAnnotation(detailedImage: detailedImage)
@@ -288,28 +288,28 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         menuController = nil
     }
     
-    func showAnnotationsForLatestDay(_ sender: UIButton) {
+    @objc func showAnnotationsForLatestDay(_ sender: UIButton) {
         //24hours/day * 60min/hour * 60sec/min
         let dayInterval : TimeInterval = 86400 //secs
         showAnnotationsForTimeIntervalFromCurrentDate(dayInterval)
         filterByDateButton.title = "Filter by Date: Latest Day"
     }
     
-    func showAnnotationsForLatestWeek() {
+    @objc func showAnnotationsForLatestWeek() {
         //7days/week * 24hours/day * 60min/hour * 60sec/min
         let weekInterval : TimeInterval = 604800 //secs
         showAnnotationsForTimeIntervalFromCurrentDate(weekInterval)
         filterByDateButton.title = "Filter by Date: Latest Week"
     }
     
-    func showAnnotationsForLatestMonth() {
+    @objc func showAnnotationsForLatestMonth() {
         //30.5 days/month * 24hours/day * 60min/hour * 60sec/min
         let monthInterval : TimeInterval = 2635200 //secs
         showAnnotationsForTimeIntervalFromCurrentDate(monthInterval)
         filterByDateButton.title = "Filter by Date: Latest Month"
     }
     
-    func showAnnotationsForLatestYear() {
+    @objc func showAnnotationsForLatestYear() {
         //24hours/day * 60min/hour * 60sec/min
         let yearInterval : TimeInterval = 31536000 //secs
         showAnnotationsForTimeIntervalFromCurrentDate(yearInterval)
@@ -369,17 +369,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         self.present(menuController!, animated: true, completion: nil)
     }
     
-    func showStandardMap() {
+    @objc func showStandardMap() {
         self.mapView.mapType = MKMapType.standard
         menuController?.dismiss(animated: true, completion: nil)
         menuController = nil
     }
-    func showSatelliteMap() {
+    @objc func showSatelliteMap() {
         self.mapView.mapType = MKMapType.satellite
         menuController?.dismiss(animated: true, completion: nil)
         menuController = nil
     }
-    func showHybridMap() {
+    @objc func showHybridMap() {
         self.mapView.mapType = MKMapType.hybrid
         menuController?.dismiss(animated: true, completion: nil)
         menuController = nil
@@ -482,7 +482,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CustomCalloutViewD
         return overlayView
     }
     
-    func calloutImageTapped() {
+    @objc func calloutImageTapped() {
         let alert = UIAlertController(
             title: "Interpret this Outcrop?", message: nil, preferredStyle: .alert
         )

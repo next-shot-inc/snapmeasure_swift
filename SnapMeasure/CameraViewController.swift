@@ -92,7 +92,7 @@ extension UIImage {
                 
                 NSLog("Down");
                 transform = transform.translatedBy(x: self.size.width, y: self.size.height)
-                transform = transform.rotated(by: CGFloat(M_PI))
+                transform = transform.rotated(by: CGFloat(Double.pi))
         }
         
         if (self.imageOrientation == UIImageOrientation.right
@@ -100,7 +100,7 @@ extension UIImage {
                 
                 NSLog("Right");
                 transform = transform.translatedBy(x: self.size.width, y: 0)
-                transform = transform.rotated(by: CGFloat(M_PI/2.0))
+                transform = transform.rotated(by: CGFloat(.pi/2.0))
         }
         
         if (self.imageOrientation == UIImageOrientation.left
@@ -108,7 +108,7 @@ extension UIImage {
                 
                 NSLog("Left");
                 transform = transform.translatedBy(x: 0, y: self.size.height);
-                transform = transform.rotated(by: CGFloat(3*M_PI/2.0));
+                transform = transform.rotated(by: CGFloat(3*Double.pi/2.0));
         }
         
         if (self.imageOrientation == UIImageOrientation.upMirrored
@@ -156,9 +156,9 @@ extension UIImage {
     }
 }
 
-class CameraViewController: UIViewController, CLLocationManagerDelegate {
+class CameraViewController: UIViewController, CLLocationManagerDelegate, AVCapturePhotoCaptureDelegate {
     var captureSession: AVCaptureSession!
-    var stillImageOutput: AVCaptureStillImageOutput?
+    var stillImageOutput: AVCapturePhotoOutput?
     var previewLayer: AVCaptureVideoPreviewLayer?
     var videoDeviceInput: AVCaptureDeviceInput?
     var image : UIImage?
@@ -191,28 +191,32 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         super.viewWillAppear(animated)
         
         self.captureSession = AVCaptureSession()
-        self.captureSession!.sessionPreset = AVCaptureSessionPresetPhoto
+        self.captureSession!.sessionPreset = AVCaptureSession.Preset.photo
         
-        let backCamera = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        let backCamera = AVCaptureDevice.default(for: AVMediaType.video)
+        if( backCamera == nil ) {
+            return
+        }
         
-        let input = try? AVCaptureDeviceInput(device: backCamera)
+        let input = try? AVCaptureDeviceInput(device: backCamera!)
         
         if input != nil && self.captureSession!.canAddInput(input!) {
             self.captureSession!.addInput(input!)
             self.videoDeviceInput = input;
             
-            stillImageOutput = AVCaptureStillImageOutput()
-            stillImageOutput!.outputSettings = [AVVideoCodecKey: AVVideoCodecJPEG]
-            if self.captureSession!.canAddOutput(stillImageOutput) {
-                self.captureSession!.addOutput(stillImageOutput)
-                CameraViewController.setFlashMode(AVCaptureFlashMode.auto, forDevice: backCamera!)
+            stillImageOutput = AVCapturePhotoOutput()
+            
+        
+            if self.captureSession!.canAddOutput(stillImageOutput!) {
+                self.captureSession!.addOutput(stillImageOutput!)
+                
                 
                 previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
                 if let connection = previewLayer?.connection {
                     connection.videoOrientation = AVCaptureVideoOrientation(ui:UIApplication.shared.statusBarOrientation)
 
                 }
-                previewLayer!.videoGravity = AVLayerVideoGravityResizeAspectFill
+                previewLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
                 previewView.layer.addSublayer(previewLayer!)
                 
                 self.captureSession!.startRunning()
@@ -291,70 +295,93 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         if( stillImageOutput == nil ) {
             return
         }
-        if let videoConnection = stillImageOutput!.connection(withMediaType: AVMediaTypeVideo) {
+        if let videoConnection = stillImageOutput!.connection(with: AVMediaType.video) {
             videoConnection.videoOrientation = AVCaptureVideoOrientation.portrait
-            stillImageOutput?.captureStillImageAsynchronously(from: videoConnection, completionHandler: {(sampleBuffer, error) in
-                if (sampleBuffer != nil) {
-                    let imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer)
-                    let dataProvider = CGDataProvider(data: imageData as! CFData)
-                    let cgImageRef = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: CGColorRenderingIntent.defaultIntent)
-                    
-                    let image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation(ui:UIApplication.shared.statusBarOrientation)).fixOrientation()
-                    //var image = UIImage.init(data: imageData)
-                    NSLog("image Orientation %i", image.imageOrientation.rawValue)
-                    self.image = image
-                    
-                    let exifAttachUnManaged = CMGetAttachment(
-                        sampleBuffer!, kCGImagePropertyExifDictionary, nil
-                    )
-                    //NSLog("attachments %@", exifAttachUnManaged);
-                    //let exifAttach = exifAttachUnManaged.takeUnretainedValue() as! CFDictionaryRef
-                    let exifAttach = exifAttachUnManaged as? NSDictionary
-                    if( exifAttach != nil ) {
-                        let flNumber = exifAttach!.value(forKey: kCGImagePropertyExifFocalLength as String) as? NSNumber
-                        if( flNumber != nil ) {
-                            let focalLength = flNumber!.floatValue
-                            self.imageInfo.focalLength = focalLength/1000.0 // (in meters)
-                        }
-                        let pxNumber = exifAttach!.value(forKey: kCGImagePropertyExifPixelXDimension as String) as? NSNumber
-                        if( pxNumber != nil ) {
-                            let px = pxNumber!.int32Value
-                            self.imageInfo.xDimension = Int(px)
-                        }
-                        let pyNumber = exifAttach!.value(forKey: kCGImagePropertyExifPixelYDimension as String) as? NSNumber
-                        if( pyNumber != nil ) {
-                            let py = pyNumber!.int32Value
-                            self.imageInfo.yDimension = Int(py)
-                        }
-                        let diNumber = exifAttach!.value(forKey: kCGImagePropertyExifSubjectDistRange as String) as?NSNumber
-                        if( diNumber != nil ) {
-                            let di = diNumber!.floatValue
-                            self.imageInfo.subjectDistance = di
-                        }
-                    }
-                    
-                    if (CLLocationManager.locationServicesEnabled()) {
-                        self.getLocation()
-                        self.imageInfo.latitude = self.bestEffortAtLocation!.coordinate.latitude
-                        self.imageInfo.longitude = self.bestEffortAtLocation!.coordinate.longitude
-                        if (self.currentHeading != nil) {
-                            self.imageInfo.compassOrienation = self.currentHeading!
-                        }
-                        self.imageInfo.altitude = self.bestEffortAtLocation!.altitude
-                    
-                        self.stopUpdatingLocationWithMessage("Still Image Captured:")
-                        self.locationManager?.stopUpdatingHeading()
-                        self.captureSession!.stopRunning()
-                    }
-                    self.imageInfo.date = Date()
-                    self.imageInfo.xDimension = Int(image.size.width)
-                    self.imageInfo.yDimension = Int(image.size.height)
-                    
-                    // Ask for resolution and then segue to drawingView
-                    self.askForPictureSize(image)
-                }
-            })
+            let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecJPEG])
+            if( stillImageOutput!.supportedFlashModes.contains(AVCaptureDevice.FlashMode.auto) ) {
+               settings.flashMode = AVCaptureDevice.FlashMode.auto
+            }
+            
+            stillImageOutput?.capturePhoto(with: settings, delegate: self)
         }
+    }
+    
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
+    }
+    
+    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
+    
+        if let error = error {
+            print(error.localizedDescription)
+            return
+        }
+        
+        let sampleBuffer = photoSampleBuffer
+        let previewBuffer = previewPhotoSampleBuffer
+        if( sampleBuffer == nil ) {
+            return
+        }
+        let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: sampleBuffer!, previewPhotoSampleBuffer: previewBuffer)
+        if( imageData == nil ) {
+            return
+        }
+    
+        let dataProvider = CGDataProvider(data: imageData! as CFData)
+        let cgImageRef = CGImage(jpegDataProviderSource: dataProvider!, decode: nil, shouldInterpolate: true, intent: CGColorRenderingIntent.defaultIntent)
+        
+        let image = UIImage(cgImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation(ui:UIApplication.shared.statusBarOrientation)).fixOrientation()
+        //var image = UIImage.init(data: imageData)
+        NSLog("image Orientation %i", image.imageOrientation.rawValue)
+        self.image = image
+        
+        let exifAttachUnManaged = CMGetAttachment(
+            photoSampleBuffer!, kCGImagePropertyExifDictionary, nil
+        )
+        //NSLog("attachments %@", exifAttachUnManaged);
+        //let exifAttach = exifAttachUnManaged.takeUnretainedValue() as! CFDictionaryRef
+        let exifAttach = exifAttachUnManaged as? NSDictionary
+        if( exifAttach != nil ) {
+            let flNumber = exifAttach!.value(forKey: kCGImagePropertyExifFocalLength as String) as? NSNumber
+            if( flNumber != nil ) {
+                let focalLength = flNumber!.floatValue
+                self.imageInfo.focalLength = focalLength/1000.0 // (in meters)
+            }
+            let pxNumber = exifAttach!.value(forKey: kCGImagePropertyExifPixelXDimension as String) as? NSNumber
+            if( pxNumber != nil ) {
+                let px = pxNumber!.int32Value
+                self.imageInfo.xDimension = Int(px)
+            }
+            let pyNumber = exifAttach!.value(forKey: kCGImagePropertyExifPixelYDimension as String) as? NSNumber
+            if( pyNumber != nil ) {
+                let py = pyNumber!.int32Value
+                self.imageInfo.yDimension = Int(py)
+            }
+            let diNumber = exifAttach!.value(forKey: kCGImagePropertyExifSubjectDistRange as String) as?NSNumber
+            if( diNumber != nil ) {
+                let di = diNumber!.floatValue
+                self.imageInfo.subjectDistance = di
+            }
+        }
+    
+        if (CLLocationManager.locationServicesEnabled()) {
+            self.getLocation()
+            self.imageInfo.latitude = self.bestEffortAtLocation!.coordinate.latitude
+            self.imageInfo.longitude = self.bestEffortAtLocation!.coordinate.longitude
+            if (self.currentHeading != nil) {
+                self.imageInfo.compassOrienation = self.currentHeading!
+            }
+            self.imageInfo.altitude = self.bestEffortAtLocation!.altitude
+            
+            self.stopUpdatingLocationWithMessage("Still Image Captured:")
+            self.locationManager?.stopUpdatingHeading()
+            self.captureSession!.stopRunning()
+        }
+        self.imageInfo.date = Date()
+        self.imageInfo.xDimension = Int(image.size.width)
+        self.imageInfo.yDimension = Int(image.size.height)
+        
+        // Ask for resolution and then segue to drawingView
+        self.askForPictureSize(image)
     }
     
     override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
@@ -376,7 +403,6 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                     if let connection = self.previewLayer?.connection {
                         connection.videoOrientation = AVCaptureVideoOrientation(ui:UIApplication.shared.statusBarOrientation)
                         
-                        
                         switch connection.videoOrientation {
                         case AVCaptureVideoOrientation.landscapeLeft: NSLog("LandscapeLeft");
                         case AVCaptureVideoOrientation.landscapeRight: NSLog("LandscapeRight");
@@ -387,7 +413,7 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
                     }
                     self.previewLayer!.frame = self.previewView.bounds
 
-                    self.previewLayer!.videoGravity = AVLayerVideoGravityResizeAspectFill
+                    self.previewLayer!.videoGravity = AVLayerVideoGravity.resizeAspectFill
                     NSLog("Omg Rotation!")
 
             })
@@ -404,23 +430,23 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         
         //dispatch block to sessionQueue
         let currentVideoDevice = self.videoDeviceInput?.device
-        var preferredPosition = AVCaptureDevicePosition.unspecified
+        var preferredPosition = AVCaptureDevice.Position.unspecified
         let currentPosition = currentVideoDevice?.position
-        if (currentPosition == AVCaptureDevicePosition.unspecified) {
-            
+        if (currentPosition == AVCaptureDevice.Position.unspecified || currentPosition == nil ) {
+            return
         }
         //change preferred camera postion so flip happens
         switch (currentPosition!) {
-        case AVCaptureDevicePosition.unspecified:
-            preferredPosition = AVCaptureDevicePosition.back; break;
-        case AVCaptureDevicePosition.back:
-            preferredPosition = AVCaptureDevicePosition.front; break;
-        case AVCaptureDevicePosition.front:
-            preferredPosition = AVCaptureDevicePosition.back; break;
+        case AVCaptureDevice.Position.unspecified:
+            preferredPosition = AVCaptureDevice.Position.back; break;
+        case AVCaptureDevice.Position.back:
+            preferredPosition = AVCaptureDevice.Position.front; break;
+        case AVCaptureDevice.Position.front:
+            preferredPosition = AVCaptureDevice.Position.back; break;
         }
 
         //AVCaptureDevice *videoDevice = [CameraViewController deviceWithMediaType:AVMediaTypeVideo preferringPosition:preferredPosition];
-        let videoDevice = CameraViewController.deviceWithMediaType(AVMediaTypeVideo as NSString, preferringPosition: preferredPosition)
+        let videoDevice = CameraViewController.deviceWithMediaType(AVMediaType.video as NSString, preferringPosition: preferredPosition)
         
         let input = try? AVCaptureDeviceInput(device: videoDevice)
 
@@ -428,19 +454,18 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         //[[self session] beginConfiguration];
         self.captureSession!.beginConfiguration()
         
-        self.captureSession!.removeInput(self.videoDeviceInput)
+        self.captureSession!.removeInput(self.videoDeviceInput!)
         
         
-        if (self.captureSession!.canAddInput(input)) {
+        if (self.captureSession!.canAddInput(input!)) {
             NotificationCenter.default.removeObserver(self, name:NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange, object: currentVideoDevice)
-            CameraViewController.setFlashMode(AVCaptureFlashMode.auto, forDevice: videoDevice)
             
             NotificationCenter.default.addObserver(self, selector: #selector(CameraViewController.subjectAreaDidChange(_:)), name: NSNotification.Name.AVCaptureDeviceSubjectAreaDidChange, object: currentVideoDevice)
-            self.captureSession!.addInput(input)
+            self.captureSession!.addInput(input!)
             self.videoDeviceInput = input
             
         } else {
-            self.captureSession!.addInput(self.videoDeviceInput)
+            self.captureSession!.addInput(self.videoDeviceInput!)
         }
         
         self.captureSession!.commitConfiguration()
@@ -450,18 +475,18 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     
     }
     
-    func focusAndExposeTap(_ gestureRecognizer : UIGestureRecognizer) {
-        let devicePoint = self.previewLayer?.captureDevicePointOfInterest(for: gestureRecognizer.location(in: gestureRecognizer.view))
+    @objc func focusAndExposeTap(_ gestureRecognizer : UIGestureRecognizer) {
+        let devicePoint = self.previewLayer?.captureDevicePointConverted(fromLayerPoint: gestureRecognizer.location(in: gestureRecognizer.view))
         NSLog("FocusPoint (%f,%f)",devicePoint!.x,devicePoint!.y)
-        self.focusWithMode(AVCaptureFocusMode.autoFocus, exposeWithMode: AVCaptureExposureMode.autoExpose, atDevicePoint: devicePoint!, monitorSubjectAreaChange: true)
+        self.focusWithMode(AVCaptureDevice.FocusMode.autoFocus, exposeWithMode: AVCaptureDevice.ExposureMode.autoExpose, atDevicePoint: devicePoint!, monitorSubjectAreaChange: true)
         //NSLog("No Continuous Focus")
         self.drawFocusBox(devicePoint!)
         
     }
     
-    func doubleTaptoContinuouslyAutofocus(_ gestureRecognizer : UIGestureRecognizer) {
+    @objc func doubleTaptoContinuouslyAutofocus(_ gestureRecognizer : UIGestureRecognizer) {
         let devicePoint = CGPoint(x: 0.5, y: 0.5);
-        self.focusWithMode(AVCaptureFocusMode.continuousAutoFocus, exposeWithMode: AVCaptureExposureMode.continuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
+        self.focusWithMode(AVCaptureDevice.FocusMode.continuousAutoFocus, exposeWithMode: AVCaptureDevice.ExposureMode.continuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: true)
         removeFocusBox()
         NSLog("Continuous Focus")
     }
@@ -476,21 +501,15 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         self.dismiss(animated: true, completion: nil)
     }
     
-    class func deviceWithMediaType(_ mediaType: NSString, preferringPosition position: AVCaptureDevicePosition) -> AVCaptureDevice {
-        let devices = AVCaptureDevice.devices(withMediaType: mediaType as String) as! [AVCaptureDevice]
-        var captureDevice = devices[0]
-        
-        for device in devices {
-            if device.position == position {
-                captureDevice = device
-                break
-            }
+    class func deviceWithMediaType(_ mediaType: NSString, preferringPosition position: AVCaptureDevice.Position) -> AVCaptureDevice {
+        let device = AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType(rawValue: mediaType as String), position: position)
+        if( device == nil ) {
+            return AVCaptureDevice.default(for: AVMediaType(rawValue: mediaType as String))!
         }
-        
-        return captureDevice;
+        return device!
     }
     
-    func focusWithMode(_ focusMode: AVCaptureFocusMode, exposeWithMode exposureMode: AVCaptureExposureMode, atDevicePoint point: CGPoint, monitorSubjectAreaChange monitorSubjectAreachange: (Bool)) {
+    func focusWithMode(_ focusMode: AVCaptureDevice.FocusMode, exposeWithMode exposureMode: AVCaptureDevice.ExposureMode, atDevicePoint point: CGPoint, monitorSubjectAreaChange monitorSubjectAreachange: (Bool)) {
         let device = self.videoDeviceInput?.device
 
         do {
@@ -543,19 +562,6 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
         UIView.animate(withDuration: 0.25, animations: {
             self.previewView.layer.opacity = 1.0
         })
-    }
-
-    
-    class func setFlashMode(_ flashMode: AVCaptureFlashMode, forDevice device: AVCaptureDevice) {
-        if (device.hasFlash && device.isFlashModeSupported(flashMode)) {
-            do {
-                try device.lockForConfiguration()
-                device.flashMode = flashMode
-                device.unlockForConfiguration()
-            } catch {
-                //error
-            }
-        }
     }
     
     // Mark: CLManager Delegate Methods
@@ -668,9 +674,9 @@ class CameraViewController: UIViewController, CLLocationManagerDelegate {
     }
     
     //    MARK: Observers
-    func subjectAreaDidChange(_ notification: Notification) {
+    @objc func subjectAreaDidChange(_ notification: Notification) {
         let devicePoint : CGPoint = CGPoint(x: 0.5, y: 0.5)
-        self.focusWithMode(AVCaptureFocusMode.continuousAutoFocus, exposeWithMode: AVCaptureExposureMode.continuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
+        self.focusWithMode(AVCaptureDevice.FocusMode.continuousAutoFocus, exposeWithMode: AVCaptureDevice.ExposureMode.continuousAutoExposure, atDevicePoint: devicePoint, monitorSubjectAreaChange: false)
         removeFocusBox()
         
     }

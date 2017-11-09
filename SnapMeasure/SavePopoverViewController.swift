@@ -101,7 +101,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         var labelWidth : CGFloat = 0
         for i in 0..<projects.count {
            let t = projects[i].name as NSString
-           let size = t.size(attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: UIFont.buttonFontSize)])
+           let size = t.size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize: UIFont.buttonFontSize)])
            labelWidth = max(labelWidth, size.width)
         }
         
@@ -129,7 +129,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         self.present(menuController!, animated: true, completion: nil)
     }
     
-    func loadProject(_ sender: UIButton) {
+    @objc func loadProject(_ sender: UIButton) {
         currentProject = projects[sender.tag]
         projectNameLabel.text = currentProject.name
         menuController!.dismiss(animated: true, completion: nil)
@@ -168,6 +168,13 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         } else {
             newImage.name = "Image " + String(currentProject.detailedImages.count)
         }
+        
+        // Attention: image files are shared between different version of the same interpretation.
+        let currentImage = drawingVC!.detailedImage!
+        newImage.imageFile = currentImage.imageFile
+        newImage.thumbImageFile = currentImage.thumbImageFile
+        newImage.imageWidth = currentImage.imageWidth
+        newImage.imageHeight = currentImage.imageHeight
         
         // Update project date
         currentProject.date = Date()
@@ -257,10 +264,8 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
             
             lineObject!.image = image
             linesSet.add(lineObject!)
-            print("Added a line")
         }
         image.lines = linesSet
-        
         
         let faciesVignetteSet = NSMutableSet()
         

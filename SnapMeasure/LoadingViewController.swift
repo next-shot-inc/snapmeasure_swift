@@ -61,7 +61,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         self.tableView.backgroundView = UIImageView(image:UIImage(named:"loadingBackground"))
         self.tableView.estimatedRowHeight = 280
         self.tableView.separatorStyle = UITableViewCellSeparatorStyle.none
-        self.tableView.rowHeight = UITableViewAutomaticDimension
+        //self.tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.alwaysBounceVertical = false
         //self.tableView.allowsSelection = false
         
@@ -254,20 +254,43 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
                         }
                     }
                     if( fullIndex != nil ) {
-                       managedContext.delete(deletedImage!)
-                       detailedImages.remove(at: fullIndex!)
-                    
-                       filteredDetailedImages.remove(at: indexPath.row)
-                       tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
-                    
-                       edited = true
+                        // Count the number of times an image file has been referenced.
+                        var countRef = 0
+                        for di in detailedImages {
+                            let od = di.getObject()
+                            if( od?.imageFile == deletedImage?.imageFile ) {
+                                countRef += 1
+                            }
+                        }
+                        if( countRef == 1 ) {
+                            // Remove Image files
+                            deletedImage?.removeImage()
+                        }
+                        managedContext.delete(deletedImage!)
+                        detailedImages.remove(at: fullIndex!)
+                        
+                        filteredDetailedImages.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.automatic)
+                        
+                        edited = true
                     }
                 }
                 
             } else {
-                
+                // Count the number of times an image file has been referenced.
                 let deletedImage = detailedImages[indexPath.row].getObject()
-                deletedImage?.removeImage()
+                var countRef = 0
+                for di in detailedImages {
+                    let od = di.getObject()
+                    if( od?.imageFile == deletedImage?.imageFile ) {
+                        countRef += 1
+                    }
+                }
+                if( countRef == 1 ) {
+                    // Remove Image files
+                    deletedImage?.removeImage()
+                }
+                
                 if( deletedImage != nil ) {
                    managedContext.delete(deletedImage!)
                 }
