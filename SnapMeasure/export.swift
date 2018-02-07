@@ -459,10 +459,10 @@ class ExportAsShapeFile : Exporter {
 }
 
 class ExportAsGocadFile : Exporter {
-    func export() -> URL {
+    func export(prefix: String = "export") -> URL {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
-            "export-gocad.txt"
+            "\(prefix)-gocad.txt"
         )
         export(url)
         return url

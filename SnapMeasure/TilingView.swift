@@ -13,6 +13,7 @@ class TilingView : UIView {
     var name_ : String
     var size_ : CGSize
     var cachePath : String
+    var boundsCopy = CGRect()
     let sideLength : CGFloat = 1024
     
     init(name: String, size: CGSize) {
@@ -20,14 +21,12 @@ class TilingView : UIView {
         size_ = size
         
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        cachePath = appDelegate.applicationDocumentsDirectory.path
+        cachePath = appDelegate.applicationSupportDirectory.path
         
         super.init(frame: CGRect(x: 0,y: 0, width: size.width, height: size.height))
         let tiledLayer = self.layer as? CATiledLayer
         tiledLayer!.levelsOfDetail = 1
         tiledLayer!.tileSize = CGSize(width: sideLength,height: sideLength)
-        
-        
     }
     
     override class var layerClass : AnyClass {
@@ -50,6 +49,11 @@ class TilingView : UIView {
         get {
             return super.contentScaleFactor
         }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        boundsCopy = self.bounds // to use in drawRect method to avoid multi-threaded warnings
     }
     
     override func draw(_ rect: CGRect) {
@@ -85,14 +89,14 @@ class TilingView : UIView {
                 
                 let tile = tileForScale(scale!, row:row, col:col)
                 
-                let tileRect = CGRect(
+                var tileRect = CGRect(
                     x: sideLength * CGFloat(col),y: sideLength * CGFloat(row),
                     width: sideLength, height: sideLength
                 )
                 
                 // if the tile would stick outside of our bounds, we need to truncate it so as
                 // to avoid stretching out the partial tiles at the right and bottom edges
-                //tileRect = bounds.intersection(tileRect) // Thread problem access
+                tileRect = boundsCopy.intersection(tileRect)
                 
                 if( tile == nil ) {
                     annotateRect(tileRect, ctx: context!)

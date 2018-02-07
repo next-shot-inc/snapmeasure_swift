@@ -14,7 +14,8 @@ class CardTableViewCell: UITableViewCell {
     @IBOutlet var mainView: UIView!
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var myImageView: UIImageView!
-
+    @IBOutlet weak var nbInterpretations: UILabel!
+    
     var detailedImageProxy : DetailedImageProxy?
     
     deinit {
@@ -30,11 +31,12 @@ class CardTableViewCell: UITableViewCell {
         
         //fill in the data
         nameLabel.text = detailedImage.name
-        let detailedImage = detailedImageProxy?.getObject()
-        if( detailedImage != nil ) {
-            myImageView.image = detailedImage!.smallImage()
+        let detailedImageObject = detailedImageProxy?.getObject()
+        if( detailedImageObject != nil ) {
+            myImageView.image = detailedImageObject!.smallImage()
         }
         
+        nbInterpretations.text = "\(detailedImage.nb_interps) Interpretations"
     }
     
     func cleanImage() {

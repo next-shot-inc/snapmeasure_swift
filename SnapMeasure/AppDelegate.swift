@@ -17,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        cleanDocumentDirectory()
         return true
     }
 
@@ -51,6 +53,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return urls[urls.count-1]
     }()
+    
+    lazy var applicationSupportDirectory: URL = {
+        // The directory the application uses to store the Core Data store file. This code uses a directory named "next-shot-inc.com.SnapMeasure" in the application's documents Application Support directory.
+        let urls = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        let url = urls[urls.count-1]
+        do {
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
+            return url
+        } catch let error as NSError {
+            NSLog("Unresolved error \(error), \(error.userInfo)")
+            return url
+        }
+    }()
 
     lazy var managedObjectModel: NSManagedObjectModel = {
         // The managed object model for the application. This property is not optional. It is a fatal error for the application not to be able to find and load its model.
@@ -62,8 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // The persistent store coordinator for the application. This implementation creates and return a coordinator, having added the store for the application to it. This property is optional since there are legitimate error conditions that could cause the creation of the store to fail.
         // Create the coordinator and store
         var coordinator: NSPersistentStoreCoordinator? = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
-        let url = self.applicationDocumentsDirectory.appendingPathComponent("SnapMeasure.sqlite")
-        var error: NSError? = nil
+        let url = self.applicationSupportDirectory.appendingPathComponent("SnapMeasure.sqlite")
         var failureReason = "There was an error creating or loading the application's saved data."
         do {
             try coordinator!.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: nil)
@@ -109,5 +123,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
+    // As in version 1.2 we use the Documents directory to share files with the Files app
+    // We need to store DB and image files in the application support directory.
+    // This function is to perform this one-time migration.
+    func cleanDocumentDirectory() {
+        let fileMngr = FileManager.default
+        let docurl = applicationDocumentsDirectory
+        let docs = docurl.path
+        
+        let db_url = docurl.appendingPathComponent("SnapMeasure.sqlite")
+        if( !fileMngr.fileExists(atPath: db_url.path) ) {
+            // Migration has already been performed or nothing to do.
+            return
+        }
+        
+        let supporturl = applicationSupportDirectory
+        do {
+            let files = try fileMngr.contentsOfDirectory(atPath:docs)
+            for f in files {
+                let f_url = docurl.appendingPathComponent(f)
+                let t_url = supporturl.appendingPathComponent(f)
+                do {
+                  try fileMngr.moveItem(at: f_url, to: t_url)
+                } catch let error as NSError {
+                    NSLog("Unresolved error \(error), \(error.userInfo)")
+                }
+            }
+        } catch {
+    
+        }
+    }
 }
 

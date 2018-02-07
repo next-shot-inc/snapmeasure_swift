@@ -170,6 +170,16 @@ struct Line {
         return (exist, p)
     }
     
+    static func distance(_ p0: CGPoint, _ p1: CGPoint, _ p: CGPoint) -> Double {
+        let dx = Double(p1.x-p0.x)
+        let dy = Double(p1.y-p0.y)
+        let dpx = Double(p.x-p0.x)
+        let dpy = Double(p.y-p0.y)
+        let ldir = sqrt(dx*dx + dy*dy)
+        let det = dpy*dx - dpx*dy
+        return abs(det)/ldir
+    }
+    
     static func segmentIntersectPoint(_ a: CGPoint, b: CGPoint, c: CGPoint) -> CGFloat {
         if( b.x != a.x ) {
             return (c.x - a.x)/(b.x - a.x)
@@ -178,6 +188,88 @@ struct Line {
         } else {
             return 0.0
         }
+    }
+    
+    mutating func filterKinks() {
+        var newPoints = [CGPoint]()
+        let vertices = self.points
+        newPoints.append(vertices[0])
+        let n = vertices.count
+        var i = 0
+        while ( i < n-2 ) {
+            var di = 0
+            repeat {
+                let p0x = vertices[i].x
+                let p0y = vertices[i].y
+                let p1x = vertices[i+di+1].x
+                let p1y = vertices[i+di+1].y
+                let p2x = vertices[i+di+2].x
+                let p2y = vertices[i+di+2].y
+                var dx0 = p1x - p0x
+                var dy0 = p1y - p0y
+                let d0 = sqrt(dx0*dx0 + dy0*dy0)
+                dx0 /= d0
+                dy0 /= d0
+                var dx1 = p2x - p1x
+                var dy1 = p2y - p1y
+                let d1 = sqrt(dx1*dx1 + dy1*dy1)
+                dx1 /= d1
+                dy1 /= d1
+                let dot = dx0*dx1 + dy0*dy1
+                if( dot < 0 || dot < 0.7 ) {
+                    di += 1
+                } else {
+                    newPoints.append(vertices[i+di+1])
+                    i += di
+                    di = 0
+                }
+            } while( di > 0 && di+i < n-2 )
+            i += 1
+        }
+        newPoints.append(vertices[n-1])
+        points = newPoints
+    }
+    
+    mutating func filter(tol: Float) {
+        var vertices = self.points
+        if( vertices.count == 0 ) {
+            return
+        }
+        
+        var found = false
+        var newPoints = [(p: CGPoint, i: Int)]()
+        newPoints.append((p: vertices.first!, i: 0))
+        newPoints.append((p: vertices.last!, i: vertices.count-1))
+        
+        repeat {
+            found = false
+            // In each interval of newPoints find if there is a new point to insert
+            for i in 0 ..< newPoints.count - 1 {
+                let p0 = newPoints[i]
+                let p2 = newPoints[i+1]
+                var maxDist : Double = Double(tol)
+                var maxDistIndex = -1
+                for j in p0.i+1 ..< p2.i {
+                    let p1 = vertices[j]
+                    let d = Line.distance(p0.p, p2.p, p1)
+                    if( d > maxDist ) {
+                        maxDist = d
+                        maxDistIndex = j
+                    }
+                }
+                if( maxDistIndex != -1 ) {
+                    newPoints.insert((p: vertices[maxDistIndex], i: maxDistIndex), at: i+1)
+                    found = true
+                }
+            }
+        } while( found )
+        
+        vertices.removeAll()
+        for p in newPoints {
+            vertices.append(p.p)
+        }
+        
+        points = vertices
     }
 }
 
@@ -221,6 +313,7 @@ class LineView : UIView {
     var polygons : Polygons?
     var drawPolygon = false
     var zoomScale : CGFloat = 1.0
+    var boundsCopy = CGRect()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -232,6 +325,11 @@ class LineView : UIView {
     
     override class var layerClass : AnyClass {
         return CATiledLayer.self
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        boundsCopy = self.bounds // to use in drawRect method to avoid multi-threaded warnings
     }
 
     // Handle thread safety for currentLine
@@ -365,6 +463,7 @@ class LineView : UIView {
             scale = Double(refMeasureValue)/Double(dist)
         }
         
+        let measure = self.measure // Copy for multi-threaded
         if( measure.count == 2 ) {
             // Draw measurement line
             context?.setStrokeColor(UIColor.red.cgColor)
@@ -388,9 +487,9 @@ class LineView : UIView {
         // Draw bounding rectangle
         context?.setStrokeColor(UIColor.black.cgColor)
         context?.move (to: CGPoint(x: 10, y: 10));
-        context?.addLine(to: CGPoint(x: bounds.width - 10.0, y: 10.0));
-        context?.addLine(to: CGPoint(x: bounds.width - 10.0, y: bounds.height - 10.0))
-        context?.addLine(to: CGPoint(x: 10, y: bounds.height - 10.0))
+        context?.addLine(to: CGPoint(x: boundsCopy.width - 10.0, y: 10.0));
+        context?.addLine(to: CGPoint(x: boundsCopy.width - 10.0, y: boundsCopy.height - 10.0))
+        context?.addLine(to: CGPoint(x: 10, y: boundsCopy.height - 10.0))
         context?.addLine(to: CGPoint(x: 10, y: 10))
         context?.strokePath()
     }
@@ -398,10 +497,13 @@ class LineView : UIView {
     // Add or merge a new line
     // The merge is done when the name of the new line is the same as the name of an existing line
     // And when the new portion and the old portion overlaps. 
-    func add(_ line: Line) {
-        if( line.points.count < 2 ) {
+    func add(_ iline: Line) {
+        if( iline.points.count < 2 ) {
             return
         }
+        var line = iline
+        line.filter(tol: Float(boundsCopy.maxY*0.002/zoomScale))
+        line.filterKinks()
         
         // Find if it needs to be merged with an existing line
         for (index,value) in lines.enumerated() {
@@ -410,6 +512,7 @@ class LineView : UIView {
                 newline.color = line.color // Take latest color
                 newline.role = line.role // Take latest role
                 if( newline.merge(line) ) {
+                    newline.filterKinks()
                    lines.remove(at: index)
                    lines.insert(newline, at: index)
                    return
@@ -628,15 +731,6 @@ class FaciesView : UIView {
             context?.addRect(drawTool!.curRect)
             context?.strokePath()
         }
-        
-        // Draw bounding rectangle
-        context?.setStrokeColor(UIColor.red.cgColor)
-        context?.move (to: CGPoint(x: 10, y: 10));
-        context?.addLine(to: CGPoint(x: bounds.width - 10.0, y: 10.0));
-        context?.addLine(to: CGPoint(x: bounds.width - 10.0, y: bounds.height - 10.0))
-        context?.addLine(to: CGPoint(x: 10, y: bounds.height - 10.0))
-        context?.addLine(to: CGPoint(x: 10, y: 10))
-        context?.strokePath()
     }
     
 }
@@ -813,7 +907,7 @@ class DipMarkerView : UIView {
 class DrawingView : UIImageView {
     enum ToolMode : Int {
         case draw = 0, erase = 1, measure = 2, reference = 3, facies = 4, text = 5,
-        dipMarker = 6, select = 7
+        dipMarker = 6, select = 7, measure_H = 8, measure_L = 9
     }
     
     var lineView = LineView()
@@ -1185,7 +1279,25 @@ class DrawingView : UIImageView {
         let touch = touches.first!
         let point = touch.location(in: self)
         
-        if( drawMode != ToolMode.facies && drawMode != ToolMode.text &&
+        if( drawMode == ToolMode.measure || drawMode == ToolMode.measure_H || drawMode == ToolMode.measure_L ) {
+            lineView.measure.removeAll(keepingCapacity: true)
+            var curLine = lineView.currentLine
+            if( curLine.points.count >= 2 ) {
+                lineView.measure.append(curLine.points[0])
+                if( drawMode == ToolMode.measure ) {
+                    lineView.measure.append(curLine.points[curLine.points.count-1])
+                } else if( drawMode == ToolMode.measure_L ) {
+                    lineView.measure.append(CGPoint(x: curLine.points.last!.x, y: curLine.points.first!.y))
+                } else if( drawMode == ToolMode.measure_H ){
+                    lineView.measure.append(CGPoint(x: curLine.points.first!.x, y: curLine.points.last!.y))
+                }
+                lineView.currentLine.points = lineView.measure
+            } else {
+                lineView.currentLine.points.append(point)
+            }
+            lineView.setNeedsDisplay()
+            
+        } else if( drawMode != ToolMode.facies && drawMode != ToolMode.text &&
             drawMode != ToolMode.dipMarker && drawMode != DrawingView.ToolMode.select
         ) {
            lineView.currentLine.points.append(point)
@@ -1211,11 +1323,17 @@ class DrawingView : UIImageView {
         lineView.currentLine.points.append(point)
         
         var curLine = lineView.currentLine // Copy for multi-threaded
-        if( drawMode == ToolMode.measure ) {
+        if( drawMode == ToolMode.measure || drawMode == ToolMode.measure_H || drawMode == ToolMode.measure_L ) {
             lineView.measure.removeAll(keepingCapacity: true)
             if( curLine.points.count >= 2 ) {
                 lineView.measure.append(curLine.points[0])
-                lineView.measure.append(curLine.points[curLine.points.count-1])
+                if( drawMode == ToolMode.measure ) {
+                    lineView.measure.append(curLine.points[curLine.points.count-1])
+                } else if( drawMode == ToolMode.measure_L ) {
+                    lineView.measure.append(CGPoint(x: curLine.points.last!.x, y: curLine.points.first!.y))
+                } else if( drawMode == ToolMode.measure_H ){
+                    lineView.measure.append(CGPoint(x: curLine.points.first!.x, y: curLine.points.last!.y))
+                }
             }
         } else if( drawMode == ToolMode.draw) {
             // Avoid wrong digitizing with doubleTap event

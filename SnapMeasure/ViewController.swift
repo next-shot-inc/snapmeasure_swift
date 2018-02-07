@@ -449,7 +449,9 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let fileMngr = FileManager.default;
         
         // Full path to documents directory
-        let docs = fileMngr.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let url = appDelegate.applicationSupportDirectory
+        let docs = url.path
         
         // List all contents of directory and test if the file is an orphan image File
         do {

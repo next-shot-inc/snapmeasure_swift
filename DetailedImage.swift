@@ -48,7 +48,7 @@ class DetailedImageObject: NSManagedObject {
     func removeImage() {
         let df = FileManager.default
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             imageFile
         )
         if( df.fileExists(atPath: url.path) ) {
@@ -65,7 +65,7 @@ class DetailedImageObject: NSManagedObject {
         for  row  in  0 ... lastRow {
             for col in  0 ... lastCol {
                 let tileName = NSString(format: "%@_%d_%d", imageFile, col, row)
-                let tileUrl = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+                let tileUrl = appDelegate.applicationSupportDirectory.appendingPathComponent(
                     tileName as String
                 )
                 if( df.fileExists(atPath: tileUrl.path) ) {
@@ -79,7 +79,7 @@ class DetailedImageObject: NSManagedObject {
         }
 
         
-        let small_url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let small_url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             thumbImageFile
         )
         if( df.fileExists(atPath: small_url.path) ) {
@@ -93,7 +93,7 @@ class DetailedImageObject: NSManagedObject {
     
     func imageData() -> Data? {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             imageFile
         )
         do {
@@ -105,7 +105,7 @@ class DetailedImageObject: NSManagedObject {
     
     func image() -> UIImage? {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             imageFile
         )
         return UIImage(contentsOfFile: url.path)
@@ -113,7 +113,7 @@ class DetailedImageObject: NSManagedObject {
     
     func smallImage() -> UIImage? {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             thumbImageFile
         )
         return UIImage(contentsOfFile: url.path)
@@ -138,7 +138,7 @@ class DetailedImageObject: NSManagedObject {
         }
         
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             imageFile
         )
         if( ((try? data!.write(to: url, options: [.atomic])) != nil) == false ) {
@@ -160,7 +160,7 @@ class DetailedImageObject: NSManagedObject {
                 if( subImage != nil ) {
                     let tileData = UIImageJPEGRepresentation(UIImage(cgImage: subImage!), 1.0)
                     let tileName = NSString(format: "%@_%d_%d", imageFile, col, row)
-                    let tileUrl = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+                    let tileUrl = appDelegate.applicationSupportDirectory.appendingPathComponent(
                         tileName as String
                     )
                     if( ((try? tileData!.write(to: tileUrl, options: [.atomic])) != nil) == false ) {
@@ -186,7 +186,7 @@ class DetailedImageObject: NSManagedObject {
             return
         }
         
-        let small_url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+        let small_url = appDelegate.applicationSupportDirectory.appendingPathComponent(
             thumbImageFile
         )
         if( ((try? small_data!.write(to: small_url, options: [.atomic])) != nil) == false ) {

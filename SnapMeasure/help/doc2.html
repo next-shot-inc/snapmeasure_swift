@@ -11,9 +11,10 @@
         <p>
         Once a picture has been taken, the interpretation screen appears with its associated tools. The image is typically of higher resolution than the device screeen so you can zoom-in/zoom-out or pan with two fingers.
         You can go back to the main screen using the "Done" or "Cancel" buttons.
-        <br>
+        <p>
         It is recommended to digitize while zoomed-in not only to be more precise with the interpretation but also to optimize the rendering of the image which is typically many times the resolution of the screen. 
         </p>
+        Below are the different digitization tools:
         <table>
             <tr>
                 <td valign="top"><img src="edit-32.png"/></td>
@@ -62,19 +63,24 @@
                 <td><b>Dip/Azimuth mode</b>: Measure dip/Azimuth with device and locate the measurement on the image. The point snapped to a given line will have the same color as the line. The apparent dip will be shown on the picture.</td>
             </tr>
             <tr>
-                <td valign="top"><img src="message.png"/></td>
-                <td><b>Export</b>: Email the image and the interpretation in GOCAD format. The image will be embedded in a Voxet, facies columns in a Well curve, lines will be PLines, and dip/azimuth points will be VSets with a normal.
-                    <br><b>Warning:</b>An image without a scale defined cannot be exported.</td>
-            </tr>
-            <tr>
-                <td valign="top"><img src="save.png"/></td>
-                <td><b>Save</b>: Save the current interpretation and image on device. The "Done" button on the navigation bar will ask to save if some editings were not saved. The "Cancel" button will discard all changes.</td>
-            </tr>
-            <tr>
                 <td valign="top"><img src="define_feature.png"/></td>
                 <td><b>Define feature</b>: Measure height and width of a feature and define the feature type (channel, lobe, etc.). These will be used for computing features statistics.</td>
             </tr>
         </table>
-        <br/>
+        <p>
+        To export interpretations inside a GOCAD model, use the "Save" button at the top
+        and the export options will be available:
+        <table>
+            <tr>
+                <td valign="top"><img src="message.png"/></td>
+                <td><b>Mail</b>: Email the image and the interpretation in GOCAD format. The image will be embedded in a Voxet, facies columns in a Well curve, lines will be PLines, and dip/azimuth points will be VSets with a normal.
+                    <br><b>Warning:</b>An image without a scale defined cannot be exported.</td>
+            </tr>
+            <tr>
+                <td valign="top"><img src="save.png"/></td>
+                <td><b>Export</b>: Save the current interpretation in GOCAD format (as above). The image file and the GOCAD file can then be found in the Files app available since IOS 11.</td>
+            </tr>
+        </table>
+        <br>
     </body>
 </html>

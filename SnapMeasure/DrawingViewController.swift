@@ -132,7 +132,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     @IBOutlet weak var addDipMeterPointButton: UIButton!
     @IBOutlet weak var referenceSizeContainerView: UIView!
-    @IBOutlet weak var faciesTypeContainerView: UIView!
+
     @IBOutlet weak var lineContainerView: UIView!
     @IBOutlet weak var emailButton: UIButton!
     @IBOutlet weak var defineFeatureButton : UIButton!
@@ -318,6 +318,12 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         
         colorPickerCtrler.drawingView = drawingView
         horizonTypePickerCtrler.drawingView = drawingView
+        
+        let scale = drawingView.getScale()
+        if(!scale.defined) {
+            self.measureButton.isEnabled = false
+            self.defineFeatureButton.isEnabled = false
+        }
     }
     
     deinit  {
@@ -347,39 +353,12 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         super.viewDidLayoutSubviews()
     }
     
-    /**
-    @IBAction func toolChanged(sender: AnyObject) {
-        let drawingView = imageView as! DrawingView
-        drawingView.drawMode =
-            DrawingView.ToolMode(rawValue: toolbarSegmentedControl.selectedSegmentIndex)!
-        
-        referenceSizeContainerView.hidden = true
-        //faciesTypeContainerView.hidden = true
-        lineContainerView.hidden = true
-        
-        if( drawingView.drawMode == DrawingView.ToolMode.Reference ) {
-            
-            let nf = NSNumberFormatter()
-            referenceSizeTextField.text =
-                nf.stringFromNumber(drawingView.lineView.refMeasureValue)
-            referenceSizeContainerView.hidden = false
-            
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Draw ) {
-            
-            lineContainerView.hidden = false
-            
-        } else if( drawingView.drawMode == DrawingView.ToolMode.Facies ) {
-            //faciesTypeContainerView.hidden = false
-        }
-    } **/
-    
     // Mark: Bottom Toolbar methods
     @IBAction func newLineButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.draw
         
         referenceSizeContainerView.isHidden = true
-        //faciesTypeContainerView.hidden = true
         
         lineContainerView.isHidden = false
         
@@ -391,7 +370,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.drawMode = DrawingView.ToolMode.erase
         
         referenceSizeContainerView.isHidden = true
-        //faciesTypeContainerView.hidden = true
         lineContainerView.isHidden = true
         
         highlightButton(sender)
@@ -434,9 +412,11 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         
         self.present(alert, animated: true, completion: nil)
 
-        //faciesTypeContainerView.hidden = true
         lineContainerView.isHidden = true
         highlightButton(sender)
+        
+        self.measureButton.isEnabled = true
+        self.defineFeatureButton.isEnabled = true
     }
     
     @IBAction func faciesButtonPressed(_ sender: UIButton) {
@@ -453,17 +433,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     @IBAction func textboxButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.text
-        
-        referenceSizeContainerView.isHidden = true
-        //faciesTypeContainerView.hidden = true
-        lineContainerView.isHidden = true
-        
-        highlightButton(sender)
-    }
-    
-    @IBAction func dipMeterButtonPressed(_ sender: UIButton) {
-        let drawingView = imageView as! DrawingView
-        drawingView.drawMode = DrawingView.ToolMode.dipMarker
         
         referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
@@ -652,27 +621,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.lineView.tool.lineType = horizonTypeButton.title(for: UIControlState())!
         drawingView.curColor = color.cgColor
     }
-    
-    /**
-    @IBAction func pushTypeButton(sender: AnyObject) {
-        let drawingView = imageView as! DrawingView
-        let ctrler = self.storyboard?.instantiateViewControllerWithIdentifier("FaciesPixmapController") as! FaciesPixmapViewController
-        //ctrler.typeButton = self.faciesTypeButton
-        ctrler.drawingView = drawingView
-        ctrler.faciesCatalog = faciesCatalog
-        ctrler.drawingController = self
-        
-        ctrler.modalPresentationStyle = UIModalPresentationStyle.Popover
-        ctrler.preferredContentSize.width = 150
-        ctrler.preferredContentSize.height = 400
-        ctrler.popoverPresentationController?.sourceView = sender as! UIView
-        ctrler.popoverPresentationController?.sourceRect = sender.bounds
-        ctrler.popoverPresentationController?.permittedArrowDirections = UIPopoverArrowDirection.Any
-        let size = ctrler.view.systemLayoutSizeFittingSize(UILayoutFittingCompressedSize)
-        ctrler.preferredContentSize = size
-        
-        self.presentViewController(ctrler, animated: true, completion: nil)
-    } **/
 
     @IBAction func pushLineTypeButton(_ sender: AnyObject) {
         horizonTypePickerView.isHidden = !horizonTypePickerView.isHidden
@@ -717,6 +665,12 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             savePopover.preferredContentSize.height = CGFloat(295 + (51*self.detailedImage!.features.count))
             print(self.detailedImage!.features.count)
             savePopover.preferredContentSize.width = 500
+            savePopover.intermediateSaveAction = false
+            
+        } else if( segue.identifier == "showIntermediateSavePopover" ) {
+            let savePopover = segue.destination as! SavePopoverViewController
+            savePopover.drawingVC = self
+            savePopover.intermediateSaveAction = true
             
         } else if segue.identifier == "showFaciesPixmap" {
             let faciesPopover = segue.destination as! FaciesPixmapViewController
@@ -738,8 +692,14 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
     
     @IBAction func pushDefineFeatureButton(_ sender : UIButton) {
         //disable all other buttons until Feature definition is complete
-        //self.toolbarSegmentedControl.enabled = false
-        self.addDipMeterPointButton.isEnabled = false
+        self.addDipMeterPointButton.isHidden = true
+        self.eraseButton.isHidden = true
+        self.measureButton.isHidden = true
+        self.measureReferenceButton.isHidden = true
+        self.faciesButton.isHidden = true
+        self.textButton.isHidden = true
+        self.drawButton.isHidden = true
+        lineContainerView.isHidden = true
         
         //create a new Feature
         feature = NSEntityDescription.insertNewObject(forEntityName: "FeatureObject",
@@ -755,11 +715,9 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             alert.addAction(cancelAction)
             self.present(alert, animated: true, completion: nil)
             
-            //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Reference.rawValue
             drawingView.drawMode = DrawingView.ToolMode.reference
             
         } else {
-            //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
             drawingView.drawMode = DrawingView.ToolMode.measure
             self.defineFeatureButton.isHidden = true
             self.setHeightButton.isEnabled = true
@@ -774,7 +732,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let drawingView = imageView as! DrawingView
         let height = drawingView.lineView.currentMeasure as NSNumber
         if (height.isEqual(to: 0.0)) {
-            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's height ", preferredStyle: .alert)
+            let alert = UIAlertController(title: "", message: "Please draw a vertical line to define the Feature's height", preferredStyle: .alert)
             let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .cancel) { action -> Void in
                 //Do some stuff
             }
@@ -798,6 +756,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             self.setWidthButton.isEnabled = true
             self.setWidthButton.isHidden = false
             
+            drawingView.drawMode = DrawingView.ToolMode.measure
             //Remove measurement line to force user to draw a new line to define the width
             drawingView.lineView.measure.removeAll(keepingCapacity: true)
             drawingView.lineView.currentMeasure = 0.0
@@ -811,7 +770,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let drawingView = imageView as! DrawingView
         let width = drawingView.lineView.currentMeasure as NSNumber
         if (width.isEqual(to: 0.0)) {
-            let alert = UIAlertController(title: "", message: "Need to add a measurement line to define the Feature's width ", preferredStyle: .alert)
+            let alert = UIAlertController(title: "", message: "Please draw a horizontal line to define the Feature's width", preferredStyle: .alert)
             let cancelAction: UIAlertAction = UIAlertAction(title: "Ok", style: .cancel) { action -> Void in
                 //Do some stuff
             }
@@ -819,7 +778,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             self.present(alert, animated: true, completion: nil)
             //just in case
             if (drawingView.drawMode != DrawingView.ToolMode.measure) {
-                //self.toolbarSegmentedControl.selectedSegmentIndex = DrawingView.ToolMode.Measure.rawValue
                 drawingView.drawMode = DrawingView.ToolMode.measure
             }
         } else {
@@ -870,17 +828,22 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
             // Manage UI components
             self.defineFeatureButton.isEnabled = true
             self.defineFeatureButton.isHidden = false
+            self.setHeightButton.isHidden = true
             
-            //Re-enable all other buttons until Feature definition is complete
-            //self.toolbarSegmentedControl.enabled = true
-            self.addDipMeterPointButton.isEnabled = true
+            //Re-enable all other buttons when Feature definition is complete
+            self.addDipMeterPointButton.isHidden = false
+            self.eraseButton.isHidden = false
+            self.measureButton.isHidden = false
+            self.measureReferenceButton.isHidden = false
+            self.faciesButton.isHidden = false
+            self.textButton.isHidden = false
+            self.drawButton.isHidden = false
             
             // Remove measurement line
             drawingView.lineView.measure.removeAll(keepingCapacity: true)
             drawingView.lineView.currentMeasure = 0.0
             drawingView.lineView.setNeedsDisplay()
         }
-        highlightButton(sender)
     }
     
     @IBAction func unwindToDrawing (_ segue: UIStoryboardSegue) {

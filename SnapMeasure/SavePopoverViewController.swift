@@ -9,17 +9,20 @@
 import Foundation
 import UIKit
 import CoreData
+import MessageUI
 
-
-class SavePopoverViewController: UIViewController, UITableViewDataSource, FeatureCellDelegate {
+class SavePopoverViewController: UIViewController, UITableViewDataSource, FeatureCellDelegate, MFMailComposeViewControllerDelegate {
     var drawingVC : DrawingViewController?
     var menuController : PopupMenuController?
     var features : [FeatureObject] = []
+    var intermediateSaveAction = false
     
     @IBOutlet weak var projectNameLabel: UILabel!
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var featureTable: UITableView!
     @IBOutlet weak var warningLabel: UILabel!
+    @IBOutlet weak var exportButton: UIButton!
+    @IBOutlet weak var mailButton: UIButton!
     
     override func viewDidLoad() {
         currentProject = drawingVC!.detailedImage!.project
@@ -36,9 +39,18 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         let scale = drawingView.getScale()
         if(!scale.defined) {
             warningLabel.isHidden = false
-            warningLabel.text = "WARNING:\nNo scale defined for this image"
-            warningLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
-            warningLabel.numberOfLines = 0
+            warningLabel.text = "Warning: No scale defined for this image"
+            //warningLabel.lineBreakMode = NSLineBreakMode.byWordWrapping
+            //warningLabel.numberOfLines = 0
+            
+            exportButton.isEnabled = false
+            mailButton.isEnabled = false
+        } else {
+            warningLabel.text = " "
+        }
+        
+        if !MFMailComposeViewController.canSendMail() {
+            mailButton.isEnabled = false
         }
         
         for feat in drawingVC!.detailedImage!.features {
@@ -46,8 +58,8 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         }
         
         featureTable.dataSource = self
-        featureTable.rowHeight = 51
-        featureTable.tableFooterView = UIView(frame: CGRect.zero)
+        //featureTable.rowHeight = 51
+        //featureTable.tableFooterView = UIView(frame: CGRect.zero)
         featureTable.reloadData()
         
     }
@@ -192,7 +204,9 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         drawingVC!.hasChanges = false
 
         self.dismiss(animated: true, completion: nil)
-        drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
+        if( !self.intermediateSaveAction ) {
+            drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
+        }
     }
     
     @IBAction func saveButtonPressed(_ sender: AnyObject) {
@@ -237,7 +251,9 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         self.dismiss(animated: true, completion: nil)
         
         drawingVC!.hasChanges = false
-        drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
+        if( !self.intermediateSaveAction ) {
+            drawingVC!.performSegue(withIdentifier: "unwindFromDrawingToMain", sender: drawingVC!)
+        }
     }
     
     func saveDrawingView(_ drawingView: DrawingView, image: DetailedImageObject, managedContext: NSManagedObjectContext) {
@@ -330,7 +346,7 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Features"
+        return "Measured Features "
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -364,6 +380,72 @@ class SavePopoverViewController: UIViewController, UITableViewDataSource, Featur
         //featureTable.reloadData()
     }
     
+    
+    @IBAction func exportButtonPushed(_ sender: Any) {
+        let detailedImage = drawingVC!.detailedImage!
+        
+        let exporter = ExportAsGocadFile(detailedImage: detailedImage, faciesCatalog: drawingVC!.faciesCatalog)
+        let filename = exporter.export(prefix: detailedImage.name) as URL
+        
+        let data = UIImageJPEGRepresentation(detailedImage.image()!, 1.0)
+        if( data == nil ) {
+            print("Could not generate JPEG representation of image")
+            return
+        }
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let url = appDelegate.applicationDocumentsDirectory.appendingPathComponent(
+            "\(detailedImage.name).jpg"
+        )
+        if( ((try? data!.write(to: url, options: [.atomic])) != nil) == false ) {
+            print("Could not save image file")
+        }
+        
+        print("Exported \(filename) and \(url)")
+        self.warningLabel.text = "Gocad file and Image file exported to Files"
+    }
+    
+    @IBAction func sendMailButtonPushed(_ sender: Any) {
+        let detailedImage = drawingVC!.detailedImage!
+        
+        let exporter = ExportAsGocadFile(detailedImage: detailedImage, faciesCatalog: drawingVC!.faciesCatalog)
+        let filename = exporter.export() as URL
+        let formatUserName = "Gocad"
+        
+        var fileData = Data()
+        do {
+            try fileData = Data(contentsOf: URL(fileURLWithPath: filename.path), options: NSData.ReadingOptions.mappedIfSafe)
+        } catch {
+            print("Could not read data to send")
+            return
+        }
+        
+        let mailComposer = MFMailComposeViewController()
+        mailComposer.setSubject("Sending " + formatUserName + " file for Outcrop " + detailedImage.name)
+        
+        /*if( format == 0 ) {
+         mailComposer.addAttachmentData(
+         fileData, mimeType: "application/shp", fileName: detailedImage!.name + ".shp"
+         )
+         } else {*/
+        mailComposer.addAttachmentData(
+            fileData, mimeType: "text/plain", fileName: detailedImage.name + "_gocad.txt"
+        )
+        //}
+        mailComposer.addAttachmentData(
+            detailedImage.imageData()! as Data, mimeType: "impage/jpeg", fileName: detailedImage.name + ".jpg"
+        )
+        
+        mailComposer.setToRecipients([String]())
+        mailComposer.mailComposeDelegate = self
+        
+        present(mailComposer, animated: true, completion: nil)
+    }
+    
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        print(result)
+        controller.dismiss(animated: true, completion: nil)
+    }
 }
 
 protocol FeatureCellDelegate: class {

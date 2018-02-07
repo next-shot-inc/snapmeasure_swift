@@ -14,6 +14,7 @@ class DetailedImageProxy {
     var name: String
     var project: String
     var date: Date
+    var nb_interps = 0
     init(name: String, project: String, date: Date) {
         self.name = name
         self.project = project
@@ -58,7 +59,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         super.viewDidLoad()
         
         // appearance and layout customization
-        self.tableView.backgroundView = UIImageView(image:UIImage(named:"loadingBackground"))
+        // self.tableView.backgroundView = UIImageView(image:UIImage(named:"loadingBackground"))
         self.tableView.estimatedRowHeight = 280
         self.tableView.separatorStyle = UITableViewCellSeparatorStyle.none
         //self.tableView.rowHeight = UITableViewAutomaticDimension
@@ -125,6 +126,8 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         fetchRequest.propertiesToFetch = [ "name", "project.name", "date"]
         fetchRequest.resultType = NSFetchRequestResultType.dictionaryResultType
         
+        
+        
         do {
             let objects = try managedContext.fetch(fetchRequest)
             for obj in objects {
@@ -132,7 +135,20 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
                 let project = (obj as AnyObject).value(forKey: "project.name") as? NSString
                 let date = (obj as AnyObject).value(forKey: "date") as? Date
                 if( name != nil && project != nil ) {
-                    detailedImages.append(DetailedImageProxy(name: name! as String, project: project! as String, date: date!))
+                    
+                    let LOfetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"LineObject")
+                    LOfetchRequest.predicate = NSPredicate(format: "image.name==%@ and image.project.name==%@", name!, project!)
+                    var fetchedResultsCount = 0
+                    do {
+                        try fetchedResultsCount = managedContext.count(for: LOfetchRequest)
+                    } catch {
+                        
+                    }
+                    
+                    let dip = DetailedImageProxy(name: name! as String, project: project! as String, date: date!)
+                    dip.nb_interps = fetchedResultsCount
+                    detailedImages.append(dip)
+                    
                 }
             }
         } catch {
@@ -165,7 +181,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
         cell.selectionStyle = UITableViewCellSelectionStyle.none
         
         var detailedImage: DetailedImageProxy
-        if (searchController.isActive || scopeSelected) {
+        if ( (searchController != nil && searchController.isActive) || scopeSelected) {
             detailedImage = filteredDetailedImages[indexPath.row]
         } else {
             detailedImage = detailedImages[indexPath.row]
@@ -176,7 +192,7 @@ class LoadingViewController: UITableViewController, UISearchResultsUpdating, UIS
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if (!self.searchController.isActive) {
+        if (!(searchController != nil && self.searchController.isActive) ) {
             self.performSegue(withIdentifier: "loadingToDrawing", sender: self)
         } else {
             // do something that deals with the fact that search controller is active
