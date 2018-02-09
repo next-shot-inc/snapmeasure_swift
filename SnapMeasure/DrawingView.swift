@@ -314,6 +314,8 @@ class LineView : UIView {
     var drawPolygon = false
     var zoomScale : CGFloat = 1.0
     var boundsCopy = CGRect()
+    weak var scrollView: UIScrollView?
+    var visibleRect = CGRect()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -330,6 +332,9 @@ class LineView : UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         boundsCopy = self.bounds // to use in drawRect method to avoid multi-threaded warnings
+        if( scrollView != nil ) {
+            visibleRect = scrollView!.convert(scrollView!.bounds, to: self)
+        }
     }
 
     // Handle thread safety for currentLine
@@ -371,8 +376,25 @@ class LineView : UIView {
             }
             context?.strokePath()
             
+            var textPoint = CGPoint(x: line.points[0].x, y: line.points[0].y)
+            if( !visibleRect.isEmpty ) {
+                // Compute the intersection of the line with the visibleRect (reduced by a margin).
+                let margin : CGFloat = 5
+                let left_edge_p0 = CGPoint(x: visibleRect.origin.x + margin, y: visibleRect.origin.y + margin)
+                let left_edge_p1 = CGPoint(x: visibleRect.origin.x + margin, y: visibleRect.origin.y + visibleRect.height - margin)
+                for j in 0 ..< line.points.count-1 {
+                    let ipoint = Line.segmentsIntersect(
+                        left_edge_p0, b: left_edge_p1, c: line.points[j], d: line.points[j+1]
+                    )
+                    if( ipoint.exist ) {
+                        textPoint = ipoint.loc
+                        break
+                    }
+                }
+            }
+            
             NSString(string: line.name).draw(
-                at: CGPoint(x: line.points[0].x, y: line.points[0].y),
+                at: textPoint,
                 withAttributes: [NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: font_size)]
             )
         }
@@ -665,6 +687,9 @@ class FaciesDrawTool {
     }
     
     func end(imageName: String) {
+        if( curRect.width < 5 || curRect.height < 0.01 ) {
+            return
+        }
         if( append ) {
             curColumn!.faciesVignettes.append(
                 FaciesVignette(rect: curRect, image: imageName)
@@ -713,7 +738,7 @@ class FaciesView : UIView {
                         context?.concatenate(flipVertical)
                         context?.draw(
                             cgimage!,
-                            in: CGRect(x:0, y:0, width: uiimage.size.width, height: uiimage.size.height), byTiling: false
+                            in: CGRect(x:0, y:0, width: uiimage.size.width, height: uiimage.size.height), byTiling: true
                         )
                     } else {
                         let flipVertical = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: v.rect.size.height+2.0*v.rect.origin.y)
@@ -1391,6 +1416,9 @@ class DrawingView : UIImageView {
         } else if( drawMode == ToolMode.facies ) {
             if( faciesView.drawTool != nil ) {
                 faciesView.drawTool!.end(imageName: faciesView.curImageName)
+                if( faciesView.drawTool!.curColumn!.faciesVignettes.isEmpty ) {
+                    faciesView.faciesColumns.removeLast()
+                }
                 controller!.hasChanges = true
             }
             faciesView.drawTool = nil

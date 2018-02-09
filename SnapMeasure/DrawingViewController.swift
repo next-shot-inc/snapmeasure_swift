@@ -222,9 +222,6 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let scrollViewSize = self.scrollView.bounds.size;
         let zoomViewSize = self.imageView.bounds.size;
         var scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
-        if (scaleToFit > 1.0 ) {
-            scaleToFit = 1.0;
-        }
         self.scrollView.zoomScale = scaleToFit;
         //centerScrollViewContents()
 
@@ -233,6 +230,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         drawingView.controller = self
         drawingView.faciesView.faciesCatalog = faciesCatalog
         drawingView.lineView.zoomScale = scaleToFit
+        drawingView.lineView.scrollView = scrollView
         
         referenceSizeContainerView.isHidden = true
         //faciesTypeContainerView.hidden = true
@@ -353,6 +351,20 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         super.viewDidLayoutSubviews()
     }
     
+    /* This function is called at each button click - Not good to change the zoom level then.
+    override func viewWillLayoutSubviews() {
+        // Center view and reset zoom
+        let scrollViewSize = self.scrollView.bounds.size;
+        let zoomViewSize = self.imageView.bounds.size;
+        
+        let scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
+        
+        self.scrollView.zoomScale = scaleToFit;
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.zoomScale = scaleToFit
+    }
+ */
+    
     // Mark: Bottom Toolbar methods
     @IBAction func newLineButtonPressed(_ sender: UIButton) {
         let drawingView = imageView as! DrawingView
@@ -390,7 +402,7 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let drawingView = imageView as! DrawingView
         drawingView.drawMode = DrawingView.ToolMode.reference
         
-        let alert = UIAlertController(title: "", message: "Please specify reference value (m)", preferredStyle: .alert)
+        let alert = UIAlertController(title: "", message: "To define the image scale, enter the reference size and draw a line of that same size on the picture", preferredStyle: .alert)
         alert.addTextField { (textField) in
             let nf = NumberFormatter()
             textField.text =
@@ -490,11 +502,24 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         return imageView
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.visibleRect = scrollView.convert(scrollView.bounds, to: drawingView)
+        // Do not redraw while scrolling
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        // Redraw when scrolling is done.
+        let drawingView = imageView as! DrawingView
+        drawingView.lineView.setNeedsDisplay()
+    }
+    
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         // Recenter the image view when it is smaller than the scrollView
         //self.centerScrollViewContents()
         let drawingView = imageView as! DrawingView
         drawingView.lineView.zoomScale = scale
+        drawingView.lineView.visibleRect = scrollView.convert(scrollView.bounds, to: drawingView)
         drawingView.lineView.setNeedsDisplay()
     }
     
@@ -570,16 +595,18 @@ class DrawingViewController: UIViewController, UITextFieldDelegate, MFMailCompos
         let scrollViewSize = self.scrollView.bounds.size;
         let zoomViewSize = self.imageView.bounds.size;
         
-        var scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
-        if (scaleToFit > 1.0 ) {
-            scaleToFit = 1.0;
-        }
+        let scaleToFit = min(scrollViewSize.width / zoomViewSize.width, scrollViewSize.height / zoomViewSize.height);
+        //if (scaleToFit > 1.0 ) {
+            //scaleToFit = 1.0;
+        //}
         
         self.scrollView.zoomScale = scaleToFit;
+        
         //self.centerScrollViewContents()
         
         let drawingView = imageView as! DrawingView
         drawingView.lineView.zoomScale = scaleToFit
+        drawingView.lineView.visibleRect = scrollView.convert(scrollView.bounds, to: drawingView)
         drawingView.lineView.setNeedsDisplay()
     }
     

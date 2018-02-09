@@ -443,7 +443,7 @@
                                 <rect key="frame" x="16" y="615" width="343" height="44"/>
                                 <items>
                                     <navigationItem title="Facies" id="aKi-Y1-gh3">
-                                        <barButtonItem key="leftBarButtonItem" title="Back" id="lDf-IP-oke">
+                                        <barButtonItem key="leftBarButtonItem" title="Done" id="lDf-IP-oke">
                                             <connections>
                                                 <segue destination="3Wn-2n-Hga" kind="unwind" unwindAction="unwindToDrawing:" id="nvH-BC-SKu"/>
                                             </connections>
